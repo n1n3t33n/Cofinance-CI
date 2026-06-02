@@ -1,0 +1,2 @@
+from .produit import ProduitAssuranceSerializer
+from .souscription import SouscriptionSerializer, SouscrireSerializer
