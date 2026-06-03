@@ -152,6 +152,16 @@ SPECTACULAR_SETTINGS = {
     'TITLE': 'COFINANCE CI API',
     'DESCRIPTION': 'Plateforme digitale de gestion de microcrédits, assurance mobile et support client.',
     'VERSION': '1.0.0',
+    'SECURITY': [{'bearerAuth': []}],
+    'COMPONENTS': {
+        'securitySchemes': {
+            'bearerAuth': {
+                'type': 'http',
+                'scheme': 'bearer',
+                'bearerFormat': 'JWT',
+            }
+        }
+    },
 }
 
 # ─── CHANNELS (WebSocket) ─────────────────────────────────────
@@ -161,4 +171,11 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',
     }
+}
+
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME':  timedelta(hours=2),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 }

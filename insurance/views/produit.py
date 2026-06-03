@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
 
 from insurance.models import ProduitAssurance
 from insurance.serializers import ProduitAssuranceSerializer
@@ -16,6 +17,7 @@ def liste_produits(request):
     return Response(ProduitAssuranceSerializer(produits, many=True).data)
 
 
+@extend_schema(request=ProduitAssuranceSerializer, responses=ProduitAssuranceSerializer)
 @api_view(['POST'])
 @permission_classes([EstAgentOuAdmin])
 def creer_produit(request):

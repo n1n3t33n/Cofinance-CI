@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
 
 from credits.models import DemandeCrédit, Echeance
 from credits.serializers import (
@@ -15,45 +16,18 @@ from credits.services import calculer_score, generer_echeancier
 
 # ── CLIENT ────────────────────────────────────────────────────
 
+@extend_schema(request=SoumettreDemandSerializer, responses=DemandeCréditSerializer)
 @api_view(['POST'])
 @permission_classes([EstClient])
 def soumettre_demande(request):
     """Un client soumet une nouvelle demande de crédit."""
     serializer = SoumettreDemandSerializer(data=request.data)
     if serializer.is_valid():
-        ancien_statut = demande.statut
-        demande = serializer.save(agent_traitant=request.user)
-
-        # Si la demande vient d'être approuvée → score + échéancier
-        if demande.statut == 'approuvee':
-            demande.score_eligibilite = calculer_score(demande)
-            demande.save(update_fields=['score_eligibilite'])
-
-            demande.echeances.all().delete()
-            echeances_data = generer_echeancier(demande)
-            Echeance.objects.bulk_create([
-                Echeance(demande=demande, **e) for e in echeances_data
-            ])
-
-        # Notification automatique au client si statut a changé
-        if ancien_statut != demande.statut:
-            from notifications.services import creer_notification
-            messages_statut = {
-                'en_analyse': "Votre dossier est en cours d'analyse par notre équipe.",
-                'approuvee':  f"Félicitations ! Votre crédit de {demande.montant_approuve} FCFA a été approuvé.",
-                'decaissee':  "Votre crédit a été décaissé. Consultez votre échéancier.",
-                'rejetee':    "Votre demande de crédit n'a pas pu être approuvée. Contactez le support.",
-            }
-            if demande.statut in messages_statut:
-                creer_notification(
-                    destinataire=demande.client,
-                    type_notif='statut_credit',
-                    titre=f"Dossier crédit — {demande.get_statut_display()}",
-                    message=messages_statut[demande.statut],
-                    objet_id=demande.pk,
-                )
-
-        return Response(DemandeCréditSerializer(demande).data)
+        demande = serializer.save(client=request.user)
+        return Response(
+            DemandeCréditSerializer(demande).data,
+            status=status.HTTP_201_CREATED
+        )
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -94,6 +68,7 @@ def liste_demandes(request):
     return Response(DemandeCréditSerializer(qs, many=True).data)
 
 
+@extend_schema(request=TraiterDemandSerializer, responses=DemandeCréditSerializer)
 @api_view(['PATCH'])
 @permission_classes([EstAgentOuAdmin])
 def traiter_demande(request, pk):

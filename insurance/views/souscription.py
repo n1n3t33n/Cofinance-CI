@@ -2,12 +2,14 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
 
 from insurance.models import Souscription
 from insurance.serializers import SouscriptionSerializer, SouscrireSerializer
 from credits.permissions import EstClient, EstAgentOuAdmin
 
 
+@extend_schema(request=SouscrireSerializer, responses=SouscriptionSerializer)
 @api_view(['POST'])
 @permission_classes([EstClient])
 def souscrire(request):

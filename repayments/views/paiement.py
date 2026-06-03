@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
 
 from credits.models import Echeance
 from repayments.models import Paiement, Penalite
@@ -16,6 +17,7 @@ from repayments.services import calculer_penalite
 
 # ── AGENT : enregistrement d'un paiement ─────────────────────
 
+@extend_schema(request=EnregistrerPaiementSerializer, responses=PaiementSerializer)
 @api_view(['POST'])
 @permission_classes([EstAgentOuAdmin])
 def enregistrer_paiement(request):
