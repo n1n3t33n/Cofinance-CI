@@ -245,7 +245,7 @@ pip install psycopg2-binary
 
 1. Lancer le serveur : `python manage.py runserver`
 2. Ouvrir `http://127.0.0.1:8000/api/chat/demo/` dans **deux onglets**
-3. Onglet 1 : se connecter avec `client_aya / client1234`
+3. Onglet 1 : se connecter avec `client_kone / client1234`
 4. Onglet 2 : se connecter avec `agent_kouame / agent1234`
 5. Envoyer des messages — ils apparaissent instantanément dans les deux onglets
 
@@ -253,5 +253,6 @@ pip install psycopg2-binary
 
 ## Auteur
 
+Moussa Ben Youssouf TRAORE
 Projet réalisé dans le cadre du module **Programmation Python**
 Institut Ivoirien de Technologie (IIT) — Abidjan, juin 2026
