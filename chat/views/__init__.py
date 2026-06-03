@@ -6,3 +6,4 @@ from .conversation import (
     fermer_conversation,
     historique_messages,
 )
+from .demo import demo_chat

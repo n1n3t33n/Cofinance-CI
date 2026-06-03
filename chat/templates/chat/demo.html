@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>COFINANCE CI — Démo Chat</title>
+  <style>
+    /* ── Reset & base ────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ─────────────────────────────────────────── */
+    header {
+      background: #1a1a2e;
+      color: #fff;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: 1px; }
+    header span {
+      font-size: 0.8rem;
+      background: #e8c84a;
+      color: #1a1a2e;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    /* ── Layout principal ───────────────────────────────── */
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 0;
+      max-width: 1100px;
+      width: 100%;
+      margin: 32px auto;
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+    }
+
+    /* ── Panneau gauche : connexion ─────────────────────── */
+    .panel-left {
+      background: #1a1a2e;
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .panel-left h2 {
+      color: #e8c84a;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.78rem;
+      color: #aab;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #2e2e4e;
+      border-radius: 8px;
+      background: #12122a;
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+      border-color: #e8c84a;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-primary {
+      background: #e8c84a;
+      color: #1a1a2e;
+      width: 100%;
+    }
+    .btn-primary:hover:not(:disabled) { opacity: 0.85; }
+
+    .btn-danger {
+      background: #e74c3c;
+      color: #fff;
+      width: 100%;
+    }
+
+    /* Indicateur de statut */
+    .statut-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: #aab;
+    }
+    .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #555;
+      transition: background 0.3s;
+    }
+    .dot.connecte  { background: #2ecc71; }
+    .dot.deconnecte { background: #e74c3c; }
+
+    /* Infos utilisateur connecté */
+    .user-info {
+      background: #12122a;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 0.85rem;
+      color: #ccd;
+      display: none;
+    }
+    .user-info.visible { display: block; }
+    .user-info strong { color: #e8c84a; display: block; margin-bottom: 4px; }
+
+    /* Comptes de démo */
+    .demo-comptes {
+      border-top: 1px solid #2e2e4e;
+      padding-top: 20px;
+    }
+    .demo-comptes h3 {
+      color: #aab;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+    .compte-btn {
+      display: block;
+      width: 100%;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      background: #12122a;
+      border: 1px solid #2e2e4e;
+      border-radius: 8px;
+      color: #ccd;
+      font-size: 0.82rem;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .compte-btn:hover { border-color: #e8c84a; background: #1e1e3a; }
+    .compte-btn .role-badge {
+      float: right;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    .role-client { background: #2980b9; color: #fff; }
+    .role-agent  { background: #27ae60; color: #fff; }
+    .role-admin  { background: #8e44ad; color: #fff; }
+
+    /* ── Panneau droit : chat ───────────────────────────── */
+    .panel-right {
+      display: flex;
+      flex-direction: column;
+      height: 600px;
+    }
+
+    .chat-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .chat-header h2 { font-size: 1rem; font-weight: 600; }
+    .chat-header p  { font-size: 0.82rem; color: #888; margin-top: 2px; }
+
+    /* Zone messages */
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: #f8f9fa;
+    }
+
+    .msg {
+      max-width: 70%;
+      padding: 10px 16px;
+      border-radius: 16px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      position: relative;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg.recu {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+    .msg.envoye {
+      background: #1a1a2e;
+      color: #fff;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+    .msg .meta {
+      font-size: 0.72rem;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .msg.recu  .meta { color: #e8c84a; }
+    .msg.envoye .meta { color: #aab; }
+    .msg .heure {
+      font-size: 0.68rem;
+      color: #aaa;
+      margin-top: 4px;
+      display: block;
+    }
+    .msg.envoye .heure { color: #8899aa; }
+
+    /* Message système */
+    .msg-systeme {
+      text-align: center;
+      font-size: 0.78rem;
+      color: #aaa;
+      padding: 4px 0;
+      font-style: italic;
+    }
+
+    /* Indicateur de frappe */
+    #typing-indicator {
+      padding: 6px 20px;
+      font-size: 0.8rem;
+      color: #888;
+      font-style: italic;
+      min-height: 24px;
+    }
+
+    /* Zone de saisie */
+    .chat-input {
+      padding: 16px 20px;
+      border-top: 1px solid #eee;
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      background: #fff;
+    }
+    .chat-input textarea {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1.5px solid #ddd;
+      border-radius: 12px;
+      resize: none;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      max-height: 100px;
+      transition: border-color 0.2s;
+    }
+    .chat-input textarea:focus { border-color: #1a1a2e; }
+    .chat-input textarea:disabled { background: #f5f5f5; }
+
+    .btn-send {
+      background: #1a1a2e;
+      color: #e8c84a;
+      border: none;
+      border-radius: 12px;
+      width: 44px;
+      height: 44px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s;
+      flex-shrink: 0;
+    }
+    .btn-send:hover:not(:disabled) { opacity: 0.8; }
+    .btn-send:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* ── Alertes ────────────────────────────────────────── */
+    .alerte {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.83rem;
+      margin-top: 8px;
+      display: none;
+    }
+    .alerte.erreur  { background: #fde8e8; color: #c0392b; display: block; }
+    .alerte.succes  { background: #e8f8ee; color: #1e8449; display: block; }
+    .alerte.info    { background: #e8f0fe; color: #1a5276; display: block; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>⚡ COFINANCE CI — Chat Support</h1>
+  <span>Démo temps réel</span>
+</header>
+
+<main>
+
+  <!-- ── Panneau gauche ──────────────────────────────────── -->
+  <div class="panel-left">
+    <div>
+      <h2>Connexion</h2>
+    </div>
+
+    <div>
+      <label>Identifiant</label>
+      <input type="text" id="username" placeholder="ex: client_aya" />
+    </div>
+
+    <div>
+      <label>Mot de passe</label>
+      <input type="password" id="password" placeholder="••••••••" />
+    </div>
+
+    <div id="alerte-login" class="alerte"></div>
+
+    <button class="btn btn-primary" id="btn-login" onclick="seConnecter()">
+      Se connecter
+    </button>
+
+    <div class="statut-bar">
+      <div class="dot deconnecte" id="dot-ws"></div>
+      <span id="statut-ws">WebSocket déconnecté</span>
+    </div>
+
+    <div class="user-info" id="user-info">
+      <strong id="info-username">—</strong>
+      <span id="info-role">—</span><br/>
+      <span id="info-conv" style="font-size:0.78rem; color:#888;">—</span>
+    </div>
+
+    <button class="btn btn-danger" id="btn-deconnexion"
+            style="display:none;" onclick="seDeconnecter()">
+      Se déconnecter
+    </button>
+
+    <!-- Comptes de démo -->
+    <div class="demo-comptes">
+      <h3>Comptes de démo</h3>
+      <button class="compte-btn" onclick="remplir('client_aya','client1234')">
+        client_aya
+        <span class="role-badge role-client">Client</span>
+      </button>
+      <button class="compte-btn" onclick="remplir('client_kone','client1234')">
+        client_kone
+        <span class="role-badge role-client">Client</span>
+      </button>
+      <button class="compte-btn" onclick="remplir('agent_kouame','agent1234')">
+        agent_kouame
+        <span class="role-badge role-agent">Agent</span>
+      </button>
+      <button class="compte-btn" onclick="remplir('agent_bamba','agent1234')">
+        agent_bamba
+        <span class="role-badge role-agent">Agent</span>
+      </button>
+      <button class="compte-btn" onclick="remplir('admin','admin1234')">
+        admin
+        <span class="role-badge role-admin">Admin</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Panneau droit : chat ────────────────────────────── -->
+  <div class="panel-right">
+    <div class="chat-header">
+      <div>
+        <h2>💬 Support Client</h2>
+        <p id="conv-info">Connectez-vous pour accéder au chat</p>
+      </div>
+    </div>
+
+    <div id="messages">
+      <div class="msg-systeme">
+        Connectez-vous pour démarrer ou rejoindre une conversation.
+      </div>
+    </div>
+
+    <div id="typing-indicator"></div>
+
+    <div class="chat-input">
+      <textarea id="input-message"
+                placeholder="Connectez-vous pour écrire..."
+                rows="1"
+                disabled
+                onkeydown="gererTouche(event)"
+                oninput="signalerFrappe()"></textarea>
+      <button class="btn-send" id="btn-send" disabled onclick="envoyerMessage()">
+        ➤
+      </button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // ── État global ─────────────────────────────────────────────
+  let accessToken    = null;
+  let currentUser    = null;
+  let conversationId = null;
+  let socket         = null;
+  let typingTimeout  = null;
+  let estEnTrainEcrire = false;
+
+  const API = 'http://127.0.0.1:8000/api';
+  const WS  = 'ws://127.0.0.1:8000/ws/chat';
+
+  // ── Utilitaires ─────────────────────────────────────────────
+  function remplir(user, pass) {
+    document.getElementById('username').value = user;
+    document.getElementById('password').value = pass;
+  }
+
+  function afficherAlerte(id, message, type) {
+    const el = document.getElementById(id);
+    el.className = `alerte ${type}`;
+    el.textContent = message;
+  }
+
+  function cacherAlerte(id) {
+    document.getElementById(id).className = 'alerte';
+  }
+
+  function heure(isoString) {
+    const d = isoString ? new Date(isoString) : new Date();
+    return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function ajouterMessage(contenu, auteur, auteurRole, createdAt, estMoi) {
+    const zone = document.getElementById('messages');
+
+    // Retirer le message d'accueil si présent
+    const accueil = zone.querySelector('.msg-systeme');
+    if (accueil) accueil.remove();
+
+    const div = document.createElement('div');
+    div.className = `msg ${estMoi ? 'envoye' : 'recu'}`;
+    div.innerHTML = `
+      <div class="meta">${auteur} · ${auteurRole}</div>
+      ${contenu}
+      <span class="heure">${heure(createdAt)}</span>
+    `;
+    zone.appendChild(div);
+    zone.scrollTop = zone.scrollHeight;
+  }
+
+  function ajouterSysteme(texte) {
+    const zone = document.getElementById('messages');
+    const div  = document.createElement('div');
+    div.className = 'msg-systeme';
+    div.textContent = texte;
+    zone.appendChild(div);
+    zone.scrollTop = zone.scrollHeight;
+  }
+
+  function setWsStatut(connecte) {
+    const dot    = document.getElementById('dot-ws');
+    const statut = document.getElementById('statut-ws');
+    dot.className    = `dot ${connecte ? 'connecte' : 'deconnecte'}`;
+    statut.textContent = connecte ? 'WebSocket connecté' : 'WebSocket déconnecté';
+  }
+
+  // ── Connexion ───────────────────────────────────────────────
+  async function seConnecter() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    if (!username || !password) {
+      afficherAlerte('alerte-login', 'Remplissez les deux champs.', 'erreur');
+      return;
+    }
+
+    cacherAlerte('alerte-login');
+    document.getElementById('btn-login').disabled = true;
+    document.getElementById('btn-login').textContent = 'Connexion...';
+
+    try {
+      // 1. Obtenir le token JWT
+      const repLogin = await fetch(`${API}/auth/login/`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ username, password }),
+      });
+
+      if (!repLogin.ok) {
+        throw new Error('Identifiants incorrects.');
+      }
+
+      const dataLogin = await repLogin.json();
+      accessToken = dataLogin.access;
+
+      // 2. Récupérer le profil
+      const repProfile = await fetch(`${API}/auth/profile/`, {
+        headers: { 'Authorization': `Bearer ${accessToken}` }
+      });
+      currentUser = await repProfile.json();
+
+      // 3. Ouvrir ou rejoindre une conversation
+      await initialiserConversation();
+
+      // 4. Mettre à jour l'UI
+      document.getElementById('user-info').classList.add('visible');
+      document.getElementById('info-username').textContent = currentUser.username;
+      document.getElementById('info-role').textContent     = currentUser.role;
+      document.getElementById('btn-login').style.display        = 'none';
+      document.getElementById('btn-deconnexion').style.display  = 'block';
+
+      document.getElementById('input-message').disabled = false;
+      document.getElementById('input-message').placeholder = 'Écrivez votre message…';
+      document.getElementById('btn-send').disabled = false;
+
+    } catch (err) {
+      afficherAlerte('alerte-login', err.message, 'erreur');
+      document.getElementById('btn-login').disabled = false;
+      document.getElementById('btn-login').textContent = 'Se connecter';
+    }
+  }
+
+  // ── Initialisation conversation ─────────────────────────────
+  async function initialiserConversation() {
+    const isClient = currentUser.role === 'client';
+    let conv;
+
+    if (isClient) {
+      // Le client ouvre ou récupère sa conversation
+      const rep = await fetch(`${API}/chat/ouvrir/`, {
+        method:  'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type':  'application/json',
+        },
+      });
+      conv = await rep.json();
+    } else {
+      // L'agent prend la première conversation ouverte ou en attente
+      const rep = await fetch(`${API}/chat/toutes/?statut=en_attente`, {
+        headers: { 'Authorization': `Bearer ${accessToken}` }
+      });
+      const liste = await rep.json();
+
+      if (liste.length === 0) {
+        // Essayer les conversations ouvertes
+        const rep2 = await fetch(`${API}/chat/toutes/?statut=ouverte`, {
+          headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        const liste2 = await rep2.json();
+        if (liste2.length === 0) {
+          ajouterSysteme("Aucune conversation active pour le moment.");
+          document.getElementById('conv-info').textContent = "Aucune conversation active";
+          return;
+        }
+        conv = liste2[0];
+      } else {
+        // Rejoindre la première conversation en attente
+        const rep3 = await fetch(`${API}/chat/${liste[0].id}/rejoindre/`, {
+          method:  'POST',
+          headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        conv = await rep3.json();
+      }
+    }
+
+    conversationId = conv.id;
+
+    // Afficher l'historique des messages
+    const repMsg = await fetch(`${API}/chat/${conversationId}/messages/`, {
+      headers: { 'Authorization': `Bearer ${accessToken}` }
+    });
+    const messages = await repMsg.json();
+    messages.forEach(msg => {
+      const estMoi = msg.auteur === currentUser.id;
+      ajouterMessage(msg.contenu, msg.auteur_username, msg.auteur_role, msg.created_at, estMoi);
+    });
+
+    document.getElementById('conv-info').textContent =
+      `Conversation #${conversationId} — ${conv.statut}`;
+    document.getElementById('info-conv').textContent =
+      `Conv. #${conversationId}`;
+
+    // Connecter le WebSocket
+    connecterWebSocket();
+  }
+
+  // ── WebSocket ───────────────────────────────────────────────
+  function connecterWebSocket() {
+    const url = `${WS}/${conversationId}/?token=${accessToken}`;
+    socket = new WebSocket(url);
+
+    socket.onopen = () => {
+      setWsStatut(true);
+      ajouterSysteme("Connexion temps réel établie.");
+    };
+
+    socket.onclose = () => {
+      setWsStatut(false);
+      ajouterSysteme("Connexion temps réel interrompue.");
+    };
+
+    socket.onerror = () => {
+      setWsStatut(false);
+    };
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      if (data.type === 'message') {
+        const estMoi = data.auteur === currentUser.username;
+        // Éviter les doublons (on reçoit aussi son propre message via WS)
+        ajouterMessage(data.contenu, data.auteur, data.auteur_role, data.created_at, estMoi);
+      }
+
+      if (data.type === 'presence') {
+        const verbe = data.event === 'connecte' ? 'a rejoint le chat' : 'a quitté le chat';
+        ajouterSysteme(`${data.username} ${verbe}.`);
+      }
+
+      if (data.type === 'typing') {
+        const ind = document.getElementById('typing-indicator');
+        if (data.username !== currentUser.username) {
+          ind.textContent = data.est_en_train_d_ecrire
+            ? `${data.username} est en train d'écrire…`
+            : '';
+        }
+      }
+    };
+  }
+
+  // ── Envoi message ───────────────────────────────────────────
+  function envoyerMessage() {
+    const textarea = document.getElementById('input-message');
+    const contenu  = textarea.value.trim();
+
+    if (!contenu || !socket || socket.readyState !== WebSocket.OPEN) return;
+
+    socket.send(JSON.stringify({ type: 'message', contenu }));
+    textarea.value = '';
+    textarea.style.height = 'auto';
+
+    // Arrêter l'indicateur de frappe
+    if (estEnTrainEcrire) {
+      socket.send(JSON.stringify({ type: 'typing', est_en_train_d_ecrire: false }));
+      estEnTrainEcrire = false;
+    }
+  }
+
+  function gererTouche(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      envoyerMessage();
+    }
+  }
+
+  // ── Indicateur de frappe ────────────────────────────────────
+  function signalerFrappe() {
+    if (!socket || socket.readyState !== WebSocket.OPEN) return;
+
+    if (!estEnTrainEcrire) {
+      estEnTrainEcrire = true;
+      socket.send(JSON.stringify({ type: 'typing', est_en_train_d_ecrire: true }));
+    }
+
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+      estEnTrainEcrire = false;
+      socket.send(JSON.stringify({ type: 'typing', est_en_train_d_ecrire: false }));
+    }, 2000);
+  }
+
+  // ── Déconnexion ─────────────────────────────────────────────
+  function seDeconnecter() {
+    if (socket) socket.close();
+    accessToken    = null;
+    currentUser    = null;
+    conversationId = null;
+    socket         = null;
+
+    document.getElementById('messages').innerHTML =
+      '<div class="msg-systeme">Connectez-vous pour démarrer ou rejoindre une conversation.</div>';
+    document.getElementById('user-info').classList.remove('visible');
+    document.getElementById('btn-login').style.display       = 'block';
+    document.getElementById('btn-login').disabled            = false;
+    document.getElementById('btn-login').textContent         = 'Se connecter';
+    document.getElementById('btn-deconnexion').style.display = 'none';
+    document.getElementById('input-message').disabled        = true;
+    document.getElementById('input-message').placeholder     = 'Connectez-vous pour écrire...';
+    document.getElementById('btn-send').disabled             = true;
+    document.getElementById('conv-info').textContent         = 'Connectez-vous pour accéder au chat';
+    document.getElementById('typing-indicator').textContent  = '';
+    setWsStatut(false);
+  }
+</script>
+
+</body>
+</html>

@@ -106,8 +106,11 @@ Comptes créés automatiquement :
 ### 6. Lancer le serveur
 
 ```bash
-python manage.py runserver
+daphne -p 8000 cofinance_ci.asgi:application
 ```
+
+> ⚠️ Ne pas utiliser `python manage.py runserver` — il ne supporte pas les WebSockets.
+> Daphne est le serveur ASGI requis pour le chat en temps réel.
 
 ---
 
