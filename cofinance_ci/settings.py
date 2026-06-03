@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'notifications',
     'chat',
     'dashboard',
+    'cofinance_ci',
 ]
 
 # Modèle utilisateur personnalisé
