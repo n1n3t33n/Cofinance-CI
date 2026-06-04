@@ -1,0 +1,391 @@
+{% extends 'base/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Dashboard Agent{% endblock %}
+
+{% block sidebar %}
+  {% include 'accounts/agent/sidebar.html' %}
+{% endblock %}
+
+{% block page_title %}Tableau de bord Agent{% endblock %}
+{% block page_subtitle %}Gestion des dossiers et support client{% endblock %}
+
+{% block dashboard_content %}
+
+<!-- ============================================================
+     SECTION : VUE D'ENSEMBLE
+     ============================================================ -->
+<div id="section-accueil">
+
+  <!-- Statistiques -->
+  <div class="row g-3 mb-4">
+    <div class="col-lg-3 col-md-6">
+      <div class="cf-card-stat">
+        <div class="stat-icon stat-icon-orange">
+          <i class="bi bi-folder2-open"></i>
+        </div>
+        <div>
+          <div class="stat-value" id="stat-dossiers-total">--</div>
+          <div class="stat-label">Total dossiers</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="cf-card-stat">
+        <div class="stat-icon stat-icon-blue">
+          <i class="bi bi-hourglass-split"></i>
+        </div>
+        <div>
+          <div class="stat-value" id="stat-dossiers-attente">--</div>
+          <div class="stat-label">En attente</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="cf-card-stat">
+        <div class="stat-icon stat-icon-green">
+          <i class="bi bi-check-circle"></i>
+        </div>
+        <div>
+          <div class="stat-value" id="stat-dossiers-approuves">--</div>
+          <div class="stat-label">Approuves</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="cf-card-stat">
+        <div class="stat-icon stat-icon-purple">
+          <i class="bi bi-chat-dots"></i>
+        </div>
+        <div>
+          <div class="stat-value" id="stat-convs-attente">--</div>
+          <div class="stat-label">Conversations</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dossiers recents + Conversations -->
+  <div class="row g-4">
+
+    <div class="col-lg-7">
+      <div class="cf-card">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h5 style="font-weight:700;margin:0">Dossiers recents</h5>
+          <button class="btn btn-sm btn-cf-outline"
+                  onclick="afficherSection('dossiers')">
+            Voir tout
+          </button>
+        </div>
+        <div id="liste-dossiers-recents">
+          <div class="text-center py-4">
+            <div class="cf-spinner mx-auto"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="cf-card">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h5 style="font-weight:700;margin:0">Conversations actives</h5>
+          <button class="btn btn-sm btn-cf-outline"
+                  onclick="afficherSection('conversations')">
+            Voir tout
+          </button>
+        </div>
+        <div id="liste-convs-recentes">
+          <div class="text-center py-4">
+            <div class="cf-spinner mx-auto"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION : DOSSIERS CREDITS
+     ============================================================ -->
+<div id="section-dossiers" style="display:none">
+  <div class="cf-card">
+
+    <!-- Filtres -->
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+      <h5 style="font-weight:700;margin:0">Dossiers de credit</h5>
+      <div class="d-flex gap-2 flex-wrap">
+        <button class="btn btn-sm filtre-btn active"
+                style="border-radius:var(--cf-radius-full);padding:6px 16px;font-weight:600;background:var(--cf-orange);color:#fff;border:none"
+                onclick="filtrerDossiers('', this)">
+          Tous
+        </button>
+        <button class="btn btn-sm filtre-btn"
+                style="border-radius:var(--cf-radius-full);padding:6px 16px;font-weight:600;background:var(--cf-surface-2);color:var(--cf-text-muted);border:1px solid var(--cf-border)"
+                onclick="filtrerDossiers('soumise', this)">
+          Soumis
+        </button>
+        <button class="btn btn-sm filtre-btn"
+                style="border-radius:var(--cf-radius-full);padding:6px 16px;font-weight:600;background:var(--cf-surface-2);color:var(--cf-text-muted);border:1px solid var(--cf-border)"
+                onclick="filtrerDossiers('en_analyse', this)">
+          En analyse
+        </button>
+        <button class="btn btn-sm filtre-btn"
+                style="border-radius:var(--cf-radius-full);padding:6px 16px;font-weight:600;background:var(--cf-surface-2);color:var(--cf-text-muted);border:1px solid var(--cf-border)"
+                onclick="filtrerDossiers('approuvee', this)">
+          Approuves
+        </button>
+      </div>
+    </div>
+
+    <div id="table-dossiers">
+      <div class="text-center py-4">
+        <div class="cf-spinner mx-auto"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal traitement dossier -->
+  <div id="modal-traitement" style="display:none;margin-top:24px">
+    <div class="row justify-content-center">
+      <div class="col-lg-7">
+        <div class="cf-card">
+          <h5 style="font-weight:700;margin-bottom:20px">
+            <i class="bi bi-pencil-square me-2 text-orange"></i>
+            Traiter le dossier <span id="modal-dossier-id"></span>
+          </h5>
+
+          <div id="alerte-traitement" class="cf-alert mb-3">
+            <i class="bi bi-info-circle" id="alerte-traitement-icon"></i>
+            <span id="alerte-traitement-msg"></span>
+          </div>
+
+          <div class="mb-3">
+            <label class="cf-label">Nouveau statut</label>
+            <select id="select-statut" class="cf-input"
+                    onchange="onStatutChange()">
+              <option value="en_analyse">Passer en analyse</option>
+              <option value="approuvee">Approuver</option>
+              <option value="decaissee">Marquer decaisse</option>
+              <option value="rejetee">Rejeter</option>
+            </select>
+          </div>
+
+          <div id="champ-montant" class="mb-3" style="display:none">
+            <label class="cf-label">Montant approuve (FCFA)</label>
+            <input type="number" id="montant-approuve" class="cf-input"
+                   placeholder="Montant approuve"/>
+          </div>
+
+          <div class="mb-4">
+            <label class="cf-label">Commentaire</label>
+            <textarea id="commentaire-agent" class="cf-input" rows="3"
+                      placeholder="Commentaire sur la decision..."></textarea>
+          </div>
+
+          <div class="d-flex gap-3">
+            <button class="btn-cf-outline btn flex-fill"
+                    onclick="document.getElementById('modal-traitement').style.display='none'">
+              Annuler
+            </button>
+            <button id="btn-valider-traitement" class="btn-cf-primary btn flex-fill"
+                    onclick="validerTraitement()">
+              <i class="bi bi-check me-2"></i>Valider
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION : ENREGISTRER PAIEMENT
+     ============================================================ -->
+<div id="section-paiements" style="display:none">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="cf-card">
+        <h5 style="font-weight:700;margin-bottom:24px">
+          <i class="bi bi-cash-coin me-2 text-orange"></i>
+          Enregistrer un paiement
+        </h5>
+
+        <div id="alerte-paiement" class="cf-alert mb-4">
+          <i class="bi bi-info-circle" id="alerte-paiement-icon"></i>
+          <span id="alerte-paiement-msg"></span>
+        </div>
+
+        <div class="mb-3">
+          <label class="cf-label">ID de l'echeance</label>
+          <input type="number" id="paiement-echeance-id" class="cf-input"
+                 placeholder="Entrez l'ID de l'echeance"/>
+        </div>
+
+        <div class="mb-3">
+          <label class="cf-label">Montant paye (FCFA)</label>
+          <input type="number" id="paiement-montant" class="cf-input"
+                 placeholder="Ex: 46500"/>
+        </div>
+
+        <div class="mb-3">
+          <label class="cf-label">Mode de paiement</label>
+          <select id="paiement-mode" class="cf-input">
+            <option value="orange_money">Orange Money</option>
+            <option value="wave">Wave</option>
+            <option value="mtn_momo">MTN MoMo</option>
+            <option value="especes">Especes</option>
+          </select>
+        </div>
+
+        <div class="mb-4">
+          <label class="cf-label">Reference transaction</label>
+          <input type="text" id="paiement-reference" class="cf-input"
+                 placeholder="Ex: OM20260603XXXX"/>
+        </div>
+
+        <button id="btn-enregistrer-paiement"
+                class="btn-cf-primary btn w-100 py-3"
+                onclick="enregistrerPaiement()">
+          <i class="bi bi-check-circle me-2"></i>
+          Enregistrer le paiement
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION : PENALITES
+     ============================================================ -->
+<div id="section-penalites" style="display:none">
+  <div class="cf-card">
+    <h5 style="font-weight:700;margin-bottom:24px">
+      <i class="bi bi-exclamation-triangle me-2 text-orange"></i>
+      Penalites de retard
+    </h5>
+    <div id="table-penalites">
+      <div class="text-center py-4">
+        <div class="cf-spinner mx-auto"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION : CONVERSATIONS
+     ============================================================ -->
+<div id="section-conversations" style="display:none">
+  <div class="row g-4">
+
+    <!-- Liste conversations -->
+    <div class="col-lg-4">
+      <div class="cf-card" style="height:600px;overflow-y:auto">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h5 style="font-weight:700;margin:0">Conversations</h5>
+        </div>
+        <div id="liste-conversations">
+          <div class="text-center py-4">
+            <div class="cf-spinner mx-auto"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat actif -->
+    <div class="col-lg-8">
+      <div class="cf-card" style="height:600px;display:flex;flex-direction:column">
+
+        <div id="chat-agent-placeholder"
+             class="text-center py-5"
+             style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <i class="bi bi-chat-dots" style="font-size:3rem;color:var(--cf-text-muted)"></i>
+          <p style="color:var(--cf-text-muted);margin-top:12px">
+            Selectionnez une conversation pour commencer
+          </p>
+        </div>
+
+        <div id="chat-agent-actif" style="display:none;flex-direction:column;flex:1">
+          <div class="d-flex align-items-center justify-content-between mb-3 pb-3"
+               style="border-bottom:1px solid var(--cf-border)">
+            <div>
+              <div style="font-weight:700" id="chat-agent-client-nom">Client</div>
+              <div style="font-size:0.8rem;color:var(--cf-text-muted)"
+                   id="chat-agent-conv-info">Conversation</div>
+            </div>
+            <div id="chat-agent-ws-dot"
+                 style="width:10px;height:10px;border-radius:50%;background:#6B7280"></div>
+          </div>
+
+          <div id="chat-agent-messages"
+               style="flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:8px;background:var(--cf-surface-2);border-radius:var(--cf-radius)">
+          </div>
+
+          <div id="chat-agent-typing"
+               style="font-size:0.75rem;color:var(--cf-text-muted);font-style:italic;padding:4px 0;min-height:20px">
+          </div>
+
+          <div style="display:flex;gap:8px;align-items:flex-end;padding-top:10px;border-top:1px solid var(--cf-border)">
+            <textarea id="chat-agent-input" class="cf-input" rows="1"
+                      style="resize:none;max-height:80px"
+                      placeholder="Votre reponse..."
+                      onkeydown="chatAgentGererTouche(event)"
+                      oninput="chatAgentSignalerFrappe()"></textarea>
+            <button class="btn-cf-primary btn px-3 py-2"
+                    onclick="chatAgentEnvoyer()">
+              <i class="bi bi-send"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION : PROFIL
+     ============================================================ -->
+<div id="section-profil" style="display:none">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <div class="cf-card">
+        <h5 style="font-weight:700;margin-bottom:24px">
+          <i class="bi bi-person me-2 text-orange"></i>
+          Mon profil
+        </h5>
+
+        <div id="alerte-profil" class="cf-alert mb-4">
+          <i class="bi bi-info-circle" id="alerte-profil-icon"></i>
+          <span id="alerte-profil-msg"></span>
+        </div>
+
+        <div class="mb-3">
+          <label class="cf-label">Email</label>
+          <input type="email" id="profil-email" class="cf-input"/>
+        </div>
+        <div class="mb-3">
+          <label class="cf-label">Telephone</label>
+          <input type="tel" id="profil-telephone" class="cf-input"/>
+        </div>
+        <div class="mb-4">
+          <label class="cf-label">Region</label>
+          <input type="text" id="profil-region" class="cf-input"/>
+        </div>
+
+        <button id="btn-sauver-profil"
+                class="btn-cf-primary btn w-100 py-3"
+                onclick="sauverProfil()">
+          <i class="bi bi-check me-2"></i>
+          Sauvegarder
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard_agent.js' %}"></script>
+{% endblock %}

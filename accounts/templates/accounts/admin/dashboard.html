@@ -1,0 +1,400 @@
+{% extends 'base/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Dashboard Admin{% endblock %}
+
+{% block sidebar %}
+  {% include 'accounts/admin/sidebar.html' %}
+{% endblock %}
+
+{% block page_title %}Tableau de bord Administrateur{% endblock %}
+{% block page_subtitle %}Vue d'ensemble de la plateforme COFINANCE CI{% endblock %}
+
+{% block dashboard_content %}
+
+<!-- ============================================================
+     SECTION : VUE D'ENSEMBLE
+     ============================================================ -->
+<div id="section-accueil">
+
+  <!-- Filtres date -->
+  <div class="cf-card mb-4">
+    <div class="d-flex align-items-center flex-wrap gap-3">
+      <div>
+        <label class="cf-label">Date debut</label>
+        <input type="date" id="filtre-date-debut" class="cf-input"
+               style="width:auto"/>
+      </div>
+      <div>
+        <label class="cf-label">Date fin</label>
+        <input type="date" id="filtre-date-fin" class="cf-input"
+               style="width:auto"/>
+      </div>
+      <div>
+        <label class="cf-label">Periode recente</label>
+        <select id="filtre-jours" class="cf-input" style="width:auto">
+          <option value="7">7 derniers jours</option>
+          <option value="30">30 derniers jours</option>
+          <option value="90">90 derniers jours</option>
+        </select>
+      </div>
+      <div style="margin-top:22px">
+        <button class="btn-cf-primary btn"
+                onclick="chargerDashboard()">
+          <i class="bi bi-arrow-clockwise me-2"></i>
+          Actualiser
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistiques credits -->
+  <div class="mb-3">
+    <span class="cf-badge cf-badge-orange mb-2">Credits</span>
+  </div>
+  <div class="row g-3 mb-4">
+    <div class="col-lg-2 col-md-4 col-6">
+      <div class="cf-card-stat" style="flex-direction:column;align-items:flex-start;gap:8px">
+        <div class="stat-icon stat-icon-blue" style="width:40px;height:40px;font-size:1.1rem">
+          <i class="bi bi-folder2"></i>
+        </div>
+        <div class="stat-value" id="kpi-total">--</div>
+        <div class="stat-label">Total</div>
+      </div>
+    </div>
+    <div class="col-lg-2 col-md-4 col-6">
+      <div class="cf-card-stat" style="flex-direction:column;align-items:flex-start;gap:8px">
+        <div class="stat-icon stat-icon-orange" style="width:40px;height:40px;font-size:1.1rem">
+          <i class="bi bi-hourglass"></i>
+        </div>
+        <div class="stat-value" id="kpi-soumises">--</div>
+        <div class="stat-label">Soumises</div>
+      </div>
+    </div>
+    <div class="col-lg-2 col-md-4 col-6">
+      <div class="cf-card-stat" style="flex-direction:column;align-items:flex-start;gap:8px">
+        <div class="stat-icon stat-icon-blue" style="width:40px;height:40px;font-size:1.1rem">
+          <i class="bi bi-search"></i>
+        </div>
+        <div class="stat-value" id="kpi-analyse">--</div>
+        <div class="stat-label">En analyse</div>
+      </div>
+    </div>
+    <div class="col-lg-2 col-md-4 col-6">
+      <div class="cf-card-stat" style="flex-direction:column;align-items:flex-start;gap:8px">
+        <div class="stat-icon stat-icon-green" style="width:40px;height:40px;font-size:1.1rem">
+          <i class="bi bi-check-circle"></i>
+        </div>
+        <div class="stat-value" id="kpi-approuvees">--</div>
+        <div class="stat-label">Approuvees</div>
+      </div>
+    </div>
+    <div class="col-lg-2 col-md-4 col-6">
+      <div class="cf-card-stat" style="flex-direction:column;align-items:flex-start;gap:8px">
+        <div class="stat-icon stat-icon-purple" style="width:40px;height:40px;font-size:1.1rem">
+          <i class="bi bi-cash"></i>
+        </div>
+        <div class="stat-value" id="kpi-decaissees">--</div>
+        <div class="stat-label">Decaissees</div>
+      </div>
+    </div>
+    <div class="col-lg-2 col-md-4 col-6">
+      <div class="cf-card-stat" style="flex-direction:column;align-items:flex-start;gap:8px">
+        <div class="stat-icon stat-icon-orange" style="width:40px;height:40px;font-size:1.1rem">
+          <i class="bi bi-x-circle"></i>
+        </div>
+        <div class="stat-value" id="kpi-rejetees" style="color:#EF4444">--</div>
+        <div class="stat-label">Rejetees</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Remboursements + Assurance + Support -->
+  <div class="row g-4 mb-4">
+
+    <!-- Remboursements -->
+    <div class="col-lg-4">
+      <div class="cf-card h-100">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <div class="stat-icon stat-icon-green"
+               style="width:40px;height:40px;font-size:1.1rem">
+            <i class="bi bi-arrow-repeat"></i>
+          </div>
+          <h6 style="font-weight:700;margin:0">Remboursements</h6>
+        </div>
+        <div class="d-flex justify-content-between mb-2" style="font-size:0.88rem">
+          <span style="color:var(--cf-text-muted)">Total echeances</span>
+          <span style="font-weight:700" id="kpi-total-echeances">--</span>
+        </div>
+        <div class="d-flex justify-content-between mb-2" style="font-size:0.88rem">
+          <span style="color:var(--cf-text-muted)">Payees</span>
+          <span style="font-weight:700;color:var(--cf-green)" id="kpi-echeances-payees">--</span>
+        </div>
+        <div class="d-flex justify-content-between mb-3" style="font-size:0.88rem">
+          <span style="color:var(--cf-text-muted)">Montant recu</span>
+          <span style="font-weight:700;color:var(--cf-orange)" id="kpi-montant-recu">--</span>
+        </div>
+        <!-- Barre taux de recouvrement -->
+        <div style="margin-top:12px">
+          <div class="d-flex justify-content-between mb-1" style="font-size:0.8rem">
+            <span style="color:var(--cf-text-muted)">Taux de recouvrement</span>
+            <span style="font-weight:700;color:var(--cf-green)" id="kpi-taux">--%</span>
+          </div>
+          <div style="height:8px;background:var(--cf-border);border-radius:8px">
+            <div id="barre-taux"
+                 style="height:8px;border-radius:8px;background:var(--cf-green);width:0%;transition:width 1s ease">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Assurance -->
+    <div class="col-lg-4">
+      <div class="cf-card h-100">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <div class="stat-icon stat-icon-blue"
+               style="width:40px;height:40px;font-size:1.1rem">
+            <i class="bi bi-shield-check"></i>
+          </div>
+          <h6 style="font-weight:700;margin:0">Assurances</h6>
+        </div>
+        <div class="d-flex justify-content-between mb-2" style="font-size:0.88rem">
+          <span style="color:var(--cf-text-muted)">Total souscriptions</span>
+          <span style="font-weight:700" id="kpi-total-assurances">--</span>
+        </div>
+        <div class="d-flex justify-content-between mb-2" style="font-size:0.88rem">
+          <span style="color:var(--cf-text-muted)">Actives</span>
+          <span style="font-weight:700;color:var(--cf-green)" id="kpi-assurances-actives">--</span>
+        </div>
+        <div class="d-flex justify-content-between mb-2" style="font-size:0.88rem">
+          <span style="color:var(--cf-text-muted)">Expirees</span>
+          <span style="font-weight:700;color:#9CA3AF" id="kpi-assurances-expirees">--</span>
+        </div>
+        <div class="d-flex justify-content-between" style="font-size:0.88rem">
+          <span style="color:var(--cf-text-muted)">Revenus primes</span>
+          <span style="font-weight:700;color:var(--cf-orange)" id="kpi-revenus-primes">--</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Support + Clients -->
+    <div class="col-lg-4">
+      <div class="cf-card h-100">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <div class="stat-icon stat-icon-purple"
+               style="width:40px;height:40px;font-size:1.1rem">
+            <i class="bi bi-people"></i>
+          </div>
+          <h6 style="font-weight:700;margin:0">Utilisateurs et Support</h6>
+        </div>
+        <div class="d-flex justify-content-between mb-2" style="font-size:0.88rem">
+          <span style="color:var(--cf-text-muted)">Total clients</span>
+          <span style="font-weight:700" id="kpi-total-clients">--</span>
+        </div>
+        <div class="d-flex justify-content-between mb-2" style="font-size:0.88rem">
+          <span style="color:var(--cf-text-muted)">Total agents</span>
+          <span style="font-weight:700" id="kpi-total-agents">--</span>
+        </div>
+        <div class="d-flex justify-content-between mb-2" style="font-size:0.88rem">
+          <span style="color:var(--cf-text-muted)">Conversations ouvertes</span>
+          <span style="font-weight:700;color:var(--cf-green)" id="kpi-convs-ouvertes">--</span>
+        </div>
+        <div class="d-flex justify-content-between" style="font-size:0.88rem">
+          <span style="color:var(--cf-text-muted)">Messages non lus</span>
+          <span style="font-weight:700;color:var(--cf-orange)" id="kpi-msgs-non-lus">--</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Activite recente -->
+  <div class="cf-card">
+    <h5 style="font-weight:700;margin-bottom:20px">
+      <i class="bi bi-activity me-2 text-orange"></i>
+      Activite recente
+    </h5>
+    <div class="row g-3" id="activite-recente">
+      <div class="text-center py-4 col-12">
+        <div class="cf-spinner mx-auto"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================
+     SECTION : TOUS LES CREDITS
+     ============================================================ -->
+<div id="section-credits" style="display:none">
+  <div class="cf-card">
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+      <h5 style="font-weight:700;margin:0">Tous les credits</h5>
+      <div class="d-flex gap-2 flex-wrap">
+        <button class="btn btn-sm filtre-credit active"
+                style="border-radius:var(--cf-radius-full);padding:6px 16px;font-weight:600;background:var(--cf-orange);color:#fff;border:none"
+                onclick="filtrerCreditsAdmin('', this)">Tous</button>
+        <button class="btn btn-sm filtre-credit"
+                style="border-radius:var(--cf-radius-full);padding:6px 16px;font-weight:600;background:var(--cf-surface-2);color:var(--cf-text-muted);border:1px solid var(--cf-border)"
+                onclick="filtrerCreditsAdmin('soumise', this)">Soumis</button>
+        <button class="btn btn-sm filtre-credit"
+                style="border-radius:var(--cf-radius-full);padding:6px 16px;font-weight:600;background:var(--cf-surface-2);color:var(--cf-text-muted);border:1px solid var(--cf-border)"
+                onclick="filtrerCreditsAdmin('approuvee', this)">Approuves</button>
+        <button class="btn btn-sm filtre-credit"
+                style="border-radius:var(--cf-radius-full);padding:6px 16px;font-weight:600;background:var(--cf-surface-2);color:var(--cf-text-muted);border:1px solid var(--cf-border)"
+                onclick="filtrerCreditsAdmin('decaissee', this)">Decaisses</button>
+      </div>
+    </div>
+    <div id="table-credits-admin">
+      <div class="text-center py-4"><div class="cf-spinner mx-auto"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION : PRODUITS ASSURANCE
+     ============================================================ -->
+<div id="section-produits" style="display:none">
+
+  <div class="cf-card mb-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <h5 style="font-weight:700;margin:0">Produits d'assurance</h5>
+      <button class="btn-cf-primary btn"
+              onclick="afficherFormProduit(null)">
+        <i class="bi bi-plus me-2"></i>Nouveau produit
+      </button>
+    </div>
+    <div id="table-produits">
+      <div class="text-center py-4"><div class="cf-spinner mx-auto"></div></div>
+    </div>
+  </div>
+
+  <!-- Formulaire produit -->
+  <div id="form-produit" style="display:none">
+    <div class="row justify-content-center">
+      <div class="col-lg-7">
+        <div class="cf-card">
+          <h5 style="font-weight:700;margin-bottom:20px" id="form-produit-titre">
+            Nouveau produit
+          </h5>
+
+          <div id="alerte-produit" class="cf-alert mb-3">
+            <i class="bi bi-info-circle" id="alerte-produit-icon"></i>
+            <span id="alerte-produit-msg"></span>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="cf-label">Nom du produit</label>
+              <input type="text" id="produit-nom" class="cf-input"
+                     placeholder="Ex: Assurance Vie Essentielle"/>
+            </div>
+            <div class="col-md-6">
+              <label class="cf-label">Type</label>
+              <select id="produit-type" class="cf-input">
+                <option value="vie">Assurance Vie</option>
+                <option value="deces">Assurance Deces-Invalidite</option>
+                <option value="credit">Assurance Credit</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="cf-label">Duree (mois)</label>
+              <input type="number" id="produit-duree" class="cf-input"
+                     placeholder="Ex: 12"/>
+            </div>
+            <div class="col-md-6">
+              <label class="cf-label">Prime mensuelle (FCFA)</label>
+              <input type="number" id="produit-prime" class="cf-input"
+                     placeholder="Ex: 2500"/>
+            </div>
+            <div class="col-md-6">
+              <label class="cf-label">Montant couverture (FCFA)</label>
+              <input type="number" id="produit-couverture" class="cf-input"
+                     placeholder="Ex: 1000000"/>
+            </div>
+            <div class="col-12">
+              <label class="cf-label">Description</label>
+              <textarea id="produit-description" class="cf-input" rows="3"
+                        placeholder="Description du produit..."></textarea>
+            </div>
+          </div>
+
+          <div class="d-flex gap-3 mt-4">
+            <button class="btn-cf-outline btn flex-fill"
+                    onclick="document.getElementById('form-produit').style.display='none'">
+              Annuler
+            </button>
+            <button id="btn-sauver-produit"
+                    class="btn-cf-primary btn flex-fill"
+                    onclick="sauverProduit()">
+              <i class="bi bi-check me-2"></i>Enregistrer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================
+     SECTION : SOUSCRIPTIONS
+     ============================================================ -->
+<div id="section-souscriptions" style="display:none">
+  <div class="cf-card">
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+      <h5 style="font-weight:700;margin:0">Toutes les souscriptions</h5>
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm filtre-sous active"
+                style="border-radius:var(--cf-radius-full);padding:6px 16px;font-weight:600;background:var(--cf-orange);color:#fff;border:none"
+                onclick="filtrerSouscriptions('', this)">Toutes</button>
+        <button class="btn btn-sm filtre-sous"
+                style="border-radius:var(--cf-radius-full);padding:6px 16px;font-weight:600;background:var(--cf-surface-2);color:var(--cf-text-muted);border:1px solid var(--cf-border)"
+                onclick="filtrerSouscriptions('active', this)">Actives</button>
+        <button class="btn btn-sm filtre-sous"
+                style="border-radius:var(--cf-radius-full);padding:6px 16px;font-weight:600;background:var(--cf-surface-2);color:var(--cf-text-muted);border:1px solid var(--cf-border)"
+                onclick="filtrerSouscriptions('expiree', this)">Expirees</button>
+      </div>
+    </div>
+    <div id="table-souscriptions">
+      <div class="text-center py-4"><div class="cf-spinner mx-auto"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION : PERFORMANCE AGENTS
+     ============================================================ -->
+<div id="section-agents" style="display:none">
+  <div class="cf-card">
+    <h5 style="font-weight:700;margin-bottom:24px">
+      <i class="bi bi-people me-2 text-orange"></i>
+      Performance des agents
+    </h5>
+    <div id="table-agents">
+      <div class="text-center py-4"><div class="cf-spinner mx-auto"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION : REPARTITION REGIONS
+     ============================================================ -->
+<div id="section-regions" style="display:none">
+  <div class="cf-card">
+    <h5 style="font-weight:700;margin-bottom:24px">
+      <i class="bi bi-geo-alt me-2 text-orange"></i>
+      Repartition par region
+    </h5>
+    <div id="table-regions">
+      <div class="text-center py-4"><div class="cf-spinner mx-auto"></div></div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard_admin.js' %}"></script>
+{% endblock %}
