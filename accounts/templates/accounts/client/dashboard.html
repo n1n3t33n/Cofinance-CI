@@ -1,0 +1,352 @@
+{% extends 'base/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Mon Dashboard{% endblock %}
+
+{% block sidebar %}
+  {% include 'accounts/client/sidebar.html' %}
+{% endblock %}
+
+{% block page_title %}Tableau de bord{% endblock %}
+{% block page_subtitle %}Bienvenue sur votre espace personnel COFINANCE CI{% endblock %}
+
+{% block page_actions %}
+<button class="btn-cf-primary btn"
+        onclick="afficherSection('nouvelle-demande')">
+  <i class="bi bi-plus me-2"></i>
+  Nouvelle demande
+</button>
+{% endblock %}
+
+{% block dashboard_content %}
+
+<!-- Sections dynamiques -->
+
+<!-- ============================================================
+     SECTION : VUE D'ENSEMBLE (defaut)
+     ============================================================ -->
+<div id="section-accueil">
+
+  <!-- Cartes statistiques -->
+  <div class="row g-3 mb-4" id="stats-cards">
+    <div class="col-lg-3 col-md-6">
+      <div class="cf-card-stat">
+        <div class="stat-icon stat-icon-orange">
+          <i class="bi bi-cash-stack"></i>
+        </div>
+        <div>
+          <div class="stat-value" id="stat-total-credits">--</div>
+          <div class="stat-label">Total credits</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="cf-card-stat">
+        <div class="stat-icon stat-icon-green">
+          <i class="bi bi-check-circle"></i>
+        </div>
+        <div>
+          <div class="stat-value" id="stat-credits-actifs">--</div>
+          <div class="stat-label">Credits actifs</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="cf-card-stat">
+        <div class="stat-icon stat-icon-blue">
+          <i class="bi bi-shield-check"></i>
+        </div>
+        <div>
+          <div class="stat-value" id="stat-assurances">--</div>
+          <div class="stat-label">Assurances actives</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="cf-card-stat">
+        <div class="stat-icon stat-icon-purple">
+          <i class="bi bi-bell"></i>
+        </div>
+        <div>
+          <div class="stat-value" id="stat-notifications">--</div>
+          <div class="stat-label">Notifications</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Derniers credits + Dernieres notifications -->
+  <div class="row g-4">
+
+    <!-- Derniers credits -->
+    <div class="col-lg-7">
+      <div class="cf-card">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h5 style="font-weight:700;margin:0">Mes derniers credits</h5>
+          <button class="btn btn-sm btn-cf-outline"
+                  onclick="afficherSection('credits')">
+            Voir tout
+          </button>
+        </div>
+        <div id="liste-derniers-credits">
+          <div class="text-center py-4">
+            <div class="cf-spinner mx-auto"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dernieres notifications -->
+    <div class="col-lg-5">
+      <div class="cf-card">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h5 style="font-weight:700;margin:0">Notifications</h5>
+          <button class="btn btn-sm btn-cf-outline"
+                  onclick="afficherSection('notifications')">
+            Voir tout
+          </button>
+        </div>
+        <div id="liste-notifs-accueil">
+          <div class="text-center py-4">
+            <div class="cf-spinner mx-auto"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION : MES CREDITS
+     ============================================================ -->
+<div id="section-credits" style="display:none">
+  <div class="cf-card">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <h5 style="font-weight:700;margin:0">Mes demandes de credit</h5>
+      <button class="btn-cf-primary btn"
+              onclick="afficherSection('nouvelle-demande')">
+        <i class="bi bi-plus me-2"></i>Nouvelle demande
+      </button>
+    </div>
+    <div id="table-credits">
+      <div class="text-center py-4">
+        <div class="cf-spinner mx-auto"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION : NOUVELLE DEMANDE
+     ============================================================ -->
+<div id="section-nouvelle-demande" style="display:none">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="cf-card">
+        <h5 style="font-weight:700;margin-bottom:24px">
+          <i class="bi bi-plus-circle me-2 text-orange"></i>
+          Soumettre une demande de credit
+        </h5>
+
+        <div id="alerte-demande" class="cf-alert mb-4">
+          <i class="bi bi-info-circle" id="alerte-demande-icon"></i>
+          <span id="alerte-demande-msg"></span>
+        </div>
+
+        <div class="mb-3">
+          <label class="cf-label">Montant souhaite (FCFA)</label>
+          <input type="number" id="montant-demande" class="cf-input"
+                 placeholder="Ex: 500000" min="50000" max="5000000"/>
+        </div>
+
+        <div class="mb-3">
+          <label class="cf-label">Duree de remboursement (mois)</label>
+          <select id="duree-demande" class="cf-input">
+            <option value="">Choisir une duree</option>
+            <option value="6">6 mois</option>
+            <option value="12">12 mois</option>
+            <option value="18">18 mois</option>
+            <option value="24">24 mois</option>
+            <option value="36">36 mois</option>
+          </select>
+        </div>
+
+        <div class="mb-4">
+          <label class="cf-label">Motif de la demande</label>
+          <textarea id="motif-demande" class="cf-input" rows="4"
+                    placeholder="Decrivez l'objet de votre demande de credit..."></textarea>
+        </div>
+
+        <button id="btn-soumettre-demande" class="btn-cf-primary btn w-100 py-3"
+                onclick="soumettreDemandeCredit()">
+          <i class="bi bi-send me-2"></i>
+          Soumettre ma demande
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION : REMBOURSEMENTS
+     ============================================================ -->
+<div id="section-remboursements" style="display:none">
+  <div class="cf-card">
+    <h5 style="font-weight:700;margin-bottom:24px">
+      <i class="bi bi-arrow-repeat me-2 text-orange"></i>
+      Historique des remboursements
+    </h5>
+    <div id="table-remboursements">
+      <div class="text-center py-4">
+        <div class="cf-spinner mx-auto"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION : MES ASSURANCES
+     ============================================================ -->
+<div id="section-assurances" style="display:none">
+  <div class="cf-card">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <h5 style="font-weight:700;margin:0">Mes souscriptions d'assurance</h5>
+      <button class="btn-cf-primary btn"
+              onclick="afficherSection('souscrire')">
+        <i class="bi bi-plus me-2"></i>Souscrire
+      </button>
+    </div>
+    <div id="table-assurances">
+      <div class="text-center py-4">
+        <div class="cf-spinner mx-auto"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION : SOUSCRIRE
+     ============================================================ -->
+<div id="section-souscrire" style="display:none">
+  <div class="cf-card mb-4">
+    <h5 style="font-weight:700;margin-bottom:24px">
+      <i class="bi bi-shield-plus me-2 text-green"></i>
+      Catalogue des produits d'assurance
+    </h5>
+    <div id="liste-produits-assurance" class="row g-3">
+      <div class="text-center py-4 col-12">
+        <div class="cf-spinner mx-auto"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulaire souscription -->
+  <div id="form-souscription" style="display:none">
+    <div class="row justify-content-center">
+      <div class="col-lg-6">
+        <div class="cf-card">
+          <h5 style="font-weight:700;margin-bottom:20px">Confirmer la souscription</h5>
+
+          <div id="alerte-souscription" class="cf-alert mb-3">
+            <i class="bi bi-info-circle" id="alerte-souscription-icon"></i>
+            <span id="alerte-souscription-msg"></span>
+          </div>
+
+          <div id="resume-produit" class="p-3 mb-3"
+               style="background:var(--cf-surface-2);border-radius:var(--cf-radius)">
+          </div>
+
+          <div class="mb-4">
+            <label class="cf-label">Reference de paiement Mobile Money</label>
+            <input type="text" id="ref-paiement" class="cf-input"
+                   placeholder="Ex: OM20260603XXXX"/>
+          </div>
+
+          <div class="d-flex gap-3">
+            <button class="btn-cf-outline btn flex-fill"
+                    onclick="document.getElementById('form-souscription').style.display='none'">
+              Annuler
+            </button>
+            <button id="btn-confirmer-souscription"
+                    class="btn-cf-secondary btn flex-fill"
+                    onclick="confirmerSouscription()">
+              <i class="bi bi-check me-2"></i>Confirmer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION : CHAT SUPPORT
+     ============================================================ -->
+<div id="section-chat" style="display:none">
+  <div class="cf-card" style="height:600px;display:flex;flex-direction:column">
+    <div class="d-flex align-items-center justify-content-between mb-3 pb-3"
+         style="border-bottom:1px solid var(--cf-border)">
+      <div>
+        <h5 style="font-weight:700;margin:0">Support client</h5>
+        <p style="font-size:0.82rem;color:var(--cf-text-muted);margin:4px 0 0"
+           id="chat-statut-label">Initialisation...</p>
+      </div>
+      <div id="chat-ws-dot"
+           style="width:10px;height:10px;border-radius:50%;background:#6B7280"></div>
+    </div>
+
+    <!-- Messages -->
+    <div id="chat-messages"
+         style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;background:var(--cf-surface-2);border-radius:var(--cf-radius)">
+      <div style="text-align:center;font-size:0.82rem;color:var(--cf-text-muted);font-style:italic">
+        Connexion en cours...
+      </div>
+    </div>
+
+    <!-- Indicateur frappe -->
+    <div id="chat-typing"
+         style="font-size:0.78rem;color:var(--cf-text-muted);font-style:italic;padding:6px 0;min-height:24px">
+    </div>
+
+    <!-- Saisie -->
+    <div style="display:flex;gap:10px;align-items:flex-end;padding-top:12px;border-top:1px solid var(--cf-border)">
+      <textarea id="chat-input" class="cf-input" rows="1"
+                placeholder="Ecrivez votre message..."
+                style="resize:none;max-height:80px"
+                onkeydown="chatGererTouche(event)"
+                oninput="chatSignalerFrappe()"></textarea>
+      <button class="btn-cf-primary btn px-3 py-2"
+              onclick="chatEnvoyerMessage()">
+        <i class="bi bi-send"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION : NOTIFICATIONS
+     ============================================================ -->
+<div id="section-notifications" style="display:none">
+  <div class="cf-card">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <h5 style="font-weight:700;margin:0">Mes notifications</h5>
+      <button class="btn btn-sm btn-cf-outline"
+              onclick="toutMarquerLu()">
+        <i class="bi bi-check-all me-1"></i>
+        Tout marquer comme lu
+      </button>
+    </div>
+    <div id="liste-notifications">
+      <div class="text-center py-4">
+        <div class="cf-spinner mx-auto"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard_client.js' %}"></script>
+{% endblock %}

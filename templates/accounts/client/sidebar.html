@@ -1,0 +1,106 @@
+{% load static %}
+<aside class="cf-sidebar d-none d-lg-block">
+
+  <!-- Profil utilisateur -->
+  <div class="text-center mb-4 pb-4"
+       style="border-bottom:1px solid var(--cf-border)">
+    <div style="
+      width:56px;height:56px;border-radius:50%;
+      background:linear-gradient(135deg,var(--cf-orange),var(--cf-orange-dark));
+      color:#fff;font-size:1.3rem;font-weight:800;
+      display:flex;align-items:center;justify-content:center;
+      margin:0 auto 10px">
+      <span class="cf-user-avatar">C</span>
+    </div>
+    <div style="font-weight:700;font-size:0.92rem" class="cf-user-name">Client</div>
+    <div>
+      <span class="cf-badge cf-badge-orange" style="font-size:0.7rem">Client</span>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="sidebar-section">Navigation</div>
+
+  <a href="/dashboard/client/" class="sidebar-link active" id="nav-accueil">
+    <div class="sidebar-icon">
+      <i class="bi bi-speedometer2"></i>
+    </div>
+    Tableau de bord
+  </a>
+
+  <div class="sidebar-section">Credits</div>
+
+  <a href="#" class="sidebar-link" id="nav-mes-credits"
+     onclick="afficherSection('credits'); return false">
+    <div class="sidebar-icon">
+      <i class="bi bi-cash-stack"></i>
+    </div>
+    Mes credits
+  </a>
+
+  <a href="#" class="sidebar-link" id="nav-nouvelle-demande"
+     onclick="afficherSection('nouvelle-demande'); return false">
+    <div class="sidebar-icon">
+      <i class="bi bi-plus-circle"></i>
+    </div>
+    Nouvelle demande
+  </a>
+
+  <a href="#" class="sidebar-link" id="nav-remboursements"
+     onclick="afficherSection('remboursements'); return false">
+    <div class="sidebar-icon">
+      <i class="bi bi-arrow-repeat"></i>
+    </div>
+    Remboursements
+  </a>
+
+  <div class="sidebar-section">Assurance</div>
+
+  <a href="#" class="sidebar-link" id="nav-assurances"
+     onclick="afficherSection('assurances'); return false">
+    <div class="sidebar-icon">
+      <i class="bi bi-shield-check"></i>
+    </div>
+    Mes assurances
+  </a>
+
+  <a href="#" class="sidebar-link" id="nav-souscrire"
+     onclick="afficherSection('souscrire'); return false">
+    <div class="sidebar-icon">
+      <i class="bi bi-plus-shield"></i>
+    </div>
+    Souscrire
+  </a>
+
+  <div class="sidebar-section">Support</div>
+
+  <a href="#" class="sidebar-link" id="nav-chat"
+     onclick="afficherSection('chat'); return false">
+    <div class="sidebar-icon">
+      <i class="bi bi-chat-dots"></i>
+    </div>
+    Support chat
+  </a>
+
+  <a href="#" class="sidebar-link" id="nav-notifications"
+     onclick="afficherSection('notifications'); return false">
+    <div class="sidebar-icon">
+      <i class="bi bi-bell"></i>
+    </div>
+    Notifications
+    <span class="cf-notif-count ms-auto cf-badge cf-badge-orange"
+          style="display:none;font-size:0.7rem">0</span>
+  </a>
+
+  <!-- Deconnexion -->
+  <div style="margin-top:auto;padding-top:24px;border-top:1px solid var(--cf-border);margin-top:32px">
+    <a href="#" class="sidebar-link cf-logout"
+       style="color:#EF4444">
+      <div class="sidebar-icon" style="color:#EF4444">
+        <i class="bi bi-box-arrow-right"></i>
+      </div>
+      Deconnexion
+    </a>
+  </div>
+
+</aside>

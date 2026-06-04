@@ -1,15 +1,16 @@
-from django.shortcuts import render
-from credits.permissions import EstClient, EstAgentOuAdmin
-from rest_framework.decorators import api_view, permission_classes
+from django.shortcuts import render, redirect
 
 
 def dashboard_client(request):
-    return render(request, 'accounts/dashboard_client.html')
+    """Dashboard client - acces protege cote JS."""
+    return render(request, 'accounts/client/dashboard.html')
 
 
 def dashboard_agent(request):
-    return render(request, 'accounts/dashboard_agent.html')
+    """Dashboard agent - acces protege cote JS."""
+    return render(request, 'accounts/agent/dashboard.html')
 
 
 def dashboard_admin(request):
-    return render(request, 'accounts/dashboard_admin.html')
+    """Dashboard admin - acces protege cote JS."""
+    return render(request, 'accounts/admin/dashboard.html')
