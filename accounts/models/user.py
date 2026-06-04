@@ -22,6 +22,10 @@ class User(AbstractUser):
     region    = models.CharField(max_length=100, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    est_disponible = models.BooleanField(
+    default=False,
+    help_text="Disponibilité de l'agent pour le support client"
+)
 
     def __str__(self):
         return f"{self.username} ({self.get_role_display()})"

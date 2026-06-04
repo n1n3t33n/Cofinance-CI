@@ -1,0 +1,611 @@
+/* ============================================================
+   COFINANCE CI - Feuille de style principale
+   Police : Calibri
+   Couleurs : Blanc (dominant), Orange (#FF6B00), Vert (#00A86B)
+   Mode sombre : Noir dominant (#0D0D0D)
+   Bordures : tres arrondies (border-radius: 16px+)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap');
+
+/* ============================================================
+   VARIABLES CSS
+   ============================================================ */
+:root {
+  --cf-orange:        #FF6B00;
+  --cf-orange-light:  #FF8C38;
+  --cf-orange-dark:   #CC5500;
+  --cf-green:         #00A86B;
+  --cf-green-light:   #00C97E;
+  --cf-green-dark:    #007A4D;
+
+  --cf-bg:            #F8F9FA;
+  --cf-surface:       #FFFFFF;
+  --cf-surface-2:     #F0F2F5;
+  --cf-border:        #E0E4EA;
+  --cf-text:          #1A1A2E;
+  --cf-text-muted:    #6B7280;
+  --cf-shadow:        rgba(0, 0, 0, 0.08);
+
+  --cf-radius-sm:     8px;
+  --cf-radius:        16px;
+  --cf-radius-lg:     24px;
+  --cf-radius-xl:     32px;
+  --cf-radius-full:   9999px;
+
+  --cf-transition:    all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================================
+   MODE SOMBRE
+   ============================================================ */
+[data-theme="dark"] {
+  --cf-bg:            #0D0D0D;
+  --cf-surface:       #1A1A2E;
+  --cf-surface-2:     #252540;
+  --cf-border:        #2E2E50;
+  --cf-text:          #F0F2F5;
+  --cf-text-muted:    #9CA3AF;
+  --cf-shadow:        rgba(0, 0, 0, 0.4);
+}
+
+/* ============================================================
+   RESET ET BASE
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Calibri', 'Nunito', sans-serif;
+  background-color: var(--cf-bg);
+  color: var(--cf-text);
+  transition: var(--cf-transition);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+a {
+  color: var(--cf-orange);
+  text-decoration: none;
+  transition: var(--cf-transition);
+}
+
+a:hover {
+  color: var(--cf-orange-dark);
+}
+
+/* ============================================================
+   TYPOGRAPHIE
+   ============================================================ */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  color: var(--cf-text);
+}
+
+.text-orange { color: var(--cf-orange) !important; }
+.text-green  { color: var(--cf-green)  !important; }
+.text-muted  { color: var(--cf-text-muted) !important; }
+
+/* ============================================================
+   NAVBAR
+   ============================================================ */
+.cf-navbar {
+  background: var(--cf-surface);
+  border-bottom: 2px solid var(--cf-border);
+  padding: 12px 0;
+  box-shadow: 0 2px 20px var(--cf-shadow);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: var(--cf-transition);
+}
+
+.cf-navbar .navbar-brand {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--cf-text) !important;
+}
+
+.cf-navbar .navbar-brand span.orange { color: var(--cf-orange); }
+.cf-navbar .navbar-brand span.green  { color: var(--cf-green); }
+
+.cf-navbar .nav-link {
+  color: var(--cf-text-muted) !important;
+  font-weight: 600;
+  padding: 8px 16px !important;
+  border-radius: var(--cf-radius-full);
+  transition: var(--cf-transition);
+}
+
+.cf-navbar .nav-link:hover,
+.cf-navbar .nav-link.active {
+  color: var(--cf-orange) !important;
+  background: rgba(255, 107, 0, 0.08);
+}
+
+/* ============================================================
+   BOUTONS
+   ============================================================ */
+.btn-cf-primary {
+  background: linear-gradient(135deg, var(--cf-orange), var(--cf-orange-dark));
+  color: #fff !important;
+  border: none;
+  border-radius: var(--cf-radius-full);
+  padding: 10px 28px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition: var(--cf-transition);
+  box-shadow: 0 4px 15px rgba(255, 107, 0, 0.3);
+}
+
+.btn-cf-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 107, 0, 0.4);
+  background: linear-gradient(135deg, var(--cf-orange-light), var(--cf-orange));
+}
+
+.btn-cf-secondary {
+  background: linear-gradient(135deg, var(--cf-green), var(--cf-green-dark));
+  color: #fff !important;
+  border: none;
+  border-radius: var(--cf-radius-full);
+  padding: 10px 28px;
+  font-weight: 700;
+  transition: var(--cf-transition);
+  box-shadow: 0 4px 15px rgba(0, 168, 107, 0.3);
+}
+
+.btn-cf-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 168, 107, 0.4);
+}
+
+.btn-cf-outline {
+  background: transparent;
+  color: var(--cf-orange) !important;
+  border: 2px solid var(--cf-orange);
+  border-radius: var(--cf-radius-full);
+  padding: 10px 28px;
+  font-weight: 700;
+  transition: var(--cf-transition);
+}
+
+.btn-cf-outline:hover {
+  background: var(--cf-orange);
+  color: #fff !important;
+  transform: translateY(-2px);
+}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+.cf-card {
+  background: var(--cf-surface);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius);
+  padding: 24px;
+  box-shadow: 0 2px 16px var(--cf-shadow);
+  transition: var(--cf-transition);
+}
+
+.cf-card:hover {
+  box-shadow: 0 8px 32px var(--cf-shadow);
+  transform: translateY(-2px);
+}
+
+.cf-card-stat {
+  background: var(--cf-surface);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: var(--cf-transition);
+  box-shadow: 0 2px 16px var(--cf-shadow);
+}
+
+.cf-card-stat:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px var(--cf-shadow);
+}
+
+.cf-card-stat .stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--cf-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.stat-icon-orange { background: rgba(255, 107, 0, 0.12); color: var(--cf-orange); }
+.stat-icon-green  { background: rgba(0, 168, 107, 0.12); color: var(--cf-green); }
+.stat-icon-blue   { background: rgba(59, 130, 246, 0.12); color: #3B82F6; }
+.stat-icon-purple { background: rgba(139, 92, 246, 0.12); color: #8B5CF6; }
+
+.cf-card-stat .stat-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--cf-text);
+  line-height: 1;
+}
+
+.cf-card-stat .stat-label {
+  font-size: 0.82rem;
+  color: var(--cf-text-muted);
+  margin-top: 4px;
+}
+
+/* ============================================================
+   FORMULAIRES
+   ============================================================ */
+.cf-input {
+  background: var(--cf-surface-2);
+  border: 1.5px solid var(--cf-border);
+  border-radius: var(--cf-radius);
+  padding: 12px 16px;
+  color: var(--cf-text);
+  font-family: inherit;
+  font-size: 0.95rem;
+  width: 100%;
+  transition: var(--cf-transition);
+  outline: none;
+}
+
+.cf-input:focus {
+  border-color: var(--cf-orange);
+  background: var(--cf-surface);
+  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.12);
+}
+
+.cf-input::placeholder {
+  color: var(--cf-text-muted);
+}
+
+.cf-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--cf-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  display: block;
+}
+
+/* ============================================================
+   BADGES ET STATUTS
+   ============================================================ */
+.cf-badge {
+  padding: 4px 12px;
+  border-radius: var(--cf-radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cf-badge-orange { background: rgba(255, 107, 0, 0.12); color: var(--cf-orange); }
+.cf-badge-green  { background: rgba(0, 168, 107, 0.12); color: var(--cf-green); }
+.cf-badge-blue   { background: rgba(59, 130, 246, 0.12); color: #3B82F6; }
+.cf-badge-red    { background: rgba(239, 68, 68, 0.12); color: #EF4444; }
+.cf-badge-purple { background: rgba(139, 92, 246, 0.12); color: #8B5CF6; }
+.cf-badge-gray   { background: rgba(107, 114, 128, 0.12); color: #6B7280; }
+
+/* ============================================================
+   SIDEBAR DASHBOARD
+   ============================================================ */
+.cf-sidebar {
+  background: var(--cf-surface);
+  border-right: 1px solid var(--cf-border);
+  width: 260px;
+  min-height: calc(100vh - 70px);
+  padding: 24px 16px;
+  position: sticky;
+  top: 70px;
+  transition: var(--cf-transition);
+  flex-shrink: 0;
+}
+
+.cf-sidebar .sidebar-section {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--cf-text-muted);
+  padding: 16px 12px 8px;
+}
+
+.cf-sidebar .sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--cf-radius);
+  color: var(--cf-text-muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: var(--cf-transition);
+  margin-bottom: 2px;
+  text-decoration: none;
+}
+
+.cf-sidebar .sidebar-link:hover,
+.cf-sidebar .sidebar-link.active {
+  background: rgba(255, 107, 0, 0.08);
+  color: var(--cf-orange);
+}
+
+.cf-sidebar .sidebar-link .sidebar-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--cf-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  background: var(--cf-surface-2);
+  transition: var(--cf-transition);
+}
+
+.cf-sidebar .sidebar-link:hover .sidebar-icon,
+.cf-sidebar .sidebar-link.active .sidebar-icon {
+  background: rgba(255, 107, 0, 0.12);
+}
+
+/* ============================================================
+   TABLES
+   ============================================================ */
+.cf-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.cf-table thead th {
+  background: var(--cf-surface-2);
+  color: var(--cf-text-muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px 16px;
+  border-bottom: 2px solid var(--cf-border);
+}
+
+.cf-table thead th:first-child { border-radius: var(--cf-radius) 0 0 0; }
+.cf-table thead th:last-child  { border-radius: 0 var(--cf-radius) 0 0; }
+
+.cf-table tbody tr {
+  transition: var(--cf-transition);
+  border-bottom: 1px solid var(--cf-border);
+}
+
+.cf-table tbody tr:hover {
+  background: var(--cf-surface-2);
+}
+
+.cf-table tbody td {
+  padding: 14px 16px;
+  font-size: 0.9rem;
+  color: var(--cf-text);
+}
+
+/* ============================================================
+   ALERTES
+   ============================================================ */
+.cf-alert {
+  padding: 14px 18px;
+  border-radius: var(--cf-radius);
+  font-size: 0.88rem;
+  font-weight: 600;
+  display: none;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.cf-alert.show    { display: flex; }
+.cf-alert-success { background: rgba(0, 168, 107, 0.1);  color: var(--cf-green);  border: 1px solid rgba(0, 168, 107, 0.2); }
+.cf-alert-error   { background: rgba(239, 68, 68, 0.1);  color: #EF4444;          border: 1px solid rgba(239, 68, 68, 0.2); }
+.cf-alert-info    { background: rgba(59, 130, 246, 0.1); color: #3B82F6;          border: 1px solid rgba(59, 130, 246, 0.2); }
+.cf-alert-warning { background: rgba(255, 107, 0, 0.1);  color: var(--cf-orange); border: 1px solid rgba(255, 107, 0, 0.2); }
+
+/* ============================================================
+   TOGGLE THEME
+   ============================================================ */
+.cf-theme-toggle {
+  background: var(--cf-surface-2);
+  border: 1.5px solid var(--cf-border);
+  border-radius: var(--cf-radius-full);
+  width: 44px;
+  height: 24px;
+  position: relative;
+  cursor: pointer;
+  transition: var(--cf-transition);
+  flex-shrink: 0;
+}
+
+.cf-theme-toggle::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--cf-orange);
+  top: 2px;
+  left: 2px;
+  transition: var(--cf-transition);
+}
+
+[data-theme="dark"] .cf-theme-toggle::after {
+  transform: translateX(20px);
+}
+
+/* ============================================================
+   BADGE NOTIFICATIONS
+   ============================================================ */
+.cf-notif-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--cf-orange);
+  color: #fff;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================================
+   HERO SECTION
+   ============================================================ */
+.cf-hero {
+  background: linear-gradient(135deg, #1A1A2E 0%, #252550 50%, #1A1A2E 100%);
+  color: #fff;
+  padding: 100px 0 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.cf-hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background:
+    radial-gradient(circle at 30% 50%, rgba(255, 107, 0, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 70% 80%, rgba(0, 168, 107, 0.08) 0%, transparent 50%);
+  animation: heroGlow 8s ease-in-out infinite alternate;
+}
+
+@keyframes heroGlow {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  100% { transform: translate(3%, 3%) rotate(5deg); }
+}
+
+.cf-hero .hero-title {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.cf-hero .hero-title .highlight {
+  background: linear-gradient(135deg, var(--cf-orange), var(--cf-green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.cf-footer {
+  background: #1A1A2E;
+  color: #9CA3AF;
+  padding: 48px 0 24px;
+  margin-top: auto;
+}
+
+.cf-footer .footer-brand {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+.cf-footer h6 {
+  color: #fff;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.cf-footer a {
+  color: #9CA3AF;
+  transition: var(--cf-transition);
+}
+
+.cf-footer a:hover {
+  color: var(--cf-orange);
+}
+
+.cf-footer .footer-bottom {
+  border-top: 1px solid #2E2E50;
+  padding-top: 20px;
+  margin-top: 32px;
+  font-size: 0.82rem;
+}
+
+/* ============================================================
+   LOADER
+   ============================================================ */
+.cf-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--cf-border);
+  border-top-color: var(--cf-orange);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+.cf-fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes floatAnim {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
+}
+
+@keyframes pulseAnim {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50%       { transform: scale(1.1); opacity: 0.8; }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  .cf-sidebar {
+    width: 100%;
+    min-height: auto;
+    position: static;
+    border-right: none;
+    border-bottom: 1px solid var(--cf-border);
+  }
+  .cf-hero {
+    padding: 60px 0 40px;
+  }
+}
+
+@media (max-width: 576px) {
+  .cf-card { padding: 16px; }
+  .cf-card-stat { padding: 14px 16px; }
+}

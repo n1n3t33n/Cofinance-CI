@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'chat',
     'dashboard',
     'cofinance_ci',
+    'pages',
 ]
 
 # Modèle utilisateur personnalisé
@@ -179,3 +180,12 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME':  timedelta(hours=2),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 }
+
+# ─── STATIC FILES ─────────────────────────────────────────────
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# ─── LANGUE ET TIMEZONE ───────────────────────────────────────
+LANGUAGE_CODE = 'fr-fr'
+TIME_ZONE = 'Africa/Abidjan'

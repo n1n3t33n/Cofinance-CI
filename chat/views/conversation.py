@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django.db.models import Q
 
 from chat.models import Conversation, Message
 from chat.serializers import ConversationSerializer, MessageSerializer
@@ -11,6 +12,67 @@ from credits.permissions import EstClient, EstAgentOuAdmin
 @api_view(['POST'])
 @permission_classes([EstClient])
 def ouvrir_conversation(request):
+    """
+    Un client ouvre une conversation.
+    Assigne automatiquement l'agent disponible
+    avec le moins de conversations actives.
+    """
+    conv_existante = Conversation.objects.filter(
+        client=request.user,
+        statut__in=['ouverte', 'en_attente']
+    ).first()
+
+    if conv_existante:
+        return Response(
+            ConversationSerializer(conv_existante, context={'request': request}).data
+        )
+
+    # Chercher l'agent disponible avec le moins de conversations actives
+    from accounts.models import User
+    from django.db.models import Count
+
+    agent_assigne = (
+        User.objects
+        .filter(role__in=['agent', 'administrateur'], est_disponible=True)
+        .annotate(nb_convs=Count(
+            'conversations_agent',
+            filter=Q(conversations_agent__statut='ouverte')
+        ))
+        .order_by('nb_convs')
+        .first()
+    )
+
+    conversation = Conversation.objects.create(
+        client=request.user,
+        agent=agent_assigne,
+        statut='ouverte' if agent_assigne else 'en_attente',
+    )
+
+    # Notifier l'agent assigné ou tous les agents si aucun disponible
+    from notifications.services import creer_notification
+    if agent_assigne:
+        creer_notification(
+            destinataire=agent_assigne,
+            type_notif='message_chat',
+            titre="Nouvelle conversation assignée",
+            message=f"Le client {request.user.username} vous a été assigné.",
+            objet_id=conversation.pk,
+        )
+    else:
+        agents = User.objects.filter(role__in=['agent', 'administrateur'])
+        for agent in agents:
+            creer_notification(
+                destinataire=agent,
+                type_notif='message_chat',
+                titre="Nouvelle conversation en attente",
+                message=f"Le client {request.user.username} attend un agent disponible.",
+                objet_id=conversation.pk,
+            )
+
+    return Response(
+        ConversationSerializer(conversation, context={'request': request}).data,
+        status=status.HTTP_201_CREATED
+    )
     """
     Un client ouvre une nouvelle conversation de support.
     S'il en a déjà une ouverte, on la retourne directement.

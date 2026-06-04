@@ -3,10 +3,10 @@ from accounts.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Serializer lecture — exposé dans les réponses API."""
     class Meta:
         model  = User
-        fields = ('id', 'username', 'email', 'role', 'telephone', 'region', 'date_joined')
+        fields = ('id', 'username', 'email', 'role', 'telephone',
+                  'region', 'est_disponible', 'date_joined')
         read_only_fields = fields
 
 
