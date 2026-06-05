@@ -1,0 +1,233 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Blog{% endblock %}
+
+{% block content %}
+
+<section style="background:linear-gradient(135deg,#1A1A2E,#252550);padding:80px 0 60px;color:#fff">
+  <div class="container text-center">
+    <span class="cf-badge cf-badge-green mb-3">Actualites</span>
+    <h1 style="font-size:clamp(1.8rem,4vw,3rem);font-weight:800;margin-bottom:16px">
+      Le Blog <span style="color:var(--cf-orange)">COFINANCE CI</span>
+    </h1>
+    <p style="color:#9CA3AF;max-width:480px;margin:0 auto;font-size:1rem;line-height:1.8">
+      Conseils financiers, actualites de la microfinance et temoignages
+      de nos clients en Cote d'Ivoire.
+    </p>
+  </div>
+</section>
+
+<section class="py-5" style="background:var(--cf-bg)">
+  <div class="container">
+
+    <!-- Article principal -->
+    <div class="cf-card mb-5 p-0" style="overflow:hidden">
+      <div class="row g-0">
+        <div class="col-lg-6"
+             style="background:linear-gradient(135deg,var(--cf-orange),var(--cf-green));
+                    min-height:280px;display:flex;align-items:center;justify-content:center">
+          <i class="bi bi-newspaper" style="font-size:5rem;color:rgba(255,255,255,0.3)"></i>
+        </div>
+        <div class="col-lg-6 p-4 d-flex flex-column justify-content-center">
+          <span class="cf-badge cf-badge-orange mb-2" style="width:fit-content">
+            A la une
+          </span>
+          <h3 style="font-weight:800;margin-bottom:12px">
+            Comment obtenir votre premier microcredit en Cote d'Ivoire
+          </h3>
+          <p style="color:var(--cf-text-muted);font-size:0.9rem;line-height:1.7;margin-bottom:20px">
+            Guide complet pour les primo-demandeurs : documents necessaires,
+            criteres d'eligibilite et conseils pour maximiser vos chances d'approbation.
+          </p>
+          <div class="d-flex align-items-center gap-3" style="font-size:0.82rem;color:var(--cf-text-muted)">
+            <span><i class="bi bi-person me-1"></i>Equipe COFINANCE CI</span>
+            <span><i class="bi bi-calendar me-1"></i>Juin 2026</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Articles -->
+    <div class="row g-4">
+
+      <div class="col-lg-4 col-md-6">
+        <div class="cf-card h-100">
+          <div style="height:160px;border-radius:var(--cf-radius);
+               background:linear-gradient(135deg,rgba(255,107,0,0.1),rgba(0,168,107,0.1));
+               display:flex;align-items:center;justify-content:center;
+               margin-bottom:16px">
+            <i class="bi bi-piggy-bank" style="font-size:3rem;color:var(--cf-orange)"></i>
+          </div>
+          <span class="cf-badge cf-badge-green mb-2" style="font-size:0.7rem">Epargne</span>
+          <h5 style="font-weight:700;margin-bottom:10px">
+            5 conseils pour bien gerer votre budget mensuel
+          </h5>
+          <p style="color:var(--cf-text-muted);font-size:0.85rem;line-height:1.7">
+            Des strategies simples et efficaces pour mieux controler vos depenses
+            et constituer une epargne de securite.
+          </p>
+          <div class="d-flex align-items-center gap-2 mt-3"
+               style="font-size:0.78rem;color:var(--cf-text-muted)">
+            <i class="bi bi-calendar"></i>Mai 2026
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-6">
+        <div class="cf-card h-100">
+          <div style="height:160px;border-radius:var(--cf-radius);
+               background:linear-gradient(135deg,rgba(0,168,107,0.1),rgba(59,130,246,0.1));
+               display:flex;align-items:center;justify-content:center;
+               margin-bottom:16px">
+            <i class="bi bi-shield-check" style="font-size:3rem;color:var(--cf-green)"></i>
+          </div>
+          <span class="cf-badge cf-badge-blue mb-2" style="font-size:0.7rem">Assurance</span>
+          <h5 style="font-weight:700;margin-bottom:10px">
+            Pourquoi souscrire a une assurance mobile en 2026
+          </h5>
+          <p style="color:var(--cf-text-muted);font-size:0.85rem;line-height:1.7">
+            L'assurance mobile revolutionne l'acces a la protection financiere
+            pour les populations ivoiriennes. Decouvrez pourquoi c'est essentiel.
+          </p>
+          <div class="d-flex align-items-center gap-2 mt-3"
+               style="font-size:0.78rem;color:var(--cf-text-muted)">
+            <i class="bi bi-calendar"></i>Avril 2026
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-6">
+        <div class="cf-card h-100">
+          <div style="height:160px;border-radius:var(--cf-radius);
+               background:linear-gradient(135deg,rgba(139,92,246,0.1),rgba(255,107,0,0.1));
+               display:flex;align-items:center;justify-content:center;
+               margin-bottom:16px">
+            <i class="bi bi-phone" style="font-size:3rem;color:#8B5CF6"></i>
+          </div>
+          <span class="cf-badge cf-badge-purple mb-2" style="font-size:0.7rem">Mobile Money</span>
+          <h5 style="font-weight:700;margin-bottom:10px">
+            Orange Money, Wave, MTN : lequel choisir ?
+          </h5>
+          <p style="color:var(--cf-text-muted);font-size:0.85rem;line-height:1.7">
+            Comparatif des principales solutions de paiement mobile en
+            Cote d'Ivoire pour bien choisir selon vos besoins.
+          </p>
+          <div class="d-flex align-items-center gap-2 mt-3"
+               style="font-size:0.78rem;color:var(--cf-text-muted)">
+            <i class="bi bi-calendar"></i>Mars 2026
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Temoignages avec ajout -->
+    <div class="mt-5">
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <h4 style="font-weight:800;margin:0">
+          Temoignages clients
+        </h4>
+        <button id="btn-temoignage"
+              class="btn-cf-primary btn"
+                style="display:none"
+                data-bs-toggle="modal"
+                data-bs-target="#modalTemoignage">
+            <i class="bi bi-plus me-2"></i>
+            Ajouter le mien
+        </button>
+      </div>
+
+      <div id="liste-temoignages" class="row g-4">
+        <!-- Charges dynamiquement par JS -->
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Modal ajout temoignage -->
+<div class="modal fade" id="modalTemoignage" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content"
+         style="border-radius:var(--cf-radius-lg);border:none;
+                background:var(--cf-surface)">
+      <div class="modal-header"
+           style="border-bottom:1px solid var(--cf-border);padding:20px 24px">
+        <h5 class="modal-title" style="font-weight:700">
+          Partager mon temoignage
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="padding:24px">
+
+        <div id="alerte-temoignage" class="cf-alert mb-3">
+          <i class="bi bi-info-circle" id="alerte-tem-icon"></i>
+          <span id="alerte-tem-msg"></span>
+        </div>
+
+        <div class="mb-3">
+          <label class="cf-label">Votre prenom</label>
+          <input type="text" id="tem-prenom" class="cf-input"
+                 placeholder="Ex: Aya"/>
+        </div>
+        <div class="mb-3">
+          <label class="cf-label">Votre ville</label>
+          <input type="text" id="tem-ville" class="cf-input"
+                 placeholder="Ex: Abidjan"/>
+        </div>
+        <div class="mb-3">
+          <label class="cf-label">Votre temoignage</label>
+          <textarea id="tem-texte" class="cf-input" rows="4"
+                    placeholder="Partagez votre experience avec COFINANCE CI..."></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="cf-label">Note (1 a 5)</label>
+          <div class="d-flex gap-2" id="etoiles">
+            <button type="button" class="etoile-btn" data-val="1"
+                    onclick="noterEtoile(1)"
+                    style="background:none;border:none;font-size:1.5rem;color:var(--cf-border);cursor:pointer">
+              <i class="bi bi-star-fill"></i>
+            </button>
+            <button type="button" class="etoile-btn" data-val="2"
+                    onclick="noterEtoile(2)"
+                    style="background:none;border:none;font-size:1.5rem;color:var(--cf-border);cursor:pointer">
+              <i class="bi bi-star-fill"></i>
+            </button>
+            <button type="button" class="etoile-btn" data-val="3"
+                    onclick="noterEtoile(3)"
+                    style="background:none;border:none;font-size:1.5rem;color:var(--cf-border);cursor:pointer">
+              <i class="bi bi-star-fill"></i>
+            </button>
+            <button type="button" class="etoile-btn" data-val="4"
+                    onclick="noterEtoile(4)"
+                    style="background:none;border:none;font-size:1.5rem;color:var(--cf-border);cursor:pointer">
+              <i class="bi bi-star-fill"></i>
+            </button>
+            <button type="button" class="etoile-btn" data-val="5"
+                    onclick="noterEtoile(5)"
+                    style="background:none;border:none;font-size:1.5rem;color:var(--cf-border);cursor:pointer">
+              <i class="bi bi-star-fill"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer"
+           style="border-top:1px solid var(--cf-border);padding:16px 24px">
+        <button type="button" class="btn-cf-outline btn"
+                data-bs-dismiss="modal">Annuler</button>
+        <button type="button" class="btn-cf-primary btn"
+                onclick="soumettreTemoin()">
+          <i class="bi bi-send me-2"></i>Publier
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/blog.js' %}"></script>
+{% endblock %}

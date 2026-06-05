@@ -1,1 +1,248 @@
-{% extends 'base/base.html' %}{% block content %}<p>À propos</p>{% endblock %}
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}A propos{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<section style="background:linear-gradient(135deg,#1A1A2E,#252550);padding:80px 0 60px;color:#fff">
+  <div class="container text-center">
+    <span class="cf-badge cf-badge-green mb-3">Notre histoire</span>
+    <h1 style="font-size:clamp(1.8rem,4vw,3rem);font-weight:800;margin-bottom:16px">
+      A propos de <span style="color:var(--cf-orange)">COFINANCE CI</span>
+    </h1>
+    <p style="color:#9CA3AF;max-width:560px;margin:0 auto;font-size:1rem;line-height:1.8">
+      Une societe ivoirienne engagee pour l'inclusion financiere et la protection
+      des populations a revenus modestes depuis 2020.
+    </p>
+  </div>
+</section>
+
+<!-- Mission + Vision -->
+<section class="py-5" style="background:var(--cf-bg)">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="cf-card h-100 text-center">
+          <div style="width:72px;height:72px;border-radius:50%;
+               background:rgba(255,107,0,0.1);
+               display:flex;align-items:center;justify-content:center;
+               margin:0 auto 20px">
+            <i class="bi bi-bullseye fs-2" style="color:var(--cf-orange)"></i>
+          </div>
+          <h4 style="font-weight:700;margin-bottom:12px">Notre Mission</h4>
+          <p style="color:var(--cf-text-muted);font-size:0.9rem;line-height:1.8">
+            Rendre les services financiers accessibles a tous les ivoiriens,
+            quelle que soit leur situation geographique ou economique,
+            grace a la technologie mobile.
+          </p>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="cf-card h-100 text-center"
+             style="border-color:var(--cf-orange)">
+          <div style="width:72px;height:72px;border-radius:50%;
+               background:rgba(0,168,107,0.1);
+               display:flex;align-items:center;justify-content:center;
+               margin:0 auto 20px">
+            <i class="bi bi-eye fs-2" style="color:var(--cf-green)"></i>
+          </div>
+          <h4 style="font-weight:700;margin-bottom:12px">Notre Vision</h4>
+          <p style="color:var(--cf-text-muted);font-size:0.9rem;line-height:1.8">
+            Devenir la plateforme de microfinance de reference en Afrique
+            de l'Ouest, en combinant innovation technologique et
+            impact social durable.
+          </p>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="cf-card h-100 text-center">
+          <div style="width:72px;height:72px;border-radius:50%;
+               background:rgba(139,92,246,0.1);
+               display:flex;align-items:center;justify-content:center;
+               margin:0 auto 20px">
+            <i class="bi bi-heart fs-2" style="color:#8B5CF6"></i>
+          </div>
+          <h4 style="font-weight:700;margin-bottom:12px">Nos Valeurs</h4>
+          <p style="color:var(--cf-text-muted);font-size:0.9rem;line-height:1.8">
+            Transparence, intégrité, accessibilite et innovation sont au
+            coeur de tout ce que nous faisons pour nos clients
+            et partenaires.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Chiffres -->
+<section class="py-5" style="background:var(--cf-surface-2)">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 style="font-size:1.8rem;font-weight:800">
+        COFINANCE CI en <span class="text-orange">chiffres</span>
+      </h2>
+    </div>
+    <div class="row g-4 text-center">
+      <div class="col-lg-3 col-md-6">
+        <div class="cf-card py-4">
+          <div style="font-size:2.5rem;font-weight:800;color:var(--cf-orange)">5 000+</div>
+          <div style="color:var(--cf-text-muted);font-size:0.9rem;margin-top:8px">
+            Clients actifs
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="cf-card py-4">
+          <div style="font-size:2.5rem;font-weight:800;color:var(--cf-green)">2 Mrd</div>
+          <div style="color:var(--cf-text-muted);font-size:0.9rem;margin-top:8px">
+            FCFA decaisses
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="cf-card py-4">
+          <div style="font-size:2.5rem;font-weight:800;color:#3B82F6">15+</div>
+          <div style="color:var(--cf-text-muted);font-size:0.9rem;margin-top:8px">
+            Regions couvertes
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="cf-card py-4">
+          <div style="font-size:2.5rem;font-weight:800;color:#8B5CF6">98%</div>
+          <div style="color:var(--cf-text-muted);font-size:0.9rem;margin-top:8px">
+            Satisfaction client
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Equipe -->
+<section class="py-5" style="background:var(--cf-bg)">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="cf-badge cf-badge-orange mb-3">Notre equipe</span>
+      <h2 style="font-size:1.8rem;font-weight:800">
+        Des professionnels <span class="text-orange">engages</span>
+      </h2>
+    </div>
+    <div class="row g-4 justify-content-center">
+      <div class="col-lg-3 col-md-6">
+        <div class="cf-card text-center">
+          <div style="width:80px;height:80px;border-radius:50%;
+               background:linear-gradient(135deg,var(--cf-orange),var(--cf-orange-dark));
+               color:#fff;font-size:1.8rem;font-weight:800;
+               display:flex;align-items:center;justify-content:center;
+               margin:0 auto 16px">K</div>
+          <h6 style="font-weight:700">Kouassi Jean</h6>
+          <div class="cf-badge cf-badge-orange" style="font-size:0.72rem">
+            Directeur General
+          </div>
+          <p style="color:var(--cf-text-muted);font-size:0.82rem;
+               margin-top:12px;line-height:1.6">
+            15 ans d'experience dans la microfinance en Afrique de l'Ouest.
+          </p>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="cf-card text-center">
+          <div style="width:80px;height:80px;border-radius:50%;
+               background:linear-gradient(135deg,var(--cf-green),var(--cf-green-dark));
+               color:#fff;font-size:1.8rem;font-weight:800;
+               display:flex;align-items:center;justify-content:center;
+               margin:0 auto 16px">A</div>
+          <h6 style="font-weight:700">Adjoua Marie</h6>
+          <div class="cf-badge cf-badge-green" style="font-size:0.72rem">
+            Directrice Financiere
+          </div>
+          <p style="color:var(--cf-text-muted);font-size:0.82rem;
+               margin-top:12px;line-height:1.6">
+            Expert-comptable, specialiste des produits financiers inclusifs.
+          </p>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="cf-card text-center">
+          <div style="width:80px;height:80px;border-radius:50%;
+               background:linear-gradient(135deg,#3B82F6,#1D4ED8);
+               color:#fff;font-size:1.8rem;font-weight:800;
+               display:flex;align-items:center;justify-content:center;
+               margin:0 auto 16px">B</div>
+          <h6 style="font-weight:700">Bamba Seydou</h6>
+          <div class="cf-badge cf-badge-blue" style="font-size:0.72rem">
+            Directeur Technique
+          </div>
+          <p style="color:var(--cf-text-muted);font-size:0.82rem;
+               margin-top:12px;line-height:1.6">
+            Ingenieur logiciel, architecte de la plateforme digitale.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Partenaires -->
+<section class="py-5" style="background:var(--cf-surface-2)">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="cf-badge cf-badge-gray mb-3">Partenaires</span>
+      <h2 style="font-size:1.8rem;font-weight:800">
+        Ils nous <span class="text-orange">font confiance</span>
+      </h2>
+    </div>
+    <div class="row g-4 justify-content-center align-items-center">
+      <div class="col-lg-2 col-md-4 col-6">
+        <div class="cf-card text-center py-4"
+             style="color:var(--cf-text-muted);font-weight:700;font-size:0.9rem">
+          <i class="bi bi-bank2 fs-2 mb-2 d-block" style="color:var(--cf-orange)"></i>
+          BCEAO
+        </div>
+      </div>
+      <div class="col-lg-2 col-md-4 col-6">
+        <div class="cf-card text-center py-4"
+             style="color:var(--cf-text-muted);font-weight:700;font-size:0.9rem">
+          <i class="bi bi-phone fs-2 mb-2 d-block" style="color:#FF6600"></i>
+          Orange CI
+        </div>
+      </div>
+      <div class="col-lg-2 col-md-4 col-6">
+        <div class="cf-card text-center py-4"
+             style="color:var(--cf-text-muted);font-weight:700;font-size:0.9rem">
+          <i class="bi bi-lightning fs-2 mb-2 d-block" style="color:#0066FF"></i>
+          Wave
+        </div>
+      </div>
+      <div class="col-lg-2 col-md-4 col-6">
+        <div class="cf-card text-center py-4"
+             style="color:var(--cf-text-muted);font-weight:700;font-size:0.9rem">
+          <i class="bi bi-building fs-2 mb-2 d-block" style="color:var(--cf-green)"></i>
+          Ecobank CI
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-5"
+         style="background:linear-gradient(135deg,#1A1A2E,#252550)">
+  <div class="container text-center">
+    <h2 style="font-size:1.8rem;font-weight:800;color:#fff;margin-bottom:12px">
+      Rejoignez la communaute COFINANCE CI
+    </h2>
+    <p style="color:#9CA3AF;margin-bottom:28px">
+      Plus de 5 000 clients nous font deja confiance.
+    </p>
+    <a href="/inscription/" class="btn-cf-primary btn btn-lg px-5">
+      <i class="bi bi-person-plus me-2"></i>
+      Creer mon compte
+    </a>
+  </div>
+</section>
+
+{% endblock %}

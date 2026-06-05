@@ -609,3 +609,376 @@ h1, h2, h3, h4, h5, h6 {
   .cf-card { padding: 16px; }
   .cf-card-stat { padding: 14px 16px; }
 }
+
+/* ============================================================
+   CORRECTIFS CARROUSEL
+   ============================================================ */
+.carousel-inner {
+  min-height: 300px;
+}
+
+.carousel-item {
+  transition: transform 0.6s ease-in-out;
+}
+
+/* ============================================================
+   NAVBAR PERSONNALISEE
+   ============================================================ */
+.cf-navbar-wrap {
+  background: var(--cf-surface);
+  border-bottom: 1.5px solid var(--cf-border);
+  box-shadow: 0 2px 24px var(--cf-shadow);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: var(--cf-transition);
+}
+
+.cf-navbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 68px;
+  gap: 16px;
+}
+
+/* Logo */
+.cf-logo {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--cf-text) !important;
+  text-decoration: none;
+  flex-shrink: 0;
+  letter-spacing: -0.5px;
+}
+.cf-logo-co  { color: var(--cf-orange); }
+.cf-logo-fin { color: var(--cf-green); }
+
+/* Liens nav */
+.cf-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  justify-content: center;
+}
+.cf-nav-links li a {
+  color: var(--cf-text-muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 8px 14px;
+  border-radius: var(--cf-radius-full);
+  text-decoration: none;
+  transition: var(--cf-transition);
+  display: block;
+}
+.cf-nav-links li a:hover {
+  color: var(--cf-orange);
+  background: rgba(255, 107, 0, 0.08);
+}
+
+/* Actions droite */
+.cf-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* Bouton theme */
+.cf-theme-btn {
+  background: var(--cf-surface-2);
+  border: 1.5px solid var(--cf-border);
+  border-radius: var(--cf-radius-full);
+  width: 44px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--cf-transition);
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  padding: 0;
+}
+.cf-theme-btn:hover {
+  border-color: var(--cf-orange);
+}
+
+/* Boutons nav visiteur */
+.cf-btn-nav-outline {
+  padding: 8px 18px;
+  border: 2px solid var(--cf-orange);
+  border-radius: var(--cf-radius-full);
+  color: var(--cf-orange) !important;
+  font-weight: 700;
+  font-size: 0.88rem;
+  text-decoration: none;
+  transition: var(--cf-transition);
+  white-space: nowrap;
+}
+.cf-btn-nav-outline:hover {
+  background: var(--cf-orange);
+  color: #fff !important;
+}
+
+.cf-btn-nav-primary {
+  padding: 8px 18px;
+  background: linear-gradient(135deg, var(--cf-orange), var(--cf-orange-dark));
+  border-radius: var(--cf-radius-full);
+  color: #fff !important;
+  font-weight: 700;
+  font-size: 0.88rem;
+  text-decoration: none;
+  transition: var(--cf-transition);
+  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+  white-space: nowrap;
+}
+.cf-btn-nav-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(255, 107, 0, 0.4);
+}
+
+/* Cloche notifications */
+.cf-notif-btn {
+  position: relative;
+  color: var(--cf-text-muted);
+  font-size: 1.2rem;
+  text-decoration: none;
+  padding: 6px;
+  border-radius: var(--cf-radius);
+  transition: var(--cf-transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cf-notif-btn:hover {
+  color: var(--cf-orange);
+  background: rgba(255, 107, 0, 0.08);
+}
+.cf-notif-dot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--cf-orange);
+  color: #fff;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Dropdown utilisateur */
+.cf-user-dropdown {
+  position: relative;
+}
+
+.cf-avatar-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px 4px 4px;
+  border-radius: var(--cf-radius-full);
+  transition: var(--cf-transition);
+}
+.cf-avatar-btn:hover {
+  background: var(--cf-surface-2);
+}
+
+.cf-avatar-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--cf-orange), var(--cf-orange-dark));
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.cf-user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+.cf-user-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--cf-text);
+}
+.cf-user-role {
+  font-size: 0.7rem;
+  color: var(--cf-text-muted);
+}
+
+.cf-chevron {
+  font-size: 0.7rem;
+  color: var(--cf-text-muted);
+  transition: var(--cf-transition);
+}
+.cf-user-dropdown.open .cf-chevron {
+  transform: rotate(180deg);
+}
+
+/* Menu dropdown */
+.cf-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: var(--cf-surface);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius-lg);
+  box-shadow: 0 12px 40px var(--cf-shadow);
+  min-width: 220px;
+  padding: 8px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2000;
+}
+.cf-dropdown-menu.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.cf-dropdown-header {
+  padding: 10px 12px 12px;
+  border-bottom: 1px solid var(--cf-border);
+  margin-bottom: 6px;
+}
+.cf-dropdown-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--cf-text);
+}
+.cf-dropdown-role {
+  font-size: 0.75rem;
+  color: var(--cf-text-muted);
+  margin-top: 2px;
+}
+
+.cf-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--cf-radius);
+  color: var(--cf-text);
+  font-weight: 600;
+  font-size: 0.88rem;
+  text-decoration: none;
+  transition: var(--cf-transition);
+}
+.cf-dropdown-item:hover {
+  background: var(--cf-surface-2);
+  color: var(--cf-orange);
+}
+.cf-dropdown-item i {
+  color: var(--cf-text-muted);
+  font-size: 1rem;
+  width: 18px;
+}
+.cf-dropdown-item:hover i {
+  color: var(--cf-orange);
+}
+
+.cf-dropdown-logout {
+  color: #EF4444 !important;
+}
+.cf-dropdown-logout:hover {
+  background: rgba(239, 68, 68, 0.08) !important;
+  color: #EF4444 !important;
+}
+.cf-dropdown-logout i {
+  color: #EF4444 !important;
+}
+
+.cf-dropdown-divider {
+  height: 1px;
+  background: var(--cf-border);
+  margin: 6px 0;
+}
+
+/* Burger mobile */
+.cf-burger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--cf-radius-sm);
+}
+.cf-burger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--cf-text);
+  border-radius: 2px;
+  transition: var(--cf-transition);
+}
+
+/* Menu mobile */
+.cf-mobile-menu {
+  display: none;
+  padding: 12px 0 16px;
+  border-top: 1px solid var(--cf-border);
+}
+.cf-mobile-menu.open {
+  display: block;
+}
+.cf-mobile-menu a {
+  display: block;
+  padding: 10px 4px;
+  color: var(--cf-text-muted);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  border-radius: var(--cf-radius);
+  transition: var(--cf-transition);
+}
+.cf-mobile-menu a:hover {
+  color: var(--cf-orange);
+  padding-left: 12px;
+}
+.cf-mobile-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.cf-mobile-logout {
+  color: #EF4444 !important;
+}
+
+/* Responsive navbar */
+@media (max-width: 991px) {
+  .cf-nav-links  { display: none !important; }
+  .cf-nav-guest  { display: none !important; }
+  .cf-burger     { display: flex !important; }
+}
+
+@media (max-width: 991px) {
+  .cf-nav-actions .cf-notif-btn,
+  .cf-nav-actions .cf-nav-user-bloc {
+    display: flex;
+  }
+}

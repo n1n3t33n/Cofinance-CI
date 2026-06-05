@@ -1,126 +1,127 @@
 {% load static %}
-<nav class="cf-navbar navbar navbar-expand-lg">
+
+<nav class="cf-navbar-wrap">
   <div class="container">
+    <div class="cf-navbar-inner">
 
-    <!-- Logo -->
-    <a class="navbar-brand" href="/">
-      <span class="orange">CO</span><span class="green">FINANCE</span> CI
-    </a>
+      <!-- Logo -->
+      <a class="cf-logo" href="/">
+        <span class="cf-logo-co">CO</span><span class="cf-logo-fin">FINANCE</span>&nbsp;CI
+      </a>
 
-    <!-- Burger mobile -->
-    <button class="navbar-toggler border-0" type="button"
-            data-bs-toggle="collapse" data-bs-target="#cfNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+      <!-- Liens visiteur -->
+      <ul class="cf-nav-links" id="nav-links-guest">
+        <li><a href="/">Accueil</a></li>
+        <li><a href="/services/">Services</a></li>
+        <li><a href="/blog/">Blog</a></li>
+        <li><a href="/eligibilite/">Eligibilite</a></li>
+        <li><a href="/a-propos/">A propos</a></li>
+      </ul>
 
-    <div class="collapse navbar-collapse" id="cfNav">
-
-      <!-- Liens publics -->
-      <ul class="navbar-nav me-auto" id="nav-public">
-        <li class="nav-item">
-          <a class="nav-link" href="/">Accueil</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/services/">Services</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/a-propos/">À propos</a>
-        </li>
+      <!-- Liens utilisateur (masques par defaut) -->
+      <ul class="cf-nav-links" id="nav-links-user" style="display:none">
+        <li><a href="/">Accueil</a></li>
+        <li><a href="/services/">Services</a></li>
+        <li><a href="/blog/">Blog</a></li>
+        <li><a href="/eligibilite/">Eligibilite</a></li>
+        <li><a href="/a-propos/">A propos</a></li>
       </ul>
 
       <!-- Actions droite -->
-      <div class="d-flex align-items-center gap-3">
+      <div class="cf-nav-actions">
 
-        <!-- Toggle thème -->
-        <button class="cf-toggle-theme cf-theme-toggle border-0 p-0"
-                title="Changer le thème" aria-label="Toggle thème">
+        <!-- Toggle theme -->
+        <button class="cf-toggle-theme cf-theme-btn" title="Changer le theme">
+          <span class="cf-theme-icon">🌙</span>
         </button>
-        <span class="cf-theme-icon">🌙</span>
 
-        <!-- Non connecté -->
-        <div id="nav-guest" class="d-flex gap-2">
-          <a href="/connexion/" class="btn-cf-outline btn">Connexion</a>
-          <a href="/inscription/" class="btn-cf-primary btn">Inscription</a>
+        <!-- Bloc visiteur -->
+        <div id="nav-guest" class="cf-nav-guest">
+          <a href="/connexion/"   class="cf-btn-nav-outline">Connexion</a>
+          <a href="/inscription/" class="cf-btn-nav-primary">Inscription</a>
         </div>
 
-        <!-- Connecté -->
-        <div id="nav-user" class="d-flex align-items-center gap-3" style="display:none!important">
+        <!-- Bloc utilisateur (masque par defaut) -->
+        <div id="nav-user" style="display:none" class="cf-nav-user-bloc">
 
-          <!-- Notifications -->
-          <a href="/notifications/" class="position-relative text-decoration-none"
-             style="color: var(--cf-text-muted)">
-            <i class="bi bi-bell fs-5"></i>
-            <span class="cf-notif-badge cf-notif-count" style="display:none">0</span>
+          <!-- Cloche -->
+          <a id="nav-notif-link" href="#" class="cf-notif-btn" title="Notifications">
+            <i class="bi bi-bell"></i>
+            <span class="cf-notif-dot cf-notif-count" style="display:none">0</span>
           </a>
 
-          <!-- Menu utilisateur -->
-          <div class="dropdown">
-            <button class="btn d-flex align-items-center gap-2 p-0 border-0 bg-transparent"
-                    data-bs-toggle="dropdown">
-              <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--cf-orange),var(--cf-orange-dark));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem;">
+          <!-- Bouton avatar -->
+          <div class="cf-user-dropdown" id="cf-user-dropdown">
+            <button class="cf-avatar-btn" id="cf-avatar-btn"
+                    onclick="toggleDropdown(event)" type="button">
+              <div class="cf-avatar-circle" id="nav-avatar">
                 <span class="cf-user-avatar">U</span>
               </div>
-              <div class="text-start d-none d-lg-block">
-                <div style="font-size:0.85rem;font-weight:700;color:var(--cf-text)"
-                     class="cf-user-name">Utilisateur</div>
-                <div style="font-size:0.72rem;color:var(--cf-text-muted)"
-                     class="cf-user-role">Rôle</div>
+              <div class="cf-user-info d-none d-lg-block">
+                <span class="cf-user-name">Utilisateur</span>
+                <span class="cf-user-role">Role</span>
               </div>
-              <i class="bi bi-chevron-down" style="font-size:0.75rem;color:var(--cf-text-muted)"></i>
+              <i class="bi bi-chevron-down cf-chevron"></i>
             </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2"
-                style="background:var(--cf-surface);border:1px solid var(--cf-border)!important;min-width:200px">
-              <li>
-                <a class="dropdown-item py-2" href="#"
-                   id="nav-dashboard-link"
-                   style="color:var(--cf-text);font-weight:600">
-                  <i class="bi bi-speedometer2 me-2 text-orange"></i>
-                  Mon dashboard
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item py-2" href="/profil/"
-                   style="color:var(--cf-text);font-weight:600">
-                  <i class="bi bi-person me-2 text-orange"></i>
-                  Mon profil
-                </a>
-              </li>
-              <li><hr class="dropdown-divider" style="border-color:var(--cf-border)"></li>
-              <li>
-                <a class="dropdown-item py-2 cf-logout" href="#"
-                   style="color:#EF4444;font-weight:600">
-                  <i class="bi bi-box-arrow-right me-2"></i>
-                  Déconnexion
-                </a>
-              </li>
-            </ul>
+
+            <!-- Menu dropdown -->
+            <div class="cf-dropdown-menu" id="cf-dropdown-menu">
+              <div class="cf-dropdown-header">
+                <div class="cf-dropdown-name cf-user-name">Utilisateur</div>
+                <div class="cf-dropdown-role cf-user-role">Role</div>
+              </div>
+              <a href="#" id="nav-dashboard-link" class="cf-dropdown-item">
+                <i class="bi bi-speedometer2"></i>
+                Mon dashboard
+              </a>
+              <a href="/parametres/" class="cf-dropdown-item">
+                <i class="bi bi-gear"></i>
+                Parametres
+              </a>
+              <div class="cf-dropdown-divider"></div>
+              <a href="#" class="cf-dropdown-item cf-dropdown-logout cf-logout">
+                <i class="bi bi-box-arrow-right"></i>
+                Deconnexion
+              </a>
+            </div>
           </div>
+
         </div>
 
+        <!-- Burger mobile -->
+        <button class="cf-burger" id="cf-burger" onclick="toggleMobileMenu()"
+                type="button">
+          <span></span><span></span><span></span>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- Menu mobile -->
+    <div class="cf-mobile-menu" id="cf-mobile-menu">
+      <div id="cf-mobile-guest">
+        <a href="/">Accueil</a>
+        <a href="/services/">Services</a>
+        <a href="/blog/">Blog</a>
+        <a href="/eligibilite/">Eligibilite</a>
+        <a href="/a-propos/">A propos</a>
+        <div class="cf-mobile-actions">
+          <a href="/connexion/"   class="cf-btn-nav-outline">Connexion</a>
+          <a href="/inscription/" class="cf-btn-nav-primary">Inscription</a>
+        </div>
+      </div>
+      <div id="cf-mobile-user" style="display:none">
+        <a href="/">Accueil</a>
+        <a href="/services/">Services</a>
+        <a href="/blog/">Blog</a>
+        <a href="/eligibilite/">Eligibilite</a>
+        <a href="/a-propos/">A propos</a>
+        <div class="cf-mobile-actions">
+          <a href="#" id="cf-mobile-dashboard">Mon dashboard</a>
+          <a href="/parametres/">Parametres</a>
+          <a href="#" class="cf-logout cf-mobile-logout">Deconnexion</a>
+        </div>
       </div>
     </div>
   </div>
 </nav>
-
-<script>
-  /* Affichage conditionnel navbar selon connexion */
-  (function() {
-    const token = localStorage.getItem('cf_access');
-    const user  = localStorage.getItem('cf_user');
-    if (token && user) {
-      document.getElementById('nav-guest').style.display = 'none';
-      document.getElementById('nav-user').style.removeProperty('display');
-      // Lien dashboard selon rôle
-      try {
-        const u = JSON.parse(user);
-        const routes = {
-          client: '/dashboard/client/',
-          agent:  '/dashboard/agent/',
-          administrateur: '/dashboard/admin/'
-        };
-        const link = document.getElementById('nav-dashboard-link');
-        if (link) link.href = routes[u.role] || '/';
-      } catch(e) {}
-    }
-  })();
-</script>

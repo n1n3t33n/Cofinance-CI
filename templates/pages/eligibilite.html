@@ -1,0 +1,194 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Verifier mon eligibilite{% endblock %}
+
+{% block content %}
+
+<section style="background:linear-gradient(135deg,#1A1A2E,#252550);padding:80px 0 60px;color:#fff">
+  <div class="container text-center">
+    <span class="cf-badge cf-badge-orange mb-3">Simulateur</span>
+    <h1 style="font-size:clamp(1.8rem,4vw,3rem);font-weight:800;margin-bottom:16px">
+      Verifiez votre <span style="color:var(--cf-orange)">eligibilite</span>
+    </h1>
+    <p style="color:#9CA3AF;max-width:480px;margin:0 auto;font-size:1rem;line-height:1.8">
+      Estimez votre score d'eligibilite en quelques secondes
+      et decouvrez le montant auquel vous pouvez pretendre.
+    </p>
+  </div>
+</section>
+
+<section class="py-5" style="background:var(--cf-bg)">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-7">
+
+        <div class="cf-card">
+          <h5 style="font-weight:700;margin-bottom:24px">
+            <i class="bi bi-calculator me-2 text-orange"></i>
+            Simulateur d'eligibilite
+          </h5>
+
+          <!-- Etape 1 -->
+          <div id="etape-1">
+            <div class="mb-3">
+              <label class="cf-label">Montant souhaite (FCFA)</label>
+              <input type="range" id="sim-montant"
+                     min="50000" max="5000000" step="50000" value="300000"
+                     class="form-range"
+                     oninput="document.getElementById('val-montant').textContent=
+                       new Intl.NumberFormat('fr-FR').format(this.value)+' FCFA'"/>
+              <div class="d-flex justify-content-between mt-1" style="font-size:0.8rem;color:var(--cf-text-muted)">
+                <span>50 000 FCFA</span>
+                <span id="val-montant" style="font-weight:700;color:var(--cf-orange)">
+                  300 000 FCFA
+                </span>
+                <span>5 000 000 FCFA</span>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="cf-label">Duree souhaitee</label>
+              <select id="sim-duree" class="cf-input">
+                <option value="6">6 mois</option>
+                <option value="12" selected>12 mois</option>
+                <option value="18">18 mois</option>
+                <option value="24">24 mois</option>
+                <option value="36">36 mois</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="cf-label">Avez-vous deja eu un credit chez nous ?</label>
+              <select id="sim-historique" class="cf-input">
+                <option value="0">Non, premier credit</option>
+                <option value="1">Oui, 1 a 2 credits rembourses</option>
+                <option value="3">Oui, 3 credits ou plus rembourses</option>
+              </select>
+            </div>
+
+            <button class="btn-cf-primary btn w-100 py-3 mt-2"
+                    onclick="calculerScore()">
+              <i class="bi bi-calculator me-2"></i>
+              Calculer mon score
+            </button>
+          </div>
+
+          <!-- Resultat -->
+          <div id="resultat-score" style="display:none;margin-top:24px">
+            <div style="border-top:1px solid var(--cf-border);padding-top:24px">
+              <h6 style="font-weight:700;margin-bottom:20px;text-align:center">
+                Votre estimation
+              </h6>
+
+              <!-- Jauge score -->
+              <div class="text-center mb-4">
+                <div style="position:relative;width:160px;height:160px;margin:0 auto">
+                  <svg viewBox="0 0 36 36" style="transform:rotate(-90deg)">
+                    <circle cx="18" cy="18" r="15.9"
+                            fill="none" stroke="var(--cf-border)" stroke-width="3"/>
+                    <circle id="svg-score-arc" cx="18" cy="18" r="15.9"
+                            fill="none" stroke="var(--cf-orange)" stroke-width="3"
+                            stroke-dasharray="0 100"
+                            style="transition:stroke-dasharray 1s ease"/>
+                  </svg>
+                  <div style="position:absolute;top:50%;left:50%;
+                       transform:translate(-50%,-50%);text-align:center">
+                    <div id="score-valeur"
+                         style="font-size:1.8rem;font-weight:800;color:var(--cf-text)">
+                      0
+                    </div>
+                    <div style="font-size:0.72rem;color:var(--cf-text-muted)">/ 100</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row g-3">
+                <div class="col-6">
+                  <div class="cf-card text-center py-3">
+                    <div style="font-size:0.75rem;color:var(--cf-text-muted);margin-bottom:4px">
+                      Mensualite estimee
+                    </div>
+                    <div id="res-mensualite"
+                         style="font-size:1.1rem;font-weight:800;color:var(--cf-orange)">
+                      --
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="cf-card text-center py-3">
+                    <div style="font-size:0.75rem;color:var(--cf-text-muted);margin-bottom:4px">
+                      Avis
+                    </div>
+                    <div id="res-avis"
+                         style="font-size:0.88rem;font-weight:700">
+                      --
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="res-message" class="cf-alert mt-3"></div>
+
+              <a href="/inscription/" class="btn-cf-primary btn w-100 py-3 mt-4">
+                <i class="bi bi-person-plus me-2"></i>
+                Creer mon compte et faire une demande
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Info droite -->
+      <div class="col-lg-4 d-none d-lg-block">
+        <div class="cf-card mb-3">
+          <h6 style="font-weight:700;margin-bottom:16px">
+            <i class="bi bi-info-circle me-2 text-orange"></i>
+            Comment est calcule le score ?
+          </h6>
+          <ul class="list-unstyled" style="font-size:0.85rem">
+            <li class="d-flex gap-2 mb-2">
+              <i class="bi bi-check-circle-fill mt-1" style="color:var(--cf-green);flex-shrink:0"></i>
+              <span style="color:var(--cf-text-muted)">
+                <strong style="color:var(--cf-text)">Montant :</strong>
+                Plus le montant est faible, meilleur est le score.
+              </span>
+            </li>
+            <li class="d-flex gap-2 mb-2">
+              <i class="bi bi-check-circle-fill mt-1" style="color:var(--cf-green);flex-shrink:0"></i>
+              <span style="color:var(--cf-text-muted)">
+                <strong style="color:var(--cf-text)">Duree :</strong>
+                Une duree courte favorise l'approbation.
+              </span>
+            </li>
+            <li class="d-flex gap-2">
+              <i class="bi bi-check-circle-fill mt-1" style="color:var(--cf-green);flex-shrink:0"></i>
+              <span style="color:var(--cf-text-muted)">
+                <strong style="color:var(--cf-text)">Historique :</strong>
+                Un bon historique de remboursement augmente votre score.
+              </span>
+            </li>
+          </ul>
+        </div>
+        <div class="cf-card">
+          <h6 style="font-weight:700;margin-bottom:12px">Taux d'interet</h6>
+          <div style="font-size:2rem;font-weight:800;color:var(--cf-orange);text-align:center">
+            12%
+          </div>
+          <div style="text-align:center;font-size:0.82rem;color:var(--cf-text-muted)">
+            Taux annuel fixe
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/eligibilite.js' %}"></script>
+{% endblock %}

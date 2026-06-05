@@ -1,0 +1,131 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Parametres{% endblock %}
+
+{% block content %}
+<section style="min-height:calc(100vh - 140px);background:var(--cf-bg);padding:48px 0">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-7">
+
+        <h2 style="font-weight:800;margin-bottom:8px">Parametres du compte</h2>
+        <p style="color:var(--cf-text-muted);margin-bottom:32px">
+          Modifiez vos informations personnelles et prefereces.
+        </p>
+
+        <!-- Photo de profil -->
+        <div class="cf-card mb-4">
+          <h5 style="font-weight:700;margin-bottom:20px">
+            <i class="bi bi-person-circle me-2 text-orange"></i>
+            Photo de profil
+          </h5>
+          <div class="d-flex align-items-center gap-4">
+            <div id="apercu-avatar"
+                 style="width:80px;height:80px;border-radius:50%;
+                        background:linear-gradient(135deg,var(--cf-orange),var(--cf-orange-dark));
+                        color:#fff;font-size:2rem;font-weight:800;
+                        display:flex;align-items:center;justify-content:center;
+                        overflow:hidden;flex-shrink:0">
+              <span id="avatar-initiale">U</span>
+            </div>
+            <div>
+              <input type="file" id="input-photo" accept="image/*"
+                     style="display:none"
+                     onchange="previewPhoto(event)"/>
+              <button class="btn-cf-primary btn mb-2"
+                      onclick="document.getElementById('input-photo').click()">
+                <i class="bi bi-upload me-2"></i>Changer la photo
+              </button>
+              <button class="btn-cf-outline btn ms-2 mb-2"
+                      onclick="supprimerPhoto()">
+                Supprimer
+              </button>
+              <div style="font-size:0.78rem;color:var(--cf-text-muted);margin-top:4px">
+                JPG, PNG ou GIF. Max 2 MB.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Informations personnelles -->
+        <div class="cf-card mb-4">
+          <h5 style="font-weight:700;margin-bottom:20px">
+            <i class="bi bi-person me-2 text-orange"></i>
+            Informations personnelles
+          </h5>
+
+          <div id="alerte-profil-param" class="cf-alert mb-4">
+            <i class="bi bi-info-circle" id="alerte-param-icon"></i>
+            <span id="alerte-param-msg"></span>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="cf-label">Email</label>
+              <input type="email" id="param-email" class="cf-input"
+                     placeholder="votre@email.com"/>
+            </div>
+            <div class="col-md-6">
+              <label class="cf-label">Telephone</label>
+              <input type="tel" id="param-telephone" class="cf-input"
+                     placeholder="+225 07 00 00 00"/>
+            </div>
+            <div class="col-12">
+              <label class="cf-label">Region</label>
+              <input type="text" id="param-region" class="cf-input"
+                     placeholder="Ex: Abidjan-Cocody"/>
+            </div>
+          </div>
+
+          <button id="btn-sauver-param"
+                  class="btn-cf-primary btn w-100 py-3 mt-4"
+                  onclick="sauverParametres()">
+            <i class="bi bi-check me-2"></i>
+            Sauvegarder les modifications
+          </button>
+        </div>
+
+        <!-- Preferences -->
+        <div class="cf-card mb-4">
+          <h5 style="font-weight:700;margin-bottom:20px">
+            <i class="bi bi-palette me-2 text-orange"></i>
+            Preferences d'affichage
+          </h5>
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div style="font-weight:600">Mode sombre</div>
+              <div style="font-size:0.82rem;color:var(--cf-text-muted)">
+                Changer l'apparence de l'interface
+              </div>
+            </div>
+            <button class="cf-toggle-theme cf-theme-toggle border-0 p-0"
+                    style="margin-left:16px"></button>
+          </div>
+        </div>
+
+        <!-- Securite -->
+        <div class="cf-card">
+          <h5 style="font-weight:700;margin-bottom:20px">
+            <i class="bi bi-shield-lock me-2 text-orange"></i>
+            Securite
+          </h5>
+          <div class="p-3"
+               style="background:rgba(59,130,246,0.06);
+                      border:1px solid rgba(59,130,246,0.15);
+                      border-radius:var(--cf-radius);
+                      font-size:0.85rem;color:#3B82F6">
+            <i class="bi bi-info-circle me-2"></i>
+            Pour modifier votre mot de passe, contactez le support via le chat.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/parametres.js' %}"></script>
+{% endblock %}
