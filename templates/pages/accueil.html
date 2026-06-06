@@ -163,7 +163,7 @@
               <i class="bi bi-check-circle-fill" style="color:var(--cf-green)"></i>Taux competitifs des 12%/an
             </li>
           </ul>
-          <a href="/inscription/" class="btn-cf-primary btn w-100 mt-4">Faire une demande</a>
+          <a href="/inscription/" class="btn-cf-primary btn w-100 mt-4 cf-cta-redirect">Faire une demande</a>
         </div>
       </div>
       <div class="col-lg-4 col-md-6">
@@ -193,7 +193,7 @@
               <i class="bi bi-check-circle-fill" style="color:var(--cf-green)"></i>Souscription en 2 minutes
             </li>
           </ul>
-          <a href="/inscription/" class="btn-cf-secondary btn w-100 mt-4">Souscrire maintenant</a>
+          <a href="/inscription/" class="btn-cf-secondary btn w-100 mt-4 cf-cta-redirect">Souscrire maintenant</a>
         </div>
       </div>
       <div class="col-lg-4 col-md-6">
@@ -219,7 +219,7 @@
               <i class="bi bi-check-circle-fill" style="color:var(--cf-green)"></i>Historique des echanges conserve
             </li>
           </ul>
-          <a href="/inscription/" class="btn-cf-primary btn w-100 mt-4">Acceder au support</a>
+          <a href="/inscription/" class="btn-cf-primary btn w-100 mt-4 cf-cta-redirect">Acceder au support</a>
         </div>
       </div>
     </div>
@@ -302,7 +302,8 @@
       </h2>
     </div>
 
-    <div id="temoignagesCarousel" class="carousel slide">
+    <div id="temoignagesCarousel" class="carousel slide"
+         data-bs-ride="carousel" data-bs-interval="4000" data-bs-pause="false">
       <div class="carousel-indicators">
         <button type="button" data-bs-target="#temoignagesCarousel" data-bs-slide-to="0"
                 class="active"
@@ -447,12 +448,14 @@
 document.addEventListener('DOMContentLoaded', function () {
   var el = document.getElementById('temoignagesCarousel');
   if (el && typeof bootstrap !== 'undefined') {
-    new bootstrap.Carousel(el, {
+    var c = new bootstrap.Carousel(el, {
       interval: 4000,
       wrap:     true,
       touch:    true,
-      pause:    false
+      pause:    false,
+      ride:     true
     });
+    c.cycle();
   }
 });
 </script>

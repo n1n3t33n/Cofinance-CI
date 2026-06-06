@@ -190,8 +190,6 @@ const UI = {
   initUserNav() {
     const user  = Session.getUser();
     if (!user) return;
-    const photo = localStorage.getItem('cf_avatar');
-
     /* Noms et roles */
     document.querySelectorAll('.cf-user-name').forEach(el => {
       el.textContent = user.username;
@@ -200,17 +198,14 @@ const UI = {
       el.textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
     });
 
-    /* Avatar */
-    const avatarCircle = document.getElementById('nav-avatar');
-    if (avatarCircle) {
-      if (photo) {
-        avatarCircle.innerHTML =
-          `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
-      } else {
-        avatarCircle.innerHTML =
-          `<span class="cf-user-avatar">${user.username.charAt(0).toUpperCase()}</span>`;
-      }
-    }
+    /* Avatar — clé spécifique à l'utilisateur pour éviter le partage entre comptes */
+    const photo = localStorage.getItem('cf_avatar_' + user.username);
+    const avatarHTML = photo
+      ? `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
+      : `<span class="cf-user-avatar">${user.username.charAt(0).toUpperCase()}</span>`;
+    document.querySelectorAll('.cf-avatar-circle').forEach(el => {
+      el.innerHTML = avatarHTML;
+    });
   }
 };
 
@@ -311,9 +306,14 @@ function initNavbar() {
     const btnTemoignage = document.getElementById('btn-temoignage');
     if (btnTemoignage) btnTemoignage.style.display = 'inline-flex';
 
-    /* Masquer le CTA visiteur sur l'accueil */
+    /* Masquer le CTA visiteur sur l'accueil, services, a-propos */
     const ctaVisiteur = document.getElementById('cta-visiteur');
     if (ctaVisiteur) ctaVisiteur.style.display = 'none';
+
+    /* Rediriger les liens /inscription/ des pages publiques vers le dashboard */
+    document.querySelectorAll('a.cf-cta-redirect[href="/inscription/"]').forEach(link => {
+      link.href = href;
+    });
 
   } else {
 

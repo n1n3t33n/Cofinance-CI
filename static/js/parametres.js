@@ -78,7 +78,9 @@ async function sauverParametres() {
    PHOTO DE PROFIL (localStorage uniquement)
    ============================================================ */
 function chargerAvatar() {
-  const photo = localStorage.getItem('cf_avatar');
+  const user = Session.getUser();
+  if (!user) return;
+  const photo = localStorage.getItem('cf_avatar_' + user.username);
   if (photo) {
     const apercu = document.getElementById('apercu-avatar');
     if (apercu) {
@@ -110,11 +112,12 @@ function previewPhoto(event) {
              style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;
     }
 
-    /* Sauvegarder dans localStorage */
-    localStorage.setItem('cf_avatar', dataUrl);
+    /* Sauvegarder dans localStorage avec clé spécifique à l'utilisateur */
+    const user = Session.getUser();
+    if (user) localStorage.setItem('cf_avatar_' + user.username, dataUrl);
 
-    /* Mettre a jour la navbar immediatement */
-    document.querySelectorAll('#nav-avatar').forEach(el => {
+    /* Mettre a jour tous les cercles avatar (navbar + sidebar) */
+    document.querySelectorAll('.cf-avatar-circle').forEach(el => {
       el.innerHTML = `
         <img src="${dataUrl}"
              style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;
@@ -124,13 +127,14 @@ function previewPhoto(event) {
 }
 
 function supprimerPhoto() {
-  localStorage.removeItem('cf_avatar');
-  const initiale = Session.getUser()?.username?.charAt(0).toUpperCase() || 'U';
+  const user = Session.getUser();
+  if (user) localStorage.removeItem('cf_avatar_' + user.username);
+  const initiale = user?.username?.charAt(0).toUpperCase() || 'U';
   const apercu   = document.getElementById('apercu-avatar');
   if (apercu) {
     apercu.innerHTML = `<span id="avatar-initiale">${initiale}</span>`;
   }
-  document.querySelectorAll('#nav-avatar').forEach(el => {
+  document.querySelectorAll('.cf-avatar-circle').forEach(el => {
     el.innerHTML = `<span class="cf-user-avatar">${initiale}</span>`;
   });
 }

@@ -145,4 +145,14 @@ function afficherAlerteBlog(msg, type) {
 }
 
 /* ── Init ──────────────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', chargerTemoignages);
+document.addEventListener('DOMContentLoaded', function () {
+  chargerTemoignages();
+
+  /* Initialiser visuellement les etoiles quand le modal s'ouvre */
+  const modal = document.getElementById('modalTemoignage');
+  if (modal) {
+    modal.addEventListener('show.bs.modal', function () {
+      noterEtoile(noteSelectionnee);
+    });
+  }
+});
