@@ -4,22 +4,36 @@
 {% block title %}Inscription{% endblock %}
 
 {% block content %}
-<section style="min-height:calc(100vh - 140px);background:var(--cf-bg);padding:48px 0">
+<section style="min-height:calc(100vh - 70px);background:var(--cf-bg);padding:48px 0">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-6 col-md-8">
 
         <!-- En-tete -->
-        <div class="text-center mb-4">
-          <a href="/" style="font-size:1.6rem;font-weight:800;color:var(--cf-text);text-decoration:none">
-            <span style="color:var(--cf-orange)">CO</span><span style="color:var(--cf-green)">FINANCE</span> CI
+        <div class="text-center mb-5">
+          <a href="/" class="d-inline-block mb-4" style="text-decoration:none">
+            <div style="font-size:1.8rem;font-weight:800">
+              <span style="color:var(--cf-orange)">CO</span><span style="color:var(--cf-green)">FINANCE</span>
+              <span style="color:var(--cf-text)"> CI</span>
+            </div>
           </a>
-          <h1 style="font-size:1.5rem;font-weight:800;margin-top:20px;margin-bottom:8px">
-            Creer votre compte
-          </h1>
-          <p style="color:var(--cf-text-muted);font-size:0.92rem">
+          <h1 style="font-size:1.4rem;font-weight:800;margin-bottom:6px">Creer votre compte</h1>
+          <p style="color:var(--cf-text-muted);font-size:0.9rem">
             Rejoignez COFINANCE CI et accelez a nos services
           </p>
+
+          <!-- Avantages rapides -->
+          <div class="d-flex justify-content-center flex-wrap gap-3 mt-3">
+            <span class="cf-badge cf-badge-green">
+              <i class="bi bi-check-circle-fill me-1"></i>Gratuit
+            </span>
+            <span class="cf-badge cf-badge-orange">
+              <i class="bi bi-lightning-fill me-1"></i>2 minutes
+            </span>
+            <span class="cf-badge cf-badge-blue">
+              <i class="bi bi-shield-check-fill me-1"></i>Securise
+            </span>
+          </div>
         </div>
 
         <!-- Carte formulaire -->
@@ -33,79 +47,88 @@
 
           <div class="row g-3">
 
-            <!-- Nom d'utilisateur -->
+            <!-- Identifiant -->
             <div class="col-12">
               <label class="cf-label" for="username">
-                <i class="bi bi-person me-1"></i> Nom d'utilisateur
+                <i class="bi bi-person me-1"></i>Nom d'utilisateur
               </label>
               <input type="text" id="username" class="cf-input"
-                     placeholder="Choisissez un identifiant unique"/>
+                     placeholder="Choisissez un identifiant unique"
+                     autocomplete="username"/>
+              <div style="font-size:0.75rem;color:var(--cf-text-muted);margin-top:4px">
+                Lettres, chiffres et underscores uniquement.
+              </div>
             </div>
 
-            <!-- Email -->
+            <!-- Email — marqué comme requis pour 2FA -->
             <div class="col-12">
               <label class="cf-label" for="email">
-                <i class="bi bi-envelope me-1"></i> Adresse email
+                <i class="bi bi-envelope me-1"></i>Adresse email
+                <span class="cf-badge cf-badge-orange ms-1" style="font-size:0.62rem">
+                  Requis pour la 2FA
+                </span>
               </label>
               <input type="email" id="email" class="cf-input"
-                     placeholder="votre@email.com"/>
+                     placeholder="votre@email.com" autocomplete="email"/>
+              <div style="font-size:0.75rem;color:var(--cf-text-muted);margin-top:4px">
+                <i class="bi bi-shield-lock me-1"></i>
+                Utilise pour envoyer votre code de verification a chaque connexion.
+              </div>
             </div>
 
-            <!-- Telephone -->
+            <!-- Telephone + Region -->
             <div class="col-md-6">
               <label class="cf-label" for="telephone">
-                <i class="bi bi-telephone me-1"></i> Telephone
+                <i class="bi bi-telephone me-1"></i>Telephone
               </label>
               <input type="tel" id="telephone" class="cf-input"
                      placeholder="+225 07 00 00 00"/>
             </div>
-
-            <!-- Region -->
             <div class="col-md-6">
               <label class="cf-label" for="region">
-                <i class="bi bi-geo-alt me-1"></i> Region
+                <i class="bi bi-geo-alt me-1"></i>Region
               </label>
               <input type="text" id="region" class="cf-input"
-                     placeholder="Ex: Abidjan-Cocody"/>
+                     placeholder="Ex: Abidjan — Cocody"/>
             </div>
 
             <!-- Mot de passe -->
             <div class="col-md-6">
               <label class="cf-label" for="password">
-                <i class="bi bi-lock me-1"></i> Mot de passe
+                <i class="bi bi-lock me-1"></i>Mot de passe
               </label>
               <div style="position:relative">
                 <input type="password" id="password" class="cf-input"
                        placeholder="Min. 8 caracteres"
                        style="padding-right:48px"
+                       autocomplete="new-password"
                        oninput="evaluerForce(this.value)"/>
-                <button type="button"
-                        onclick="toggleMdp('password','eye1')"
-                        style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--cf-text-muted);cursor:pointer;padding:0">
+                <button type="button" onclick="toggleMdp('password','eye1')"
+                        style="position:absolute;right:14px;top:50%;transform:translateY(-50%);
+                               background:none;border:none;color:var(--cf-text-muted);cursor:pointer">
                   <i class="bi bi-eye" id="eye1"></i>
                 </button>
               </div>
-              <!-- Barre de force -->
               <div style="height:4px;background:var(--cf-border);border-radius:4px;margin-top:8px">
                 <div id="barre-force"
                      style="height:4px;border-radius:4px;transition:var(--cf-transition);width:0%"></div>
               </div>
-              <div id="label-force"
-                   style="font-size:0.72rem;color:var(--cf-text-muted);margin-top:4px"></div>
+              <div id="label-force" style="font-size:0.72rem;color:var(--cf-text-muted);margin-top:4px"></div>
             </div>
 
-            <!-- Confirmation mot de passe -->
+            <!-- Confirmation -->
             <div class="col-md-6">
               <label class="cf-label" for="password2">
-                <i class="bi bi-lock-fill me-1"></i> Confirmer
+                <i class="bi bi-lock-fill me-1"></i>Confirmer
               </label>
               <div style="position:relative">
                 <input type="password" id="password2" class="cf-input"
                        placeholder="Repetez le mot de passe"
-                       style="padding-right:48px"/>
-                <button type="button"
-                        onclick="toggleMdp('password2','eye2')"
-                        style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--cf-text-muted);cursor:pointer;padding:0">
+                       style="padding-right:48px"
+                       autocomplete="new-password"/>
+                <button type="button" onclick="toggleMdp('password2','eye2')"
+                        style="position:absolute;right:14px;top:50%;transform:translateY(-50%);
+                               background:none;border:none;color:var(--cf-text-muted);cursor:pointer">
                   <i class="bi bi-eye" id="eye2"></i>
                 </button>
               </div>
@@ -113,28 +136,33 @@
 
           </div>
 
-          <!-- Note compte client uniquement -->
-          <div class="mt-3 p-3"
-               style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.15);border-radius:var(--cf-radius);font-size:0.82rem;color:#3B82F6">
+          <!-- Note compte client -->
+          <div class="mt-4 p-3"
+               style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.15);
+                      border-radius:var(--cf-radius);font-size:0.82rem;color:#3B82F6">
             <i class="bi bi-info-circle me-2"></i>
             L'inscription est reservee aux clients. Les comptes agents et administrateurs
             sont crees par l'administration.
           </div>
 
-          <!-- Bouton inscription -->
+          <!-- Bouton -->
           <button id="btn-inscription" class="btn-cf-primary btn w-100 py-3 mt-4"
                   onclick="sInscrire()">
-            <i class="bi bi-person-plus me-2"></i>
-            Creer mon compte
+            <i class="bi bi-person-plus me-2"></i>Creer mon compte gratuitement
           </button>
 
           <!-- Lien connexion -->
-          <div class="text-center mt-4"
-               style="font-size:0.9rem;color:var(--cf-text-muted)">
+          <div class="text-center mt-4" style="font-size:0.88rem;color:var(--cf-text-muted)">
             Deja un compte ?
-            <a href="/connexion/" style="font-weight:700">Se connecter</a>
+            <a href="/connexion/" style="font-weight:700;color:var(--cf-orange)">Se connecter</a>
           </div>
 
+        </div>
+
+        <!-- Note securite -->
+        <div class="text-center mt-4" style="font-size:0.78rem;color:var(--cf-text-muted)">
+          <i class="bi bi-lock-fill me-1" style="color:var(--cf-green)"></i>
+          Donnees chiffrees — Conforme aux normes BCEAO
         </div>
 
       </div>

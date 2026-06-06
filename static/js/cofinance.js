@@ -15,11 +15,15 @@ const REFRESH_KEY = 'cf_refresh';
 const USER_KEY    = 'cf_user';
 
 /* ============================================================
-   THEME
+   THEME — E : clé spécifique par utilisateur
    ============================================================ */
 const Theme = {
+  _key() {
+    const user = Session.getUser();
+    return user ? `${THEME_KEY}_${user.username}` : THEME_KEY;
+  },
   init() {
-    const saved = localStorage.getItem(THEME_KEY) || 'light';
+    const saved = localStorage.getItem(this._key()) || localStorage.getItem(THEME_KEY) || 'light';
     document.documentElement.setAttribute('data-theme', saved);
     this._updateIcon(saved);
   },
@@ -27,7 +31,7 @@ const Theme = {
     const current = document.documentElement.getAttribute('data-theme');
     const next    = current === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem(THEME_KEY, next);
+    localStorage.setItem(this._key(), next);
     this._updateIcon(next);
   },
   _updateIcon(theme) {
@@ -302,6 +306,9 @@ function initNavbar() {
     UI.initUserNav();
     UI.updateNotifBadge();
 
+    /* E — Appliquer le thème spécifique à l'utilisateur */
+    Theme.init();
+
     /* Bouton temoignage blog : visible uniquement si connecte */
     const btnTemoignage = document.getElementById('btn-temoignage');
     if (btnTemoignage) btnTemoignage.style.display = 'inline-flex';
@@ -334,6 +341,96 @@ function initNavbar() {
 }
 
 /* ============================================================
+   C — SYSTEME TOAST
+   ============================================================ */
+const Toast = {
+  _icons: { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' },
+  show(message, type = 'info', duration = 4000) {
+    const container = document.getElementById('cf-toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `cf-toast cf-toast-${type}`;
+    toast.innerHTML = `
+      <span class="cf-toast-icon">${this._icons[type] || 'ℹ️'}</span>
+      <span style="flex:1">${message}</span>
+      <button class="cf-toast-close" aria-label="Fermer">✕</button>`;
+
+    toast.querySelector('.cf-toast-close').addEventListener('click', () => this._dismiss(toast));
+    container.appendChild(toast);
+
+    requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')));
+
+    if (duration > 0) setTimeout(() => this._dismiss(toast), duration);
+  },
+  _dismiss(toast) {
+    toast.classList.remove('show');
+    toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+  }
+};
+
+/* ============================================================
+   A — SCROLL REVEAL (public pages seulement)
+   ============================================================ */
+function initScrollReveal() {
+  if (document.querySelector('.cf-sidebar')) return;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('cf-animate-in');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  let idx = 0;
+  document.querySelectorAll('.cf-card').forEach(el => {
+    /* Ne cibler que les cartes hors viewport au chargement initial */
+    if (el.getBoundingClientRect().top < window.innerHeight) return;
+    el.classList.add('cf-animate-ready');
+    el.style.transitionDelay = (idx % 3 * 0.1) + 's';
+    observer.observe(el);
+    idx++;
+  });
+}
+
+/* ============================================================
+   G — COMPTEURS ANIMÉS HERO
+   ============================================================ */
+function initCounters() {
+  const elements = document.querySelectorAll('[data-counter]');
+  if (!elements.length) return;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      observer.unobserve(entry.target);
+      const el       = entry.target;
+      const target   = parseInt(el.dataset.counter, 10);
+      const suffix   = el.dataset.suffix || '';
+      const sep      = el.dataset.sep !== undefined;
+      const duration = 1400;
+      const start    = performance.now();
+
+      function step(now) {
+        const elapsed  = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased    = 1 - Math.pow(1 - progress, 3);
+        const value    = Math.round(eased * target);
+        el.textContent = sep
+          ? new Intl.NumberFormat('fr-FR').format(value) + suffix
+          : value + suffix;
+        if (progress < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
+  }, { threshold: 0.5 });
+
+  elements.forEach(el => observer.observe(el));
+}
+
+/* ============================================================
    INIT GLOBALE
    ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
@@ -351,4 +448,10 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.cf-logout').forEach(el => {
     el.addEventListener('click', e => { e.preventDefault(); logout(); });
   });
+
+  /* A — Scroll reveal cartes */
+  initScrollReveal();
+
+  /* G — Compteurs animés */
+  initCounters();
 });

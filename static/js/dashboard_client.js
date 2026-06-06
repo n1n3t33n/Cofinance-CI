@@ -139,11 +139,13 @@ async function chargerDerniersCredits() {
       return;
     }
 
-    conteneur.innerHTML = credits.map(c => `
+    conteneur.innerHTML = credits.map(c => {
+      const prog = progressCredit(c.statut);
+      return `
       <div style="
         padding:14px;border-radius:var(--cf-radius);
         background:var(--cf-surface-2);margin-bottom:10px">
-        <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex justify-content-between align-items-center mb-2">
           <div>
             <div style="font-weight:700;font-size:0.9rem">
               ${UI.montant(c.montant_demande)}
@@ -154,7 +156,13 @@ async function chargerDerniersCredits() {
           </div>
           ${UI.statutBadge(c.statut)}
         </div>
-      </div>`).join('');
+        <div class="cf-credit-progress">
+          <div class="cf-credit-progress-fill"
+               style="width:${prog.pct}%;background:${prog.color}"></div>
+        </div>
+        <div class="cf-progress-label">${prog.label}</div>
+      </div>`;
+    }).join('');
 
   } catch (err) {
     conteneur.innerHTML = '<p class="text-muted">Erreur de chargement.</p>';
@@ -194,6 +202,20 @@ async function chargerDernieresNotifications() {
   } catch (err) {
     conteneur.innerHTML = '<p class="text-muted">Erreur.</p>';
   }
+}
+
+/* ============================================================
+   B — PROGRESSION STATUT CRÉDIT
+   ============================================================ */
+function progressCredit(statut) {
+  const map = {
+    soumise:    { pct: 25,  color: '#3B82F6', label: 'Dossier soumis'       },
+    en_analyse: { pct: 55,  color: 'var(--cf-orange)', label: 'En cours d\'analyse' },
+    approuvee:  { pct: 80,  color: 'var(--cf-green)',  label: 'Approuvé — en attente de décaissement' },
+    decaissee:  { pct: 100, color: 'var(--cf-green)',  label: 'Fonds décaissés ✓' },
+    rejetee:    { pct: 100, color: '#EF4444', label: 'Dossier rejeté' },
+  };
+  return map[statut] || { pct: 0, color: 'var(--cf-border)', label: '' };
 }
 
 /* ============================================================

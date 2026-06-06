@@ -4,119 +4,223 @@
 {% block title %}Parametres{% endblock %}
 
 {% block content %}
-<section style="min-height:calc(100vh - 140px);background:var(--cf-bg);padding:48px 0">
+<section style="background:var(--cf-bg);padding:48px 0;min-height:calc(100vh - 70px)">
   <div class="container">
     <div class="row justify-content-center">
-      <div class="col-lg-7">
+      <div class="col-lg-8">
 
-        <h2 style="font-weight:800;margin-bottom:8px">Parametres du compte</h2>
-        <p style="color:var(--cf-text-muted);margin-bottom:32px">
-          Modifiez vos informations personnelles et prefereces.
-        </p>
+        <!-- En-tete page -->
+        <div class="d-flex align-items-center gap-3 mb-5">
+          <div style="width:48px;height:48px;border-radius:var(--cf-radius);
+                      background:rgba(255,107,0,0.1);
+                      display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <i class="bi bi-gear-fill fs-5" style="color:var(--cf-orange)"></i>
+          </div>
+          <div>
+            <h2 style="font-weight:800;margin:0;font-size:1.5rem">Parametres du compte</h2>
+            <p style="color:var(--cf-text-muted);margin:2px 0 0;font-size:0.88rem">
+              Gerez vos informations personnelles, securite et preferences
+            </p>
+          </div>
+        </div>
 
-        <!-- Photo de profil -->
+        <!-- ─── Photo de profil ─── -->
         <div class="cf-card mb-4">
-          <h5 style="font-weight:700;margin-bottom:20px">
-            <i class="bi bi-person-circle me-2 text-orange"></i>
-            Photo de profil
-          </h5>
-          <div class="d-flex align-items-center gap-4">
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <i class="bi bi-person-circle" style="color:var(--cf-orange);font-size:1.1rem"></i>
+            <h5 style="font-weight:700;margin:0;font-size:1rem">Photo de profil</h5>
+          </div>
+
+          <div class="d-flex align-items-center gap-4 flex-wrap">
             <div id="apercu-avatar"
-                 style="width:80px;height:80px;border-radius:50%;
+                 style="width:88px;height:88px;border-radius:50%;flex-shrink:0;
                         background:linear-gradient(135deg,var(--cf-orange),var(--cf-orange-dark));
-                        color:#fff;font-size:2rem;font-weight:800;
-                        display:flex;align-items:center;justify-content:center;
-                        overflow:hidden;flex-shrink:0">
+                        color:#fff;font-size:2.2rem;font-weight:800;
+                        display:flex;align-items:center;justify-content:center;overflow:hidden;
+                        box-shadow:0 4px 16px rgba(255,107,0,0.25)">
               <span id="avatar-initiale">U</span>
             </div>
             <div>
               <input type="file" id="input-photo" accept="image/*"
-                     style="display:none"
-                     onchange="previewPhoto(event)"/>
-              <button class="btn-cf-primary btn mb-2"
-                      onclick="document.getElementById('input-photo').click()">
-                <i class="bi bi-upload me-2"></i>Changer la photo
-              </button>
-              <button class="btn-cf-outline btn ms-2 mb-2"
-                      onclick="supprimerPhoto()">
-                Supprimer
-              </button>
-              <div style="font-size:0.78rem;color:var(--cf-text-muted);margin-top:4px">
-                JPG, PNG ou GIF. Max 2 MB.
+                     style="display:none" onchange="previewPhoto(event)"/>
+              <div class="d-flex flex-wrap gap-2">
+                <button class="btn-cf-primary btn"
+                        onclick="document.getElementById('input-photo').click()">
+                  <i class="bi bi-upload me-2"></i>Changer la photo
+                </button>
+                <button class="btn-cf-outline btn" onclick="supprimerPhoto()">
+                  <i class="bi bi-trash me-1"></i>Supprimer
+                </button>
+              </div>
+              <div style="font-size:0.78rem;color:var(--cf-text-muted);margin-top:8px">
+                <i class="bi bi-info-circle me-1"></i>
+                JPG, PNG ou GIF — 2 MB maximum. Visible dans la navbar et le dashboard.
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Informations personnelles -->
+        <!-- ─── Informations personnelles ─── -->
         <div class="cf-card mb-4">
-          <h5 style="font-weight:700;margin-bottom:20px">
-            <i class="bi bi-person me-2 text-orange"></i>
-            Informations personnelles
-          </h5>
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <i class="bi bi-person" style="color:var(--cf-orange);font-size:1.1rem"></i>
+            <h5 style="font-weight:700;margin:0;font-size:1rem">Informations personnelles</h5>
+          </div>
 
           <div id="alerte-profil-param" class="cf-alert mb-4">
             <i class="bi bi-info-circle" id="alerte-param-icon"></i>
             <span id="alerte-param-msg"></span>
           </div>
 
+          <!-- Nom utilisateur (lecture seule) -->
+          <div class="mb-3">
+            <label class="cf-label">
+              <i class="bi bi-at me-1"></i>Nom d'utilisateur
+            </label>
+            <div style="position:relative">
+              <input type="text" id="param-username" class="cf-input" disabled
+                     style="background:var(--cf-surface-2);color:var(--cf-text-muted);cursor:not-allowed;padding-right:48px"/>
+              <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);
+                           font-size:0.72rem;color:var(--cf-text-muted)">
+                <i class="bi bi-lock-fill"></i>
+              </span>
+            </div>
+            <div style="font-size:0.75rem;color:var(--cf-text-muted);margin-top:4px">
+              L'identifiant ne peut pas etre modifie.
+            </div>
+          </div>
+
           <div class="row g-3">
             <div class="col-md-6">
-              <label class="cf-label">Email</label>
+              <label class="cf-label" for="param-email">
+                <i class="bi bi-envelope me-1"></i>Adresse email
+                <span id="badge-email-2fa" class="cf-badge ms-1"
+                      style="display:none;font-size:0.65rem"></span>
+              </label>
               <input type="email" id="param-email" class="cf-input"
                      placeholder="votre@email.com"/>
             </div>
             <div class="col-md-6">
-              <label class="cf-label">Telephone</label>
+              <label class="cf-label" for="param-telephone">
+                <i class="bi bi-telephone me-1"></i>Telephone
+              </label>
               <input type="tel" id="param-telephone" class="cf-input"
                      placeholder="+225 07 00 00 00"/>
             </div>
             <div class="col-12">
-              <label class="cf-label">Region</label>
+              <label class="cf-label" for="param-region">
+                <i class="bi bi-geo-alt me-1"></i>Region
+              </label>
               <input type="text" id="param-region" class="cf-input"
-                     placeholder="Ex: Abidjan-Cocody"/>
+                     placeholder="Ex: Abidjan — Cocody"/>
             </div>
           </div>
 
           <button id="btn-sauver-param"
                   class="btn-cf-primary btn w-100 py-3 mt-4"
                   onclick="sauverParametres()">
-            <i class="bi bi-check me-2"></i>
-            Sauvegarder les modifications
+            <i class="bi bi-check-circle me-2"></i>Sauvegarder les modifications
           </button>
         </div>
 
-        <!-- Preferences -->
+        <!-- ─── Securite & 2FA ─── -->
         <div class="cf-card mb-4">
-          <h5 style="font-weight:700;margin-bottom:20px">
-            <i class="bi bi-palette me-2 text-orange"></i>
-            Preferences d'affichage
-          </h5>
-          <div class="d-flex align-items-center justify-content-between">
-            <div>
-              <div style="font-weight:600">Mode sombre</div>
-              <div style="font-size:0.82rem;color:var(--cf-text-muted)">
-                Changer l'apparence de l'interface
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <i class="bi bi-shield-lock" style="color:var(--cf-orange);font-size:1.1rem"></i>
+            <h5 style="font-weight:700;margin:0;font-size:1rem">Securite et double authentification</h5>
+          </div>
+
+          <!-- Statut 2FA -->
+          <div id="bloc-2fa-statut" class="mb-4 p-4"
+               style="background:var(--cf-surface-2);border-radius:var(--cf-radius);
+                      border:1px solid var(--cf-border)">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+              <div class="d-flex align-items-center gap-3">
+                <div style="width:44px;height:44px;border-radius:var(--cf-radius);
+                            display:flex;align-items:center;justify-content:center"
+                     id="icon-2fa-wrapper">
+                  <i class="bi bi-shield-slash fs-4" style="color:#6B7280" id="icon-2fa"></i>
+                </div>
+                <div>
+                  <div style="font-weight:700;font-size:0.92rem">
+                    Verification en deux etapes (OTP email)
+                  </div>
+                  <div style="font-size:0.82rem;color:var(--cf-text-muted);margin-top:2px"
+                       id="label-2fa-desc">
+                    Chargement...
+                  </div>
+                </div>
+              </div>
+              <span id="badge-2fa-statut" class="cf-badge cf-badge-gray">
+                Verification...
+              </span>
+            </div>
+          </div>
+
+          <!-- Comment ca marche -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <div style="text-align:center;padding:16px">
+                <div style="width:44px;height:44px;border-radius:50%;
+                            background:rgba(255,107,0,0.1);
+                            display:flex;align-items:center;justify-content:center;margin:0 auto 10px">
+                  <i class="bi bi-1-circle-fill" style="color:var(--cf-orange);font-size:1.1rem"></i>
+                </div>
+                <div style="font-weight:700;font-size:0.85rem;margin-bottom:4px">Identifiants</div>
+                <div style="font-size:0.78rem;color:var(--cf-text-muted)">Saisissez votre identifiant et mot de passe</div>
               </div>
             </div>
-            <button class="cf-toggle-theme cf-theme-toggle border-0 p-0"
-                    style="margin-left:16px"></button>
+            <div class="col-md-4">
+              <div style="text-align:center;padding:16px">
+                <div style="width:44px;height:44px;border-radius:50%;
+                            background:rgba(0,168,107,0.1);
+                            display:flex;align-items:center;justify-content:center;margin:0 auto 10px">
+                  <i class="bi bi-2-circle-fill" style="color:var(--cf-green);font-size:1.1rem"></i>
+                </div>
+                <div style="font-weight:700;font-size:0.85rem;margin-bottom:4px">Code OTP</div>
+                <div style="font-size:0.78rem;color:var(--cf-text-muted)">Un code a 6 chiffres est envoye a votre email</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div style="text-align:center;padding:16px">
+                <div style="width:44px;height:44px;border-radius:50%;
+                            background:rgba(59,130,246,0.1);
+                            display:flex;align-items:center;justify-content:center;margin:0 auto 10px">
+                  <i class="bi bi-3-circle-fill" style="color:#3B82F6;font-size:1.1rem"></i>
+                </div>
+                <div style="font-weight:700;font-size:0.85rem;margin-bottom:4px">Acces securise</div>
+                <div style="font-size:0.78rem;color:var(--cf-text-muted)">Le code valide vous donne acces au dashboard</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Note mot de passe -->
+          <div class="p-3"
+               style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.15);
+                      border-radius:var(--cf-radius);font-size:0.85rem;color:#3B82F6">
+            <i class="bi bi-info-circle me-2"></i>
+            Pour changer votre mot de passe, contactez le support via le
+            <a href="#" onclick="window.location.href='/dashboard/client/'" style="color:#3B82F6;font-weight:700">chat temps reel</a>.
           </div>
         </div>
 
-        <!-- Securite -->
+        <!-- ─── Preferences ─── -->
         <div class="cf-card">
-          <h5 style="font-weight:700;margin-bottom:20px">
-            <i class="bi bi-shield-lock me-2 text-orange"></i>
-            Securite
-          </h5>
-          <div class="p-3"
-               style="background:rgba(59,130,246,0.06);
-                      border:1px solid rgba(59,130,246,0.15);
-                      border-radius:var(--cf-radius);
-                      font-size:0.85rem;color:#3B82F6">
-            <i class="bi bi-info-circle me-2"></i>
-            Pour modifier votre mot de passe, contactez le support via le chat.
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <i class="bi bi-palette" style="color:var(--cf-orange);font-size:1.1rem"></i>
+            <h5 style="font-weight:700;margin:0;font-size:1rem">Preferences d'affichage</h5>
+          </div>
+
+          <div class="d-flex align-items-center justify-content-between p-3"
+               style="background:var(--cf-surface-2);border-radius:var(--cf-radius)">
+            <div>
+              <div style="font-weight:600;font-size:0.9rem">Mode sombre</div>
+              <div style="font-size:0.78rem;color:var(--cf-text-muted);margin-top:2px">
+                Basculer entre theme clair et sombre (preference sauvegardee par compte)
+              </div>
+            </div>
+            <button class="cf-toggle-theme cf-theme-toggle border-0 p-0"
+                    style="margin-left:16px;flex-shrink:0"></button>
           </div>
         </div>
 

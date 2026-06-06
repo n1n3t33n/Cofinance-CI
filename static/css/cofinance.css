@@ -982,3 +982,186 @@ h1, h2, h3, h4, h5, h6 {
     display: flex;
   }
 }
+
+/* ============================================================
+   F — MODE SOMBRE : contraste cartes ameliore
+   ============================================================ */
+[data-theme="dark"] .cf-card {
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+[data-theme="dark"] .cf-card:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 107, 0, 0.2);
+}
+[data-theme="dark"] .cf-card-stat {
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
+}
+
+/* ============================================================
+   A — SCROLL REVEAL (IntersectionObserver)
+   ============================================================ */
+.cf-animate-ready {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cf-animate-ready.cf-animate-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ============================================================
+   C — SYSTEME TOAST
+   ============================================================ */
+.cf-toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+.cf-toast {
+  pointer-events: all;
+  background: var(--cf-surface);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius);
+  padding: 14px 20px 14px 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 280px;
+  max-width: 360px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--cf-text);
+  transform: translateX(120%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cf-toast.show       { transform: translateX(0); }
+.cf-toast-success    { border-left: 4px solid var(--cf-green); }
+.cf-toast-error      { border-left: 4px solid #EF4444; }
+.cf-toast-info       { border-left: 4px solid #3B82F6; }
+.cf-toast-warning    { border-left: 4px solid var(--cf-orange); }
+.cf-toast .cf-toast-icon { font-size: 1.1rem; flex-shrink: 0; }
+.cf-toast-success .cf-toast-icon { color: var(--cf-green); }
+.cf-toast-error   .cf-toast-icon { color: #EF4444; }
+.cf-toast-info    .cf-toast-icon { color: #3B82F6; }
+.cf-toast-warning .cf-toast-icon { color: var(--cf-orange); }
+.cf-toast-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--cf-text-muted);
+  padding: 0;
+  font-size: 0.9rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.cf-toast-close:hover { color: var(--cf-text); }
+@media (max-width: 480px) {
+  .cf-toast-container { right: 12px; bottom: 12px; }
+  .cf-toast { min-width: 240px; }
+}
+
+/* ============================================================
+   B — BARRE DE PROGRESSION CREDIT
+   ============================================================ */
+.cf-credit-progress {
+  height: 6px;
+  border-radius: var(--cf-radius-full);
+  background: var(--cf-border);
+  overflow: hidden;
+  margin-top: 8px;
+}
+.cf-credit-progress-fill {
+  height: 100%;
+  border-radius: var(--cf-radius-full);
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cf-progress-label {
+  font-size: 0.72rem;
+  color: var(--cf-text-muted);
+  margin-top: 4px;
+}
+
+/* ============================================================
+   2FA — ETAPES FORMULAIRE CONNEXION
+   ============================================================ */
+.cf-step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 28px;
+}
+.cf-step-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--cf-surface-2);
+  border: 2px solid var(--cf-border);
+  color: var(--cf-text-muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--cf-transition);
+  flex-shrink: 0;
+}
+.cf-step-dot.active {
+  background: var(--cf-orange);
+  border-color: var(--cf-orange);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.35);
+}
+.cf-step-dot.done {
+  background: var(--cf-green);
+  border-color: var(--cf-green);
+  color: #fff;
+}
+.cf-step-line {
+  flex: 1;
+  max-width: 48px;
+  height: 2px;
+  background: var(--cf-border);
+  transition: var(--cf-transition);
+}
+.cf-step-line.done { background: var(--cf-green); }
+
+.cf-otp-input-group {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 20px 0;
+}
+.cf-otp-digit {
+  width: 52px;
+  height: 60px;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  border-radius: var(--cf-radius);
+  border: 2px solid var(--cf-border);
+  background: var(--cf-surface-2);
+  color: var(--cf-text);
+  outline: none;
+  transition: var(--cf-transition);
+  caret-color: var(--cf-orange);
+}
+.cf-otp-digit:focus {
+  border-color: var(--cf-orange);
+  background: var(--cf-surface);
+  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.12);
+}
+@media (max-width: 400px) {
+  .cf-otp-digit { width: 42px; height: 52px; font-size: 1.2rem; }
+}

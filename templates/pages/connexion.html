@@ -4,73 +4,204 @@
 {% block title %}Connexion{% endblock %}
 
 {% block content %}
-<section style="min-height:calc(100vh - 140px);display:flex;align-items:center;background:var(--cf-bg);padding:48px 0">
+<section style="min-height:calc(100vh - 70px);display:flex;align-items:center;
+                background:var(--cf-bg);padding:48px 0">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-5 col-md-7">
 
-        <!-- En-tete -->
-        <div class="text-center mb-4">
-          <a href="/" style="font-size:1.6rem;font-weight:800;color:var(--cf-text);text-decoration:none">
-            <span style="color:var(--cf-orange)">CO</span><span style="color:var(--cf-green)">FINANCE</span> CI
+        <!-- Logo + titre -->
+        <div class="text-center mb-5">
+          <a href="/" class="d-inline-block mb-4" style="text-decoration:none">
+            <div style="font-size:1.8rem;font-weight:800;color:var(--cf-text)">
+              <span style="color:var(--cf-orange)">CO</span><span style="color:var(--cf-green)">FINANCE</span>
+              <span style="color:var(--cf-text)"> CI</span>
+            </div>
           </a>
-          <h1 style="font-size:1.5rem;font-weight:800;margin-top:20px;margin-bottom:8px">
-            Bon retour parmi nous
-          </h1>
-          <p style="color:var(--cf-text-muted);font-size:0.92rem">
-            Connectez-vous pour acceder a votre espace
+          <h1 style="font-size:1.4rem;font-weight:800;margin-bottom:6px">Bon retour</h1>
+          <p style="color:var(--cf-text-muted);font-size:0.9rem">
+            Connexion securisee en deux etapes
           </p>
         </div>
 
-        <!-- Carte formulaire -->
+        <!-- Indicateur etapes -->
+        <div class="cf-step-indicator mb-4">
+          <div class="cf-step-dot active" id="step-dot-1">
+            <i class="bi bi-person-lock" style="font-size:0.75rem"></i>
+          </div>
+          <div class="cf-step-line" id="step-line-1"></div>
+          <div class="cf-step-dot" id="step-dot-2">
+            <span>2</span>
+          </div>
+          <div class="cf-step-line" id="step-line-2"></div>
+          <div class="cf-step-dot" id="step-dot-3">
+            <i class="bi bi-shield-check" style="font-size:0.75rem"></i>
+          </div>
+        </div>
+        <div class="d-flex justify-content-between mb-5"
+             style="font-size:0.72rem;color:var(--cf-text-muted);font-weight:700;
+                    text-transform:uppercase;letter-spacing:0.5px;padding:0 2px">
+          <span>Identifiants</span>
+          <span>Email</span>
+          <span>Verification</span>
+        </div>
+
+        <!-- Alerte globale -->
+        <div id="alerte-connexion" class="cf-alert cf-alert-error mb-4">
+          <i class="bi bi-exclamation-circle"></i>
+          <span id="msg-erreur"></span>
+        </div>
+
+        <!-- Carte -->
         <div class="cf-card">
 
-          <!-- Alerte erreur -->
-          <div id="alerte-connexion" class="cf-alert cf-alert-error mb-4">
-            <i class="bi bi-exclamation-circle"></i>
-            <span id="msg-erreur"></span>
-          </div>
+          <!-- ─── ETAPE 1 : identifiants ─── -->
+          <div id="etape-identifiants">
+            <div class="mb-3">
+              <label class="cf-label" for="username">
+                <i class="bi bi-person me-1"></i>Identifiant
+              </label>
+              <input type="text" id="username" class="cf-input"
+                     placeholder="Votre nom d'utilisateur"
+                     autocomplete="username"
+                     onkeydown="if(event.key==='Enter') seConnecter()"/>
+            </div>
 
-          <!-- Champ identifiant -->
-          <div class="mb-3">
-            <label class="cf-label" for="username">
-              <i class="bi bi-person me-1"></i> Identifiant
-            </label>
-            <input type="text" id="username" class="cf-input"
-                   placeholder="Votre nom d'utilisateur" autocomplete="username"/>
-          </div>
+            <div class="mb-4">
+              <label class="cf-label" for="password">
+                <i class="bi bi-lock me-1"></i>Mot de passe
+              </label>
+              <div style="position:relative">
+                <input type="password" id="password" class="cf-input"
+                       placeholder="Votre mot de passe"
+                       autocomplete="current-password"
+                       style="padding-right:48px"
+                       onkeydown="if(event.key==='Enter') seConnecter()"/>
+                <button type="button" id="toggle-password"
+                        style="position:absolute;right:14px;top:50%;transform:translateY(-50%);
+                               background:none;border:none;color:var(--cf-text-muted);cursor:pointer">
+                  <i class="bi bi-eye" id="eye-icon"></i>
+                </button>
+              </div>
+            </div>
 
-          <!-- Champ mot de passe -->
-          <div class="mb-4">
-            <label class="cf-label" for="password">
-              <i class="bi bi-lock me-1"></i> Mot de passe
-            </label>
-            <div style="position:relative">
-              <input type="password" id="password" class="cf-input"
-                     placeholder="Votre mot de passe" autocomplete="current-password"
-                     style="padding-right:48px"/>
-              <button type="button" id="toggle-password"
-                      style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--cf-text-muted);cursor:pointer;padding:0">
-                <i class="bi bi-eye" id="eye-icon"></i>
-              </button>
+            <button id="btn-connexion" class="btn-cf-primary btn w-100 py-3"
+                    onclick="seConnecter()">
+              <i class="bi bi-arrow-right me-2"></i>Continuer
+            </button>
+
+            <div class="text-center mt-4" style="font-size:0.88rem;color:var(--cf-text-muted)">
+              Pas encore de compte ?
+              <a href="/inscription/" style="font-weight:700;color:var(--cf-orange)">
+                Creer un compte gratuitement
+              </a>
             </div>
           </div>
 
-          <!-- Bouton connexion -->
-          <button id="btn-connexion" class="btn-cf-primary btn w-100 py-3"
-                  onclick="seConnecter()">
-            <i class="bi bi-box-arrow-in-right me-2"></i>
-            Se connecter
-          </button>
+          <!-- ─── ETAPE 2a : ajout email ─── -->
+          <div id="etape-email" style="display:none">
+            <div class="mb-4 p-3"
+                 style="background:rgba(255,107,0,0.06);border-radius:var(--cf-radius);
+                        border:1px solid rgba(255,107,0,0.2)">
+              <div style="font-size:0.88rem;color:var(--cf-orange);font-weight:700">
+                <i class="bi bi-shield-lock me-2"></i>Verification en deux etapes
+              </div>
+              <div style="font-size:0.82rem;color:var(--cf-text-muted);margin-top:6px">
+                Pour securiser votre compte, ajoutez un email. Vous recevrez un code
+                de verification a chaque connexion.
+              </div>
+            </div>
 
-          <!-- Lien inscription -->
-          <div class="text-center mt-4" style="font-size:0.9rem;color:var(--cf-text-muted)">
-            Pas encore de compte ?
-            <a href="/inscription/" style="font-weight:700">Creer un compte</a>
+            <div class="mb-4">
+              <label class="cf-label" for="email-2fa">
+                <i class="bi bi-envelope me-1"></i>Adresse email
+              </label>
+              <input type="email" id="email-2fa" class="cf-input"
+                     placeholder="votre@email.com" autocomplete="email"
+                     onkeydown="if(event.key==='Enter') soumettreEmail()"/>
+            </div>
+
+            <button id="btn-save-email" class="btn-cf-primary btn w-100 py-3"
+                    onclick="soumettreEmail()">
+              <i class="bi bi-envelope-check me-2"></i>Valider et recevoir le code
+            </button>
+
+            <button class="btn w-100 mt-3"
+                    style="background:none;border:none;color:var(--cf-text-muted);
+                           font-size:0.88rem;cursor:pointer"
+                    onclick="retourEtape1()">
+              <i class="bi bi-arrow-left me-1"></i>Retour
+            </button>
+          </div>
+
+          <!-- ─── ETAPE 3 : OTP ─── -->
+          <div id="etape-otp" style="display:none">
+
+            <!-- Badge mode dev -->
+            <div id="otp-dev-hint"
+                 style="display:none;background:rgba(139,92,246,0.08);
+                        border:1px solid rgba(139,92,246,0.2);border-radius:var(--cf-radius);
+                        padding:10px 14px;font-size:0.82rem;color:#8B5CF6;
+                        margin-bottom:16px;font-weight:600">
+            </div>
+
+            <div class="text-center mb-4">
+              <div style="width:60px;height:60px;border-radius:50%;
+                          background:rgba(255,107,0,0.1);
+                          display:flex;align-items:center;justify-content:center;
+                          margin:0 auto 12px">
+                <i class="bi bi-shield-lock" style="font-size:1.6rem;color:var(--cf-orange)"></i>
+              </div>
+              <div style="font-weight:700;font-size:1rem;margin-bottom:6px">
+                Code de verification
+              </div>
+              <div id="otp-email-hint" style="font-size:0.85rem;color:var(--cf-text-muted)">
+                Un code a 6 chiffres a ete envoye a votre email.
+              </div>
+            </div>
+
+            <div class="cf-otp-input-group" id="otp-inputs">
+              <input class="cf-otp-digit" type="text" inputmode="numeric" maxlength="1" data-pos="0"/>
+              <input class="cf-otp-digit" type="text" inputmode="numeric" maxlength="1" data-pos="1"/>
+              <input class="cf-otp-digit" type="text" inputmode="numeric" maxlength="1" data-pos="2"/>
+              <input class="cf-otp-digit" type="text" inputmode="numeric" maxlength="1" data-pos="3"/>
+              <input class="cf-otp-digit" type="text" inputmode="numeric" maxlength="1" data-pos="4"/>
+              <input class="cf-otp-digit" type="text" inputmode="numeric" maxlength="1" data-pos="5"/>
+            </div>
+
+            <button id="btn-verify-otp" class="btn-cf-primary btn w-100 py-3 mt-2"
+                    onclick="verifierOTP()">
+              <i class="bi bi-shield-check me-2"></i>Verifier et se connecter
+            </button>
+
+            <div class="text-center mt-3" style="font-size:0.85rem;color:var(--cf-text-muted)">
+              Pas recu le code ?
+              <button id="btn-renvoyer"
+                      style="background:none;border:none;font-weight:700;
+                             color:var(--cf-orange);font-size:0.85rem;cursor:pointer"
+                      onclick="renvoyerOTP()">
+                Renvoyer
+              </button>
+              <span id="timer-renvoyer" style="display:none;color:var(--cf-text-muted)">
+                (<span id="countdown">60</span>s)
+              </span>
+            </div>
+
+            <button class="btn w-100 mt-2"
+                    style="background:none;border:none;color:var(--cf-text-muted);
+                           font-size:0.88rem;cursor:pointer"
+                    onclick="retourEtape1()">
+              <i class="bi bi-arrow-left me-1"></i>Retour
+            </button>
           </div>
 
         </div>
 
+        <!-- Securite note -->
+        <div class="text-center mt-4" style="font-size:0.78rem;color:var(--cf-text-muted)">
+          <i class="bi bi-lock-fill me-1" style="color:var(--cf-green)"></i>
+          Connexion chiffree — vos donnees sont protegees
+        </div>
 
       </div>
     </div>

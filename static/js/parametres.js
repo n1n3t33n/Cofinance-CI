@@ -17,18 +17,68 @@ document.addEventListener('DOMContentLoaded', function() {
 async function chargerProfil() {
   try {
     const res = await API.get('/auth/profile/');
-    if (res.ok) {
-      document.getElementById('param-email').value     = res.data.email     || '';
-      document.getElementById('param-telephone').value = res.data.telephone || '';
-      document.getElementById('param-region').value    = res.data.region    || '';
+    if (!res.ok) return;
 
-      /* Initiale avatar */
-      const initiale = document.getElementById('avatar-initiale');
-      if (initiale) {
-        initiale.textContent = (res.data.username || 'U').charAt(0).toUpperCase();
-      }
-    }
+    const d = res.data;
+    const email = d.email || '';
+
+    /* Champs modifiables */
+    if (document.getElementById('param-email'))     document.getElementById('param-email').value     = email;
+    if (document.getElementById('param-telephone')) document.getElementById('param-telephone').value = d.telephone || '';
+    if (document.getElementById('param-region'))    document.getElementById('param-region').value    = d.region    || '';
+
+    /* Champ username (lecture seule) */
+    const usernameEl = document.getElementById('param-username');
+    if (usernameEl) usernameEl.value = d.username || '';
+
+    /* Initiale avatar */
+    const initiale = document.getElementById('avatar-initiale');
+    if (initiale) initiale.textContent = (d.username || 'U').charAt(0).toUpperCase();
+
+    /* Statut 2FA */
+    _afficherStatut2FA(email);
+    _afficherBadgeEmail(email);
+
   } catch (err) {}
+}
+
+function _afficherStatut2FA(email) {
+  const badge = document.getElementById('badge-2fa-statut');
+  const icon  = document.getElementById('icon-2fa');
+  const wrap  = document.getElementById('icon-2fa-wrapper');
+  const desc  = document.getElementById('label-2fa-desc');
+
+  if (!badge) return;
+
+  if (email) {
+    /* Masquer email : a***@gmail.com */
+    const masked = email.replace(/(.{1}).+(@.+)/, '$1***$2');
+    badge.className   = 'cf-badge cf-badge-green';
+    badge.textContent = 'Active';
+    if (icon) { icon.className = 'bi bi-shield-fill-check fs-4'; icon.style.color = 'var(--cf-green)'; }
+    if (wrap) { wrap.style.background = 'rgba(0,168,107,0.1)'; wrap.style.borderRadius = 'var(--cf-radius)'; }
+    if (desc) desc.textContent = `Codes OTP envoyes a ${masked}`;
+  } else {
+    badge.className   = 'cf-badge cf-badge-gray';
+    badge.textContent = 'Non activee';
+    if (icon) { icon.className = 'bi bi-shield-slash fs-4'; icon.style.color = '#6B7280'; }
+    if (wrap) { wrap.style.background = 'rgba(107,114,128,0.1)'; wrap.style.borderRadius = 'var(--cf-radius)'; }
+    if (desc) desc.textContent = 'Ajoutez un email pour activer la verification en deux etapes.';
+  }
+}
+
+function _afficherBadgeEmail(email) {
+  const badge = document.getElementById('badge-email-2fa');
+  if (!badge) return;
+  if (email) {
+    badge.className   = 'cf-badge cf-badge-green ms-1';
+    badge.style.display = 'inline-flex';
+    badge.innerHTML   = '<i class="bi bi-shield-check me-1"></i>2FA active';
+  } else {
+    badge.className   = 'cf-badge cf-badge-orange ms-1';
+    badge.style.display = 'inline-flex';
+    badge.innerHTML   = '<i class="bi bi-shield-exclamation me-1"></i>2FA requis';
+  }
 }
 
 /* ============================================================
@@ -62,6 +112,10 @@ async function sauverParametres() {
         user.region    = res.data.region;
         localStorage.setItem('cf_user', JSON.stringify(user));
       }
+
+      /* Rafraîchir le badge 2FA */
+      _afficherStatut2FA(res.data.email || '');
+      _afficherBadgeEmail(res.data.email || '');
     } else {
       alerte.className  = 'cf-alert cf-alert-error mb-4 show';
       icon.className    = 'bi bi-exclamation-circle';
