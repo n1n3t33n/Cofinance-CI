@@ -370,7 +370,7 @@ const Toast = {
 };
 
 /* ============================================================
-   A — SCROLL REVEAL (public pages seulement)
+   A+I — SCROLL REVEAL avec stagger en cascade par rangée
    ============================================================ */
 function initScrollReveal() {
   if (document.querySelector('.cf-sidebar')) return;
@@ -379,20 +379,85 @@ function initScrollReveal() {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         entry.target.classList.add('cf-animate-in');
+        /* Réinitialiser le délai après l'animation pour éviter les effets de bord */
+        setTimeout(() => { entry.target.style.transitionDelay = '0s'; }, 700);
         observer.unobserve(entry.target);
       }
     });
   }, { threshold: 0.1 });
 
-  let idx = 0;
+  /* Grouper les cartes par rangée (parent .row) pour un stagger par groupe */
+  const rowMap = new Map();
   document.querySelectorAll('.cf-card').forEach(el => {
-    /* Ne cibler que les cartes hors viewport au chargement initial */
     if (el.getBoundingClientRect().top < window.innerHeight) return;
     el.classList.add('cf-animate-ready');
-    el.style.transitionDelay = (idx % 3 * 0.1) + 's';
-    observer.observe(el);
-    idx++;
+    const row = el.closest('.row') || el.parentElement;
+    if (!rowMap.has(row)) rowMap.set(row, []);
+    rowMap.get(row).push(el);
   });
+
+  rowMap.forEach(cards => {
+    cards.forEach((card, i) => {
+      card.style.transitionDelay = `${i * 0.12}s`;
+    });
+  });
+
+  document.querySelectorAll('.cf-animate-ready').forEach(el => observer.observe(el));
+}
+
+/* ============================================================
+   D — TILT 3D MAGNÉTIQUE
+   ============================================================ */
+function initTiltCards() {
+  document.querySelectorAll('.cf-tilt').forEach(card => {
+    let raf = null;
+
+    card.addEventListener('mousemove', e => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const rect = card.getBoundingClientRect();
+        const x    = (e.clientX - rect.left) / rect.width  - 0.5;
+        const y    = (e.clientY - rect.top)  / rect.height - 0.5;
+        card.style.transition = 'box-shadow 0.15s ease, border-color 0.4s ease, opacity 0.4s ease';
+        card.style.transform  = `perspective(900px) rotateX(${-y * 7}deg) rotateY(${x * 7}deg) translateY(-6px)`;
+      });
+    });
+
+    card.addEventListener('mouseleave', () => {
+      if (raf) cancelAnimationFrame(raf);
+      card.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease';
+      card.style.transform  = '';
+      setTimeout(() => { card.style.transition = ''; }, 450);
+    });
+  });
+}
+
+/* ============================================================
+   H — TIMELINE ANIMÉE AU SCROLL
+   ============================================================ */
+function initTimeline() {
+  const line = document.getElementById('cf-timeline-line');
+  if (!line) return;
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        line.classList.add('cf-line-drawn');
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.4 });
+  obs.observe(line.parentElement);
+}
+
+/* ============================================================
+   J — NAVBAR GLASSMORPHISM AU SCROLL
+   ============================================================ */
+function initNavbarGlass() {
+  const navbar = document.querySelector('.cf-navbar-wrap');
+  if (!navbar) return;
+  const update = () => navbar.classList.toggle('cf-navbar-glass', window.scrollY > 60);
+  window.addEventListener('scroll', update, { passive: true });
+  update();
 }
 
 /* ============================================================
@@ -449,9 +514,18 @@ document.addEventListener('DOMContentLoaded', () => {
     el.addEventListener('click', e => { e.preventDefault(); logout(); });
   });
 
-  /* A — Scroll reveal cartes */
+  /* A+I — Scroll reveal cartes avec stagger */
   initScrollReveal();
+
+  /* D — Tilt 3D magnétique */
+  initTiltCards();
 
   /* G — Compteurs animés */
   initCounters();
+
+  /* H — Timeline animée */
+  initTimeline();
+
+  /* J — Navbar glass au scroll */
+  initNavbarGlass();
 });

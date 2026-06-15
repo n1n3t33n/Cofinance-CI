@@ -1,52 +1,74 @@
 /* ============================================================
    COFINANCE CI - Feuille de style principale
-   Police : Calibri
-   Couleurs : Blanc (dominant), Orange (#FF6B00), Vert (#00A86B)
-   Mode sombre : Noir dominant (#0D0D0D)
-   Bordures : tres arrondies (border-radius: 16px+)
+   Refonte « Fintech moderne chaleureuse » (2026)
+   Polices : Plus Jakarta Sans (titres) + Inter (texte)
+   Couleurs : Orange ivoirien (#FF6B00), Vert (#00A86B),
+              fonds crème chaleureux, encre profonde
+   Mode sombre : encre violacée tiède
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
 /* ============================================================
    VARIABLES CSS
    ============================================================ */
 :root {
-  --cf-orange:        #FF6B00;
-  --cf-orange-light:  #FF8C38;
-  --cf-orange-dark:   #CC5500;
-  --cf-green:         #00A86B;
-  --cf-green-light:   #00C97E;
-  --cf-green-dark:    #007A4D;
+  /* Marque ivoirienne */
+  --cf-orange:        #F2640D;
+  --cf-orange-light:  #FF8A3D;
+  --cf-orange-dark:   #C44D00;
+  --cf-green:         #0B9C66;
+  --cf-green-light:   #16C783;
+  --cf-green-dark:    #07744B;
 
-  --cf-bg:            #F8F9FA;
+  /* Encre profonde (sections sombres, dégradés) */
+  --cf-ink:           #16121F;
+  --cf-ink-2:         #221B33;
+
+  /* Fonds chaleureux (crème) */
+  --cf-bg:            #FBF8F3;
   --cf-surface:       #FFFFFF;
-  --cf-surface-2:     #F0F2F5;
-  --cf-border:        #E0E4EA;
-  --cf-text:          #1A1A2E;
-  --cf-text-muted:    #6B7280;
-  --cf-shadow:        rgba(0, 0, 0, 0.08);
+  --cf-surface-2:     #F4EEE4;
+  --cf-border:        #ECE3D6;
+  --cf-text:          #1C1726;
+  --cf-text-muted:    #726B7E;
 
-  --cf-radius-sm:     8px;
-  --cf-radius:        16px;
-  --cf-radius-lg:     24px;
-  --cf-radius-xl:     32px;
+  /* Ombres tièdes en couches */
+  --cf-shadow:        rgba(38, 28, 16, 0.07);
+  --cf-shadow-sm:     0 1px 2px rgba(38, 28, 16, 0.05);
+  --cf-shadow-md:     0 8px 24px rgba(38, 28, 16, 0.08);
+  --cf-shadow-lg:     0 22px 50px rgba(38, 28, 16, 0.12);
+  --cf-glow-orange:   0 10px 28px rgba(242, 100, 13, 0.30);
+  --cf-glow-green:    0 10px 28px rgba(11, 156, 102, 0.28);
+
+  /* Typographie */
+  --cf-font-body:     'Inter', 'Segoe UI', system-ui, sans-serif;
+  --cf-font-display:  'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+
+  --cf-radius-sm:     10px;
+  --cf-radius:        18px;
+  --cf-radius-lg:     26px;
+  --cf-radius-xl:     34px;
   --cf-radius-full:   9999px;
 
-  --cf-transition:    all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --cf-transition:    all 0.28s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 /* ============================================================
    MODE SOMBRE
    ============================================================ */
 [data-theme="dark"] {
-  --cf-bg:            #0D0D0D;
-  --cf-surface:       #1A1A2E;
-  --cf-surface-2:     #252540;
-  --cf-border:        #2E2E50;
-  --cf-text:          #F0F2F5;
-  --cf-text-muted:    #9CA3AF;
-  --cf-shadow:        rgba(0, 0, 0, 0.4);
+  --cf-bg:            #100D17;
+  --cf-surface:       #1A1525;
+  --cf-surface-2:     #241D31;
+  --cf-border:        #322A40;
+  --cf-text:          #F3EFE8;
+  --cf-text-muted:    #A79FB2;
+
+  --cf-shadow:        rgba(0, 0, 0, 0.45);
+  --cf-shadow-sm:     0 1px 2px rgba(0, 0, 0, 0.4);
+  --cf-shadow-md:     0 8px 24px rgba(0, 0, 0, 0.45);
+  --cf-shadow-lg:     0 22px 50px rgba(0, 0, 0, 0.55);
 }
 
 /* ============================================================
@@ -57,13 +79,16 @@
 }
 
 body {
-  font-family: 'Calibri', 'Nunito', sans-serif;
+  font-family: var(--cf-font-body);
   background-color: var(--cf-bg);
   color: var(--cf-text);
-  transition: var(--cf-transition);
+  transition: background-color 0.3s ease, color 0.3s ease;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
 }
 
 main {
@@ -84,8 +109,11 @@ a:hover {
    TYPOGRAPHIE
    ============================================================ */
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 700;
+  font-family: var(--cf-font-display);
+  font-weight: 800;
   color: var(--cf-text);
+  letter-spacing: -0.025em;
+  line-height: 1.18;
 }
 
 .text-orange { color: var(--cf-orange) !important; }
@@ -132,52 +160,107 @@ h1, h2, h3, h4, h5, h6 {
 /* ============================================================
    BOUTONS
    ============================================================ */
+.btn-cf-primary,
+.btn-cf-secondary,
+.btn-cf-outline {
+  font-family: var(--cf-font-display);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  letter-spacing: -0.01em;
+}
+
 .btn-cf-primary {
-  background: linear-gradient(135deg, var(--cf-orange), var(--cf-orange-dark));
+  background: linear-gradient(135deg, var(--cf-orange-light), var(--cf-orange));
   color: #fff !important;
   border: none;
   border-radius: var(--cf-radius-full);
-  padding: 10px 28px;
+  padding: 12px 30px;
   font-weight: 700;
   font-size: 0.95rem;
   transition: var(--cf-transition);
-  box-shadow: 0 4px 15px rgba(255, 107, 0, 0.3);
+  box-shadow: var(--cf-glow-orange);
 }
 
 .btn-cf-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(255, 107, 0, 0.4);
-  background: linear-gradient(135deg, var(--cf-orange-light), var(--cf-orange));
+  box-shadow: 0 16px 34px rgba(242, 100, 13, 0.40);
+  background: linear-gradient(135deg, var(--cf-orange), var(--cf-orange-dark));
 }
 
 .btn-cf-secondary {
-  background: linear-gradient(135deg, var(--cf-green), var(--cf-green-dark));
+  background: linear-gradient(135deg, var(--cf-green-light), var(--cf-green));
   color: #fff !important;
   border: none;
   border-radius: var(--cf-radius-full);
-  padding: 10px 28px;
+  padding: 12px 30px;
   font-weight: 700;
   transition: var(--cf-transition);
-  box-shadow: 0 4px 15px rgba(0, 168, 107, 0.3);
+  box-shadow: var(--cf-glow-green);
 }
 
 .btn-cf-secondary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 168, 107, 0.4);
+  box-shadow: 0 16px 34px rgba(11, 156, 102, 0.40);
+  background: linear-gradient(135deg, var(--cf-green), var(--cf-green-dark));
 }
 
 .btn-cf-outline {
   background: transparent;
   color: var(--cf-orange) !important;
-  border: 2px solid var(--cf-orange);
+  border: 1.5px solid var(--cf-orange);
   border-radius: var(--cf-radius-full);
-  padding: 10px 28px;
+  padding: 12px 30px;
   font-weight: 700;
   transition: var(--cf-transition);
 }
 
 .btn-cf-outline:hover {
   background: var(--cf-orange);
+  color: #fff !important;
+  transform: translateY(-2px);
+  box-shadow: var(--cf-glow-orange);
+}
+
+/* Variante claire sur fond sombre (hero) */
+.btn-cf-light {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--cf-ink) !important;
+  border: none;
+  border-radius: var(--cf-radius-full);
+  padding: 12px 30px;
+  font-weight: 700;
+  font-family: var(--cf-font-display);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: var(--cf-transition);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+}
+.btn-cf-light:hover {
+  transform: translateY(-2px);
+  background: #fff;
+  color: var(--cf-orange-dark) !important;
+}
+.btn-cf-ghost {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.30);
+  border-radius: var(--cf-radius-full);
+  padding: 12px 30px;
+  font-weight: 700;
+  font-family: var(--cf-font-display);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: var(--cf-transition);
+  backdrop-filter: blur(8px);
+}
+.btn-cf-ghost:hover {
+  background: rgba(255, 255, 255, 0.18);
   color: #fff !important;
   transform: translateY(-2px);
 }
@@ -188,15 +271,15 @@ h1, h2, h3, h4, h5, h6 {
 .cf-card {
   background: var(--cf-surface);
   border: 1px solid var(--cf-border);
-  border-radius: var(--cf-radius);
-  padding: 24px;
-  box-shadow: 0 2px 16px var(--cf-shadow);
+  border-radius: var(--cf-radius-lg);
+  padding: 26px;
+  box-shadow: var(--cf-shadow-md);
   transition: var(--cf-transition);
 }
 
 .cf-card:hover {
-  box-shadow: 0 8px 32px var(--cf-shadow);
-  transform: translateY(-2px);
+  box-shadow: var(--cf-shadow-lg);
+  transform: translateY(-4px);
 }
 
 .cf-card-stat {
@@ -252,32 +335,33 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--cf-surface-2);
   border: 1.5px solid var(--cf-border);
   border-radius: var(--cf-radius);
-  padding: 12px 16px;
+  padding: 13px 16px;
   color: var(--cf-text);
-  font-family: inherit;
+  font-family: var(--cf-font-body);
   font-size: 0.95rem;
   width: 100%;
-  transition: var(--cf-transition);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
   outline: none;
 }
 
 .cf-input:focus {
   border-color: var(--cf-orange);
   background: var(--cf-surface);
-  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.12);
+  box-shadow: 0 0 0 4px rgba(242, 100, 13, 0.13);
 }
 
 .cf-input::placeholder {
   color: var(--cf-text-muted);
+  opacity: 0.75;
 }
 
 .cf-label {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: var(--cf-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 6px;
+  letter-spacing: 0.6px;
+  margin-bottom: 7px;
   display: block;
 }
 
@@ -285,13 +369,16 @@ h1, h2, h3, h4, h5, h6 {
    BADGES ET STATUTS
    ============================================================ */
 .cf-badge {
-  padding: 4px 12px;
+  padding: 6px 14px;
   border-radius: var(--cf-radius-full);
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   font-weight: 700;
+  font-family: var(--cf-font-display);
+  letter-spacing: 0.01em;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
+  line-height: 1;
 }
 
 .cf-badge-orange { background: rgba(255, 107, 0, 0.12); color: var(--cf-orange); }
@@ -474,9 +561,12 @@ h1, h2, h3, h4, h5, h6 {
    HERO SECTION
    ============================================================ */
 .cf-hero {
-  background: linear-gradient(135deg, #1A1A2E 0%, #252550 50%, #1A1A2E 100%);
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(242, 100, 13, 0.18), transparent 60%),
+    radial-gradient(900px 500px at 0% 110%, rgba(11, 156, 102, 0.16), transparent 55%),
+    linear-gradient(150deg, var(--cf-ink) 0%, var(--cf-ink-2) 55%, var(--cf-ink) 100%);
   color: #fff;
-  padding: 100px 0 80px;
+  padding: 104px 0 88px;
   position: relative;
   overflow: hidden;
 }
@@ -500,9 +590,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .cf-hero .hero-title {
-  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-family: var(--cf-font-display);
+  font-size: clamp(2.1rem, 5vw, 3.6rem);
   font-weight: 800;
-  line-height: 1.2;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
 }
 
 .cf-hero .hero-title .highlight {
@@ -516,9 +608,9 @@ h1, h2, h3, h4, h5, h6 {
    FOOTER
    ============================================================ */
 .cf-footer {
-  background: #1A1A2E;
-  color: #9CA3AF;
-  padding: 48px 0 24px;
+  background: var(--cf-ink);
+  color: #A79FB2;
+  padding: 56px 0 26px;
   margin-top: auto;
 }
 
@@ -644,12 +736,15 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Logo */
 .cf-logo {
-  font-size: 1.35rem;
+  font-family: var(--cf-font-display);
+  font-size: 1.4rem;
   font-weight: 800;
   color: var(--cf-text) !important;
   text-decoration: none;
   flex-shrink: 0;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.04em;
+  display: inline-flex;
+  align-items: center;
 }
 .cf-logo-co  { color: var(--cf-orange); }
 .cf-logo-fin { color: var(--cf-green); }
@@ -1164,4 +1259,348 @@ h1, h2, h3, h4, h5, h6 {
 }
 @media (max-width: 400px) {
   .cf-otp-digit { width: 42px; height: 52px; font-size: 1.2rem; }
+}
+
+/* ============================================================
+   A — HERO ORBES FLOTTANTS (mesh renforcé)
+   ============================================================ */
+.cf-hero::before {
+  background:
+    radial-gradient(circle at 25% 45%, rgba(255, 107, 0, 0.22) 0%, transparent 50%),
+    radial-gradient(circle at 75% 70%, rgba(0, 168, 107, 0.20) 0%, transparent 50%),
+    radial-gradient(circle at 55% 15%, rgba(139, 92, 246, 0.15) 0%, transparent 40%);
+}
+
+.cf-hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(72px);
+  pointer-events: none;
+  z-index: 0;
+}
+.cf-hero-orb-1 {
+  width: 320px; height: 320px;
+  background: radial-gradient(circle, rgba(255, 107, 0, 0.30), transparent 70%);
+  top: -80px; left: -80px;
+  animation: orbFloat1 14s ease-in-out infinite;
+}
+.cf-hero-orb-2 {
+  width: 280px; height: 280px;
+  background: radial-gradient(circle, rgba(0, 168, 107, 0.28), transparent 70%);
+  bottom: -60px; right: -60px;
+  animation: orbFloat2 16s ease-in-out infinite;
+}
+.cf-hero-orb-3 {
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.24), transparent 70%);
+  top: 35%; right: 15%;
+  animation: orbFloat3 11s ease-in-out infinite;
+}
+@keyframes orbFloat1 {
+  0%, 100% { transform: translate(0, 0); }
+  33%       { transform: translate(40px, 25px); }
+  66%       { transform: translate(-15px, 35px); }
+}
+@keyframes orbFloat2 {
+  0%, 100% { transform: translate(0, 0); }
+  40%       { transform: translate(-30px, -20px); }
+  70%       { transform: translate(25px, -30px); }
+}
+@keyframes orbFloat3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%       { transform: translate(20px, -25px) scale(1.15); }
+}
+
+/* ============================================================
+   B — GLASS MORPHISM
+   ============================================================ */
+.cf-glass {
+  background: rgba(255, 255, 255, 0.07) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10),
+              0 28px 64px rgba(0, 0, 0, 0.40) !important;
+}
+
+/* ============================================================
+   C — BORDURE GRADIENT AU HOVER
+   ============================================================ */
+.cf-card {
+  position: relative;
+  isolation: isolate;
+}
+.cf-card::before {
+  content: '';
+  position: absolute;
+  inset: -1.5px;
+  border-radius: calc(var(--cf-radius-lg) + 2px);
+  background: linear-gradient(135deg, var(--cf-orange), var(--cf-green));
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.cf-card:hover {
+  border-color: transparent !important;
+}
+.cf-card:hover::before {
+  opacity: 1;
+}
+
+/* ============================================================
+   D — TILT 3D MAGNÉTIQUE (helper CSS)
+   ============================================================ */
+.cf-tilt {
+  will-change: transform;
+}
+.cf-tilt:hover {
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18) !important;
+}
+
+/* ============================================================
+   F — BOUTONS SWEEP LUMINEUX
+   ============================================================ */
+.btn-cf-primary,
+.btn-cf-secondary {
+  overflow: hidden;
+  position: relative;
+}
+.btn-cf-primary::after,
+.btn-cf-secondary::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 55%;
+  height: 100%;
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.38) 50%,
+    transparent 80%
+  );
+  transform: skewX(-12deg);
+  pointer-events: none;
+}
+.btn-cf-primary:hover::after,
+.btn-cf-secondary:hover::after {
+  animation: btnShine 0.65s ease-out forwards;
+}
+@keyframes btnShine {
+  from { left: -100%; }
+  to   { left: 160%; }
+}
+
+/* ============================================================
+   G — TEXTE DÉGRADÉ
+   ============================================================ */
+.cf-gradient-text {
+  background: linear-gradient(135deg, var(--cf-orange), var(--cf-green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================================
+   H — TIMELINE CONNECTÉE
+   ============================================================ */
+.cf-timeline-wrap {
+  position: relative;
+  padding-top: 8px;
+}
+.cf-timeline-line {
+  position: absolute;
+  top: 44px;
+  left: 11%;
+  right: 11%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--cf-orange), var(--cf-green));
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 0;
+  border-radius: 2px;
+}
+.cf-timeline-line.cf-line-drawn {
+  transform: scaleX(1);
+}
+.cf-timeline-step-num {
+  position: relative;
+  z-index: 1;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cf-timeline-step-num:hover {
+  transform: scale(1.12) !important;
+}
+
+/* ============================================================
+   J — NAVBAR GLASSMORPHISM AU SCROLL
+   ============================================================ */
+.cf-navbar-wrap {
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
+.cf-navbar-wrap.cf-navbar-glass {
+  background: rgba(251, 248, 243, 0.82) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom-color: rgba(236, 227, 214, 0.5) !important;
+  box-shadow: 0 6px 30px rgba(38, 28, 16, 0.08) !important;
+}
+[data-theme="dark"] .cf-navbar-wrap.cf-navbar-glass {
+  background: rgba(20, 16, 28, 0.88) !important;
+  border-bottom-color: rgba(50, 42, 64, 0.5) !important;
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* ============================================================
+   REFONTE 2026 — HELPERS LANDING « fintech chaleureuse »
+   ============================================================ */
+
+/* Rythme vertical des sections */
+.cf-section      { padding: 84px 0; }
+.cf-section-sm   { padding: 56px 0; }
+@media (max-width: 768px) {
+  .cf-section    { padding: 56px 0; }
+  .cf-section-sm { padding: 40px 0; }
+}
+
+/* Eyebrow : petit label au-dessus des titres */
+.cf-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--cf-font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cf-orange);
+  background: rgba(242, 100, 13, 0.10);
+  padding: 7px 14px;
+  border-radius: var(--cf-radius-full);
+  margin-bottom: 18px;
+}
+.cf-eyebrow.green { color: var(--cf-green); background: rgba(11, 156, 102, 0.10); }
+.cf-eyebrow.light { color: #fff; background: rgba(255, 255, 255, 0.12); }
+
+/* Titre de section */
+.cf-section-title {
+  font-family: var(--cf-font-display);
+  font-size: clamp(1.7rem, 3.2vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+.cf-section-lead {
+  color: var(--cf-text-muted);
+  font-size: 1.02rem;
+  line-height: 1.75;
+  max-width: 560px;
+}
+
+/* Tuile d'icône arrondie (services, features) */
+.cf-icon-tile {
+  width: 60px;
+  height: 60px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  flex-shrink: 0;
+  transition: var(--cf-transition);
+}
+.cf-icon-orange { background: rgba(242, 100, 13, 0.12); color: var(--cf-orange); }
+.cf-icon-green  { background: rgba(11, 156, 102, 0.12); color: var(--cf-green); }
+.cf-icon-blue   { background: rgba(59, 130, 246, 0.12); color: #3B82F6; }
+.cf-icon-purple { background: rgba(139, 92, 246, 0.12); color: #8B5CF6; }
+.cf-card:hover .cf-icon-tile { transform: scale(1.08) rotate(-4deg); }
+
+/* Liste de bénéfices avec puce check */
+.cf-feature-list { list-style: none; margin: 0; padding: 0; }
+.cf-feature-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.92rem;
+  color: var(--cf-text);
+  margin-bottom: 11px;
+}
+.cf-feature-list li i { color: var(--cf-green); font-size: 1.05rem; flex-shrink: 0; }
+
+/* Bandeau de confiance / partenaires */
+.cf-trust-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px 40px;
+  opacity: 0.85;
+}
+.cf-trust-strip span {
+  font-family: var(--cf-font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--cf-text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+/* Statistiques hero */
+.cf-hero-stats { display: flex; flex-wrap: wrap; gap: 28px; }
+.cf-hero-stat .num {
+  font-family: var(--cf-font-display);
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.cf-hero-stat .lbl { font-size: 0.82rem; color: rgba(255, 255, 255, 0.65); margin-top: 5px; }
+.cf-hero-divider { width: 1px; background: rgba(255, 255, 255, 0.14); align-self: stretch; }
+
+/* Badge flottant glass (carte hero / décor) */
+.cf-float-chip {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--cf-ink);
+  border-radius: var(--cf-radius);
+  padding: 11px 16px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  font-family: var(--cf-font-display);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 4;
+}
+.cf-float-chip i { font-size: 1rem; }
+
+/* Carte mise en avant (« populaire ») */
+.cf-card-featured {
+  border: 1.5px solid var(--cf-orange) !important;
+  box-shadow: 0 22px 50px rgba(242, 100, 13, 0.16) !important;
+}
+
+/* Carte sur fond sombre */
+.cf-card-dark {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--cf-radius-lg);
+  backdrop-filter: blur(10px);
+}
+
+/* Réduction des animations si préférence utilisateur */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }
