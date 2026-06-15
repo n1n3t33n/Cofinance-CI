@@ -36,7 +36,8 @@ const Theme = {
   },
   _updateIcon(theme) {
     document.querySelectorAll('.cf-theme-icon').forEach(i => {
-      i.textContent = theme === 'dark' ? '☀️' : '🌙';
+      i.textContent = '';
+      i.className = 'cf-theme-icon bi ' + (theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill');
     });
   }
 };
@@ -137,8 +138,8 @@ const UI = {
     const el = document.querySelector(selector);
     if (!el) return;
     el.className = `cf-alert cf-alert-${type} show`;
-    const icones = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
-    el.innerHTML = `<span>${icones[type] || 'ℹ️'}</span> ${message}`;
+    const icones = { success: 'bi-check-circle-fill', error: 'bi-exclamation-circle-fill', info: 'bi-info-circle-fill', warning: 'bi-exclamation-triangle-fill' };
+    el.innerHTML = `<i class="bi ${icones[type] || 'bi-info-circle-fill'}"></i> ${message}`;
     setTimeout(() => el.classList.remove('show'), 5000);
   },
   btnLoading(btn, loading = true) {
@@ -344,7 +345,7 @@ function initNavbar() {
    C — SYSTEME TOAST
    ============================================================ */
 const Toast = {
-  _icons: { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' },
+  _icons: { success: 'bi-check-circle-fill', error: 'bi-exclamation-circle-fill', info: 'bi-info-circle-fill', warning: 'bi-exclamation-triangle-fill' },
   show(message, type = 'info', duration = 4000) {
     const container = document.getElementById('cf-toast-container');
     if (!container) return;
@@ -352,9 +353,9 @@ const Toast = {
     const toast = document.createElement('div');
     toast.className = `cf-toast cf-toast-${type}`;
     toast.innerHTML = `
-      <span class="cf-toast-icon">${this._icons[type] || 'ℹ️'}</span>
+      <span class="cf-toast-icon"><i class="bi ${this._icons[type] || 'bi-info-circle-fill'}"></i></span>
       <span style="flex:1">${message}</span>
-      <button class="cf-toast-close" aria-label="Fermer">✕</button>`;
+      <button class="cf-toast-close" aria-label="Fermer"><i class="bi bi-x-lg"></i></button>`;
 
     toast.querySelector('.cf-toast-close').addEventListener('click', () => this._dismiss(toast));
     container.appendChild(toast);

@@ -21,14 +21,25 @@
   margin: 0 auto;
   aspect-ratio: 1 / 1;
 }
+.cf-hero-photo {
+  position: absolute; inset: 0;
+  border-radius: 30px; overflow: hidden;
+  background: linear-gradient(140deg, var(--cf-orange), var(--cf-green));
+  box-shadow: 0 36px 80px rgba(0,0,0,0.45);
+}
+.cf-hero-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cf-hero-photo::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(22,18,31,0.55), transparent 45%);
+}
 .cf-loan-card {
   position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 300px;
+  left: 50%; bottom: 16px;
+  transform: translateX(-50%);
+  width: 290px;
   z-index: 3;
   border-radius: var(--cf-radius-lg);
-  padding: 24px;
+  padding: 20px;
 }
 .cf-mini-progress { height: 6px; background: rgba(255,255,255,0.14); border-radius: 6px; margin-top: 10px; overflow: hidden; }
 .cf-mini-progress > div { height: 100%; border-radius: 6px; }
@@ -39,9 +50,9 @@
 
 <!-- ===================== HERO ===================== -->
 <section class="cf-hero">
-  <div class="cf-hero-orb cf-hero-orb-1"></div>
-  <div class="cf-hero-orb cf-hero-orb-2"></div>
-  <div class="cf-hero-orb cf-hero-orb-3"></div>
+  <div class="cf-hero-orb cf-hero-orb-1 cf-blob" data-parallax="0.10"></div>
+  <div class="cf-hero-orb cf-hero-orb-2 cf-blob cf-blob-2" data-parallax="0.16"></div>
+  <div class="cf-hero-orb cf-hero-orb-3 cf-blob" data-parallax="0.22"></div>
 
   <div class="container position-relative">
     <div class="row align-items-center g-5">
@@ -81,7 +92,7 @@
             <span style="width:var(--s);height:var(--s);border-radius:50%;background:linear-gradient(135deg,#8B5CF6,#6D28D9);border:2px solid var(--cf-ink);margin-left:-12px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:0.8rem">+5K</span>
           </div>
           <div style="font-size:0.86rem;color:rgba(255,255,255,0.75)">
-            <span style="color:var(--cf-orange)">★★★★★</span><br/>
+            <span style="color:var(--cf-orange)"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></span><br/>
             Notés <strong style="color:#fff">4,8/5</strong> par nos clients
           </div>
         </div>
@@ -110,6 +121,13 @@
       <!-- Colonne visuel -->
       <div class="col-lg-6 d-none d-lg-block">
         <div class="cf-hero-mockup">
+
+          <!-- Photo réelle (repli : dégradé orange→vert si l'image ne charge pas) -->
+          <div class="cf-hero-photo">
+            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=900&q=80&auto=format&fit=crop"
+                 alt="Cliente COFINANCE CI souriante" loading="lazy"
+                 onerror="this.style.display='none'"/>
+          </div>
 
           <!-- Carte prêt (glass) -->
           <div class="cf-loan-card cf-glass">
@@ -146,20 +164,12 @@
           </div>
 
           <!-- Chips flottants -->
-          <div class="cf-float-chip" style="top:6%;right:-2%;animation:floatAnim 3.4s ease-in-out infinite">
+          <div class="cf-float-chip" style="top:14px;left:-5%;animation:floatAnim 3.4s ease-in-out infinite">
             <i class="bi bi-shield-check" style="color:var(--cf-green)"></i> Assurance active
           </div>
-          <div class="cf-float-chip" style="bottom:8%;left:-4%;animation:floatAnim 3.4s ease-in-out infinite 1.6s">
+          <div class="cf-float-chip" style="top:62px;right:-5%;animation:floatAnim 3.4s ease-in-out infinite 1.6s">
             <i class="bi bi-chat-dots" style="color:var(--cf-orange)"></i> Support 24h/7j
           </div>
-
-          <!-- Cercles décoratifs -->
-          <div style="position:absolute;top:3%;left:4%;width:120px;height:120px;border-radius:50%;
-               background:rgba(242,100,13,0.08);border:2px solid rgba(242,100,13,0.30);
-               animation:pulseAnim 3.5s ease-in-out infinite"></div>
-          <div style="position:absolute;bottom:4%;right:4%;width:80px;height:80px;border-radius:50%;
-               background:rgba(11,156,102,0.08);border:2px solid rgba(11,156,102,0.30);
-               animation:pulseAnim 3.5s ease-in-out infinite 1.5s"></div>
         </div>
       </div>
 
@@ -180,12 +190,16 @@
     <p class="text-center mb-4" style="font-size:0.82rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--cf-text-muted)">
       Paiements &amp; conformité
     </p>
-    <div class="cf-trust-strip">
-      <span><i class="bi bi-phone-fill" style="color:#FF6600"></i> Orange Money</span>
-      <span><i class="bi bi-lightning-charge-fill" style="color:#1E6BFF"></i> Wave</span>
-      <span><i class="bi bi-phone-fill" style="color:#FFCC00"></i> MTN MoMo</span>
-      <span><i class="bi bi-bank" style="color:var(--cf-green)"></i> Conforme BCEAO</span>
-      <span><i class="bi bi-shield-lock-fill" style="color:var(--cf-orange)"></i> Données chiffrées</span>
+    <div class="cf-marquee">
+      <div class="cf-marquee-track cf-trust-strip" style="justify-content:flex-start;flex-wrap:nowrap">
+        <span><i class="bi bi-phone-fill" style="color:#FF6600"></i> Orange Money</span>
+        <span><i class="bi bi-lightning-charge-fill" style="color:#1E6BFF"></i> Wave</span>
+        <span><i class="bi bi-phone-fill" style="color:#FFCC00"></i> MTN MoMo</span>
+        <span><i class="bi bi-bank" style="color:var(--cf-green)"></i> Conforme BCEAO</span>
+        <span><i class="bi bi-shield-lock-fill" style="color:var(--cf-orange)"></i> Données chiffrées</span>
+        <span><i class="bi bi-people-fill" style="color:var(--cf-green)"></i> +5 000 clients</span>
+        <span><i class="bi bi-star-fill" style="color:var(--cf-orange)"></i> Noté 4,8/5</span>
+      </div>
     </div>
   </div>
 </section>
@@ -194,12 +208,12 @@
 <section class="cf-section" style="background:var(--cf-bg)">
   <div class="container">
     <div class="text-center mb-5">
-      <span class="cf-eyebrow">Nos services</span>
-      <h2 class="cf-section-title">
+      <span class="cf-eyebrow" data-reveal="up">Nos services</span>
+      <h2 class="cf-section-title" data-reveal="up" data-reveal-delay="0.06">
         Tout votre quotidien financier,<br class="d-none d-md-block"/>
-        <span class="cf-gradient-text">en un seul endroit</span>
+        <span class="cf-gradient-text cf-anim">en un seul endroit</span>
       </h2>
-      <p class="cf-section-lead mx-auto mt-3">
+      <p class="cf-section-lead mx-auto mt-3" data-reveal="up" data-reveal-delay="0.12">
         Des solutions adaptées au contexte ivoirien, accessibles depuis votre téléphone.
       </p>
     </div>
@@ -276,8 +290,8 @@
 <section class="cf-section" style="background:var(--cf-surface-2)">
   <div class="container">
     <div class="text-center mb-5">
-      <span class="cf-eyebrow green">Simple et rapide</span>
-      <h2 class="cf-section-title">Votre crédit en <span class="cf-gradient-text">4 étapes</span></h2>
+      <span class="cf-eyebrow green" data-reveal="up">Simple et rapide</span>
+      <h2 class="cf-section-title" data-reveal="up" data-reveal-delay="0.06">Votre crédit en <span class="cf-gradient-text">4 étapes</span></h2>
     </div>
 
     <div class="cf-timeline-wrap mt-5">
@@ -412,7 +426,67 @@
   </div>
 </section>
 
-<!-- WAVE pourquoi → témoignages -->
+<!-- ===================== IMPACT HUMAIN + AIDE ===================== -->
+<section class="cf-section-sm" style="background:var(--cf-bg)">
+  <div class="container">
+
+    <!-- Bande d'impact (dégradé animé) -->
+    <div class="cf-animated-gradient" data-reveal="zoom"
+         style="border-radius:var(--cf-radius-xl);padding:48px 32px;color:#fff;text-align:center;
+                box-shadow:0 26px 60px rgba(242,100,13,0.22);position:relative;overflow:hidden">
+      <div class="cf-blob" style="position:absolute;width:240px;height:240px;background:rgba(255,255,255,0.12);top:-90px;right:-60px"></div>
+      <div class="cf-blob cf-blob-2" style="position:absolute;width:180px;height:180px;background:rgba(255,255,255,0.10);bottom:-70px;left:-40px"></div>
+
+      <div class="position-relative">
+        <h2 style="color:#fff;font-size:clamp(1.5rem,3vw,2.1rem);margin-bottom:8px">
+          Bien plus que des chiffres : des vies qui avancent
+        </h2>
+        <p style="color:rgba(255,255,255,0.88);max-width:560px;margin:0 auto 32px">
+          Derrière chaque crédit, il y a une famille, un commerce, un rêve.
+          Voilà l'impact que nous construisons ensemble, chaque jour.
+        </p>
+
+        <div class="row g-4 justify-content-center">
+          <div class="col-6 col-lg-3">
+            <div style="font-family:var(--cf-font-display);font-size:2.3rem;font-weight:800;line-height:1"
+                 data-counter="12000" data-suffix="+" data-sep="1">12 000+</div>
+            <div style="font-size:0.84rem;color:rgba(255,255,255,0.85);margin-top:6px">Vies impactées</div>
+          </div>
+          <div class="col-6 col-lg-3">
+            <div style="font-family:var(--cf-font-display);font-size:2.3rem;font-weight:800;line-height:1"
+                 data-counter="850" data-suffix="+" data-sep="1">850+</div>
+            <div style="font-size:0.84rem;color:rgba(255,255,255,0.85);margin-top:6px">Commerces financés</div>
+          </div>
+          <div class="col-6 col-lg-3">
+            <div style="font-family:var(--cf-font-display);font-size:2.3rem;font-weight:800;line-height:1"
+                 data-counter="15" data-suffix="+">15+</div>
+            <div style="font-size:0.84rem;color:rgba(255,255,255,0.85);margin-top:6px">Régions couvertes</div>
+          </div>
+          <div class="col-6 col-lg-3">
+            <div style="font-family:var(--cf-font-display);font-size:2.3rem;font-weight:800;line-height:1">24h</div>
+            <div style="font-size:0.84rem;color:rgba(255,255,255,0.85);margin-top:6px">Délai moyen de réponse</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Accès au centre d'aide -->
+    <div class="cf-card cf-spotlight mt-4 d-flex align-items-center gap-4 flex-wrap">
+      <div class="cf-icon-tile cf-icon-green"><i class="bi bi-life-preserver"></i></div>
+      <div style="flex:1;min-width:220px">
+        <h5 style="font-weight:800;margin-bottom:4px">Une question avant de vous lancer ?</h5>
+        <p style="color:var(--cf-text-muted);font-size:0.9rem;margin:0">
+          Notre centre d'aide répond aux questions les plus courantes — et un conseiller humain reste joignable.
+        </p>
+      </div>
+      <a href="/aide/" class="btn-cf-outline btn">
+        <i class="bi bi-question-circle"></i> Consulter l'aide
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- WAVE impact → témoignages -->
 <div style="margin:-1px 0;line-height:0;background:var(--cf-bg)">
   <svg viewBox="0 0 1440 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:60px">
     <path d="M0,0 C720,60 720,60 1440,0 L1440,60 L0,60 Z" style="fill:var(--cf-surface-2)"/>
@@ -423,8 +497,8 @@
 <section class="cf-section" style="background:var(--cf-surface-2)">
   <div class="container">
     <div class="text-center mb-5">
-      <span class="cf-eyebrow">Témoignages</span>
-      <h2 class="cf-section-title">Ils nous font <span class="cf-gradient-text">confiance</span></h2>
+      <span class="cf-eyebrow" data-reveal="up">Témoignages</span>
+      <h2 class="cf-section-title" data-reveal="up" data-reveal-delay="0.06">Ils nous font <span class="cf-gradient-text">confiance</span></h2>
     </div>
 
     <div id="temoignagesCarousel" class="carousel slide"
@@ -451,9 +525,12 @@
                   pour développer ma boutique à Abobo. Le processus était simple et très rapide. »
                 </p>
                 <div class="d-flex align-items-center justify-content-center gap-3">
-                  <div style="width:50px;height:50px;border-radius:50%;
+                  <div style="width:50px;height:50px;border-radius:50%;position:relative;overflow:hidden;
                        background:linear-gradient(135deg,var(--cf-orange),var(--cf-green));
-                       color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem">A</div>
+                       color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem">A<img
+                       src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120&h=120&fit=crop&crop=faces&q=80&auto=format"
+                       alt="Aya Koné" loading="lazy" onerror="this.remove()"
+                       style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
                   <div class="text-start">
                     <div style="font-weight:800">Aya Koné</div>
                     <div style="font-size:0.82rem;color:var(--cf-text-muted)">Commerçante — Abidjan, Abobo</div>
@@ -476,9 +553,12 @@
                   j'ai reçu mon indemnisation. Je recommande à tous mes proches. »
                 </p>
                 <div class="d-flex align-items-center justify-content-center gap-3">
-                  <div style="width:50px;height:50px;border-radius:50%;
+                  <div style="width:50px;height:50px;border-radius:50%;position:relative;overflow:hidden;
                        background:linear-gradient(135deg,var(--cf-green),var(--cf-orange));
-                       color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem">K</div>
+                       color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem">K<img
+                       src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&h=120&fit=crop&crop=faces&q=80&auto=format"
+                       alt="Kouamé Tra" loading="lazy" onerror="this.remove()"
+                       style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
                   <div class="text-start">
                     <div style="font-weight:800">Kouamé Tra</div>
                     <div style="font-size:0.82rem;color:var(--cf-text-muted)">Chauffeur — San-Pédro</div>
@@ -501,9 +581,12 @@
                   en moins de 5 minutes et a résolu mon problème immédiatement. »
                 </p>
                 <div class="d-flex align-items-center justify-content-center gap-3">
-                  <div style="width:50px;height:50px;border-radius:50%;
+                  <div style="width:50px;height:50px;border-radius:50%;position:relative;overflow:hidden;
                        background:linear-gradient(135deg,#3B82F6,var(--cf-orange));
-                       color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem">M</div>
+                       color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem">M<img
+                       src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120&h=120&fit=crop&crop=faces&q=80&auto=format"
+                       alt="Marie Soro" loading="lazy" onerror="this.remove()"
+                       style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
                   <div class="text-start">
                     <div style="font-weight:800">Marie Soro</div>
                     <div style="font-size:0.82rem;color:var(--cf-text-muted)">Enseignante — Korhogo</div>
@@ -546,16 +629,17 @@
     radial-gradient(700px 400px at 0% 100%, rgba(11,156,102,0.16), transparent 55%),
     linear-gradient(150deg, var(--cf-ink), var(--cf-ink-2))">
   <div class="container text-center">
-    <span class="cf-eyebrow light">Commencez aujourd'hui</span>
-    <h2 class="cf-section-title" style="color:#fff;margin-bottom:16px">
-      Prêt à lancer votre <span class="cf-gradient-text">parcours financier</span> ?
+    <span class="cf-eyebrow light" data-reveal="up">Commencez aujourd'hui</span>
+    <h2 class="cf-section-title" style="color:#fff;margin-bottom:16px" data-reveal="up" data-reveal-delay="0.06">
+      Prêt à lancer votre <span class="cf-gradient-text cf-anim">parcours financier</span> ?
     </h2>
-    <p style="color:rgba(255,255,255,0.72);font-size:1.05rem;margin:0 auto 32px;max-width:520px">
+    <p style="color:rgba(255,255,255,0.72);font-size:1.05rem;margin:0 auto 32px;max-width:520px"
+       data-reveal="up" data-reveal-delay="0.12">
       Rejoignez des milliers de clients qui font confiance à COFINANCE CI
       pour leurs besoins en microfinance et assurance mobile.
     </p>
-    <div class="d-flex flex-wrap justify-content-center gap-3">
-      <a href="/inscription/" class="btn-cf-primary btn btn-lg px-5 cf-cta-redirect">
+    <div class="d-flex flex-wrap justify-content-center gap-3" data-reveal="up" data-reveal-delay="0.18">
+      <a href="/inscription/" class="btn-cf-primary btn btn-lg px-5 cf-cta-redirect cf-magnetic" data-magnetic="0.25">
         <i class="bi bi-person-plus"></i> Créer mon compte gratuitement
       </a>
       <a href="/connexion/" class="btn-cf-ghost btn btn-lg px-5">

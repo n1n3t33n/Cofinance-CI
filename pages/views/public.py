@@ -24,3 +24,6 @@ def blog(request):
 
 def parametres(request):
     return render(request, 'pages/parametres.html')
+
+def aide(request):
+    return render(request, 'pages/aide.html')

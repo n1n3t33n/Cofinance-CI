@@ -509,14 +509,14 @@ async function chargerConversations() {
         border:1px solid ${chatAgentConvId === c.id ? 'var(--cf-orange)' : 'var(--cf-border)'};
         margin-bottom:8px;cursor:pointer;transition:var(--cf-transition)"
         onclick="ouvrirConversationAgent(${c.id}, '${c.client_username}', '${c.statut}')">
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <div style="font-weight:700;font-size:0.88rem">${c.client_username}</div>
-            <div style="font-size:0.72rem;color:var(--cf-text-muted)">
+        <div class="d-flex justify-content-between align-items-center gap-2">
+          <div style="min-width:0;flex:1">
+            <div style="font-weight:700;font-size:0.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.client_username}</div>
+            <div style="font-size:0.72rem;color:var(--cf-text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
               Conv. #${c.id} — ${c.nb_messages_non_lus || 0} non lu(s)
             </div>
           </div>
-          ${UI.statutBadge(c.statut)}
+          <span style="flex-shrink:0">${UI.statutBadge(c.statut)}</span>
         </div>
       </div>`).join('');
   } catch (err) {
@@ -600,6 +600,8 @@ function ajouterMsgAgent(contenu, auteur, createdAt, estMoi) {
     background:${estMoi ? 'var(--cf-green)' : 'var(--cf-surface)'};
     color:${estMoi ? '#fff' : 'var(--cf-text)'};
     align-self:${estMoi ? 'flex-end' : 'flex-start'};
+    word-break:break-word;
+    overflow-wrap:anywhere;
     border:1px solid ${estMoi ? 'transparent' : 'var(--cf-border)'}`;
 
   div.innerHTML = `

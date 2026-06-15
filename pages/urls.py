@@ -3,6 +3,7 @@ from pages.views import (
     accueil, services, a_propos,
     connexion, inscription,
     eligibilite, blog, parametres,
+    aide,
 )
 
 urlpatterns = [
@@ -13,5 +14,6 @@ urlpatterns = [
     path('inscription/',  inscription,  name='inscription'),
     path('eligibilite/',  eligibilite,  name='eligibilite'),
     path('blog/',         blog,         name='blog'),
+    path('aide/',         aide,         name='aide'),
     path('parametres/',   parametres,   name='parametres'),
 ]

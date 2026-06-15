@@ -212,7 +212,7 @@ function progressCredit(statut) {
     soumise:    { pct: 25,  color: '#3B82F6', label: 'Dossier soumis'       },
     en_analyse: { pct: 55,  color: 'var(--cf-orange)', label: 'En cours d\'analyse' },
     approuvee:  { pct: 80,  color: 'var(--cf-green)',  label: 'Approuvé — en attente de décaissement' },
-    decaissee:  { pct: 100, color: 'var(--cf-green)',  label: 'Fonds décaissés ✓' },
+    decaissee:  { pct: 100, color: 'var(--cf-green)',  label: 'Fonds décaissés' },
     rejetee:    { pct: 100, color: '#EF4444', label: 'Dossier rejeté' },
   };
   return map[statut] || { pct: 0, color: 'var(--cf-border)', label: '' };

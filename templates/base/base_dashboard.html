@@ -2,17 +2,20 @@
 {% load static %}
 
 {% block content %}
-<div style="display:flex;min-height:calc(100vh - 70px)">
+<div class="cf-dash-shell" style="min-height:calc(100vh - 70px)">
 
   <!-- Sidebar -->
   {% block sidebar %}{% endblock %}
 
   <!-- Contenu principal -->
-  <div style="flex:1;padding:32px;background:var(--cf-bg);overflow-x:hidden">
+  <div class="cf-dash-main" style="flex:1;padding:32px;background:var(--cf-bg);overflow-x:hidden">
 
     <!-- En-tete page -->
     <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
       <div>
+        <div class="cf-dash-greeting">
+          <i class="bi bi-hand-thumbs-up"></i> Bonjour <span class="cf-user-name">…</span>
+        </div>
         <h1 style="font-size:1.4rem;font-weight:800;margin:0">
           {% block page_title %}Dashboard{% endblock %}
         </h1>

@@ -1,0 +1,38 @@
+# ── Secrets / environnement ──────────────────────────────
+.env
+.env.*
+*.pem
+
+# ── Python ───────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ── Django ───────────────────────────────────────────────
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+
+# Fichiers statiques collectés (STATIC_ROOT, regénérés par collectstatic)
+staticfiles/
+
+# ── Environnements virtuels ──────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── Éditeurs / OS ────────────────────────────────────────
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ── Tests / couverture ───────────────────────────────────
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
