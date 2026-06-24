@@ -4,6 +4,19 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <!-- Anti-FOUC : applique le theme enregistre AVANT le rendu (meme logique que Theme._key) -->
+  <script>
+    (function () {
+      try {
+        var u = localStorage.getItem('cf_user');
+        var name = u ? JSON.parse(u).username : null;
+        var t = (name && localStorage.getItem('cf_theme_' + name))
+                || localStorage.getItem('cf_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
   <meta name="description" content="{% block meta_description %}COFINANCE CI — Plateforme de microfinance et d'assurance mobile en Cote d'Ivoire{% endblock %}"/>
   <title>{% block title %}COFINANCE CI{% endblock %} | Microfinance et Assurance Mobile</title>
 
@@ -29,6 +42,7 @@
 
   <script src="{% static 'vendor/bootstrap/js/bootstrap.min.js' %}"></script>
   <script src="{% static 'js/cofinance.js' %}"></script>
+  <script src="{% static 'js/realtime.js' %}"></script>
   <script src="{% static 'js/animations.js' %}"></script>
 
   {% block extra_js %}{% endblock %}

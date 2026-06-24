@@ -110,6 +110,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'auteur':        user.username,
                 'auteur_role':   user.role,
                 'created_at':    message.created_at.isoformat(),
+                'piece_jointe_url': None,
+                'piece_jointe_nom': None,
             }
         )
 
@@ -124,6 +126,37 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'auteur':     event['auteur'],
             'auteur_role': event['auteur_role'],
             'created_at': event['created_at'],
+            'piece_jointe_url': event.get('piece_jointe_url'),
+            'piece_jointe_nom': event.get('piece_jointe_nom'),
+        }))
+
+        # Si je suis le destinataire connecté → accusé de réception (« reçu »).
+        user = self.scope.get('user')
+        if user and user.is_authenticated and event['auteur'] != user.username:
+            await self.marquer_recu(event['message_id'])
+            await self.channel_layer.group_send(self.room_group_name, {
+                'type':        'receipt_event',
+                'etat':        'recu',
+                'message_ids': [event['message_id']],
+                'par':         user.username,
+            })
+
+    async def statut_event(self, event):
+        """Diffuse un changement de statut / d'agent du ticket."""
+        await self.send(text_data=json.dumps({
+            'type':           'statut',
+            'statut':         event['statut'],
+            'statut_display': event['statut_display'],
+            'agent':          event.get('agent'),
+        }))
+
+    async def receipt_event(self, event):
+        """Diffuse un accusé de réception/lecture (reçu / lu)."""
+        await self.send(text_data=json.dumps({
+            'type':        'receipt',
+            'etat':        event['etat'],
+            'message_ids': event['message_ids'],
+            'par':         event['par'],
         }))
 
     async def presence_event(self, event):
@@ -160,6 +193,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def sauvegarder_message(self, conversation_id, auteur, contenu):
         """Sauvegarde le message en base et met à jour updated_at de la conversation."""
         from chat.models import Conversation, Message
+        from notifications.services import creer_notification
+
         conv = Conversation.objects.get(pk=conversation_id)
         message = Message.objects.create(
             conversation=conv,
@@ -168,4 +203,23 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
         # Mettre à jour la date de la conversation pour le tri
         conv.save(update_fields=['updated_at'])
+
+        # Notifier le destinataire (l'autre partie) : badge + toast en direct
+        # (push temps réel best-effort, et de toute façon récupéré par le polling).
+        destinataire = conv.agent if auteur.id == conv.client_id else conv.client
+        if destinataire and destinataire.id != auteur.id:
+            apercu = (contenu[:60] + '…') if len(contenu) > 60 else contenu
+            creer_notification(
+                destinataire=destinataire,
+                type_notif='message_chat',
+                titre=f"Nouveau message de {auteur.username}",
+                message=apercu,
+                objet_id=conv.pk,
+            )
         return message
+
+    @database_sync_to_async
+    def marquer_recu(self, message_id):
+        """Marque un message comme reçu (accusé de réception)."""
+        from chat.models import Message
+        Message.objects.filter(pk=message_id, est_recu=False).update(est_recu=True)

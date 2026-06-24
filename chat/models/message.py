@@ -4,7 +4,14 @@ from .conversation import Conversation
 
 
 class Message(models.Model):
-    """Message envoyé dans une conversation."""
+    """
+    Message d'une conversation. Peut porter une pièce jointe (image / PDF).
+
+    États du message :
+      - envoyé : dès la création (implicite)
+      - reçu   : est_recu = True (délivré au destinataire connecté)
+      - lu     : est_lu  = True (ouvert/consulté par le destinataire)
+    """
 
     conversation = models.ForeignKey(
         Conversation,
@@ -16,7 +23,12 @@ class Message(models.Model):
         on_delete=models.CASCADE,
         related_name='messages_envoyes',
     )
-    contenu    = models.TextField()
+    contenu      = models.TextField(blank=True)
+    piece_jointe = models.FileField(
+        upload_to='chat/pieces/%Y/%m/',
+        null=True, blank=True,
+    )
+    est_recu   = models.BooleanField(default=False)
     est_lu     = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 

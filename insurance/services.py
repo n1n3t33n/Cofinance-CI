@@ -16,7 +16,7 @@ def get_souscriptions_a_notifier():
 
     dans_15_jours = date.today() + timedelta(days=15)
     return Souscription.objects.filter(
-        statut='active',
+        statut='en_cours',
         date_fin=dans_15_jours,
     ).select_related('client', 'produit')
 
@@ -30,7 +30,7 @@ def marquer_souscriptions_expirees():
     from insurance.models import Souscription
 
     expirees = Souscription.objects.filter(
-        statut='active',
+        statut='en_cours',
         date_fin__lt=date.today(),
     )
     count = expirees.update(statut='expiree')

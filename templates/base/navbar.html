@@ -19,14 +19,13 @@
         <li><a href="/a-propos/">À propos</a></li>
       </ul>
 
-      <!-- Liens utilisateur (masques par defaut) -->
+      <!-- Liens utilisateur (masques par defaut) — version allegee :
+           les liens prospect (Services, Eligibilite, Blog, A propos) ne sont
+           plus necessaires une fois connecte. -->
       <ul class="cf-nav-links" id="nav-links-user" style="display:none">
         <li><a href="/">Accueil</a></li>
-        <li><a href="/services/">Services</a></li>
-        <li><a href="/eligibilite/">Éligibilité</a></li>
-        <li><a href="/blog/">Blog</a></li>
+        <li><a href="#" id="nav-links-dashboard">Mon dashboard</a></li>
         <li><a href="/aide/">Aide</a></li>
-        <li><a href="/a-propos/">À propos</a></li>
       </ul>
 
       <!-- Actions droite -->
@@ -46,11 +45,27 @@
         <!-- Bloc utilisateur (masque par defaut) -->
         <div id="nav-user" style="display:none" class="cf-nav-user-bloc">
 
-          <!-- Cloche -->
-          <a id="nav-notif-link" href="#" class="cf-notif-btn" title="Notifications">
-            <i class="bi bi-bell"></i>
-            <span class="cf-notif-dot cf-notif-count" style="display:none">0</span>
-          </a>
+          <!-- Cloche + liste deroulante -->
+          <div class="cf-notif-dropdown" id="cf-notif-dropdown">
+            <button id="nav-notif-btn" class="cf-notif-btn" type="button"
+                    title="Notifications" onclick="toggleNotifs(event)">
+              <i class="bi bi-bell"></i>
+              <span class="cf-notif-dot cf-notif-count" style="display:none">0</span>
+            </button>
+            <div class="cf-dropdown-menu cf-notif-menu" id="cf-notif-menu"
+                 onclick="event.stopPropagation()">
+              <div class="cf-dropdown-header d-flex justify-content-between align-items-center">
+                <span>Notifications</span>
+                <a href="#" onclick="toutMarquerLuNav(event)"
+                   style="font-size:0.76rem;color:var(--cf-orange);font-weight:600">Tout lire</a>
+              </div>
+              <div id="cf-notif-list" class="cf-notif-list"></div>
+              <a href="#" id="nav-notif-link" class="cf-dropdown-item"
+                 style="justify-content:center;color:var(--cf-orange);font-weight:600">
+                Voir tout
+              </a>
+            </div>
+          </div>
 
           <!-- Bouton avatar -->
           <div class="cf-user-dropdown" id="cf-user-dropdown">
@@ -115,11 +130,7 @@
       </div>
       <div id="cf-mobile-user" style="display:none">
         <a href="/">Accueil</a>
-        <a href="/services/">Services</a>
-        <a href="/eligibilite/">Éligibilité</a>
-        <a href="/blog/">Blog</a>
         <a href="/aide/">Aide</a>
-        <a href="/a-propos/">À propos</a>
         <div class="cf-mobile-actions">
           <a href="#" id="cf-mobile-dashboard">Mon dashboard</a>
           <a href="/parametres/">Parametres</a>

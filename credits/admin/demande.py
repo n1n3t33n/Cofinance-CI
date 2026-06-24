@@ -11,7 +11,8 @@ class EcheanceInline(admin.TabularInline):
 
 @admin.register(DemandeCrédit)
 class DemandeCréditAdmin(admin.ModelAdmin):
-    list_display  = ('id', 'client', 'montant_demande', 'duree_mois', 'statut', 'created_at')
-    list_filter   = ('statut',)
-    search_fields = ('client__username',)
+    list_display  = ('id', 'client', 'montant_demande', 'duree_mois', 'statut',
+                     'reference_paiement', 'est_soldee', 'created_at')
+    list_filter   = ('statut', 'est_soldee')
+    search_fields = ('client__username', 'reference_paiement')
     inlines       = [EcheanceInline]

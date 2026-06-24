@@ -54,7 +54,8 @@
   </div>
   <div class="row g-3 mb-4">
     <div class="col-lg-2 col-md-4 col-6">
-      <div class="cf-card-stat" style="flex-direction:column;align-items:flex-start;gap:8px">
+      <div class="cf-card-stat" style="flex-direction:column;align-items:flex-start;gap:8px;cursor:pointer"
+           onclick="allerCredits('')" title="Voir tous les credits">
         <div class="stat-icon stat-icon-blue" style="width:40px;height:40px;font-size:1.1rem">
           <i class="bi bi-folder2"></i>
         </div>
@@ -63,7 +64,8 @@
       </div>
     </div>
     <div class="col-lg-2 col-md-4 col-6">
-      <div class="cf-card-stat" style="flex-direction:column;align-items:flex-start;gap:8px">
+      <div class="cf-card-stat" style="flex-direction:column;align-items:flex-start;gap:8px;cursor:pointer"
+           onclick="allerCredits('soumise')" title="Voir les demandes soumises">
         <div class="stat-icon stat-icon-orange" style="width:40px;height:40px;font-size:1.1rem">
           <i class="bi bi-hourglass"></i>
         </div>
@@ -72,7 +74,8 @@
       </div>
     </div>
     <div class="col-lg-2 col-md-4 col-6">
-      <div class="cf-card-stat" style="flex-direction:column;align-items:flex-start;gap:8px">
+      <div class="cf-card-stat" style="flex-direction:column;align-items:flex-start;gap:8px;cursor:pointer"
+           onclick="allerCredits('en_analyse')" title="Voir les dossiers en analyse">
         <div class="stat-icon stat-icon-blue" style="width:40px;height:40px;font-size:1.1rem">
           <i class="bi bi-search"></i>
         </div>
@@ -81,7 +84,8 @@
       </div>
     </div>
     <div class="col-lg-2 col-md-4 col-6">
-      <div class="cf-card-stat" style="flex-direction:column;align-items:flex-start;gap:8px">
+      <div class="cf-card-stat" style="flex-direction:column;align-items:flex-start;gap:8px;cursor:pointer"
+           onclick="allerCredits('approuvee')" title="Voir les credits approuves">
         <div class="stat-icon stat-icon-green" style="width:40px;height:40px;font-size:1.1rem">
           <i class="bi bi-check-circle"></i>
         </div>
@@ -90,7 +94,8 @@
       </div>
     </div>
     <div class="col-lg-2 col-md-4 col-6">
-      <div class="cf-card-stat" style="flex-direction:column;align-items:flex-start;gap:8px">
+      <div class="cf-card-stat" style="flex-direction:column;align-items:flex-start;gap:8px;cursor:pointer"
+           onclick="allerCredits('decaissee')" title="Voir les credits decaisses">
         <div class="stat-icon stat-icon-purple" style="width:40px;height:40px;font-size:1.1rem">
           <i class="bi bi-cash"></i>
         </div>
@@ -99,7 +104,8 @@
       </div>
     </div>
     <div class="col-lg-2 col-md-4 col-6">
-      <div class="cf-card-stat" style="flex-direction:column;align-items:flex-start;gap:8px">
+      <div class="cf-card-stat" style="flex-direction:column;align-items:flex-start;gap:8px;cursor:pointer"
+           onclick="allerCredits('rejetee')" title="Voir les credits rejetes">
         <div class="stat-icon stat-icon-orange" style="width:40px;height:40px;font-size:1.1rem">
           <i class="bi bi-x-circle"></i>
         </div>
@@ -151,7 +157,8 @@
 
     <!-- Assurance -->
     <div class="col-lg-4">
-      <div class="cf-card h-100">
+      <div class="cf-card h-100" style="cursor:pointer"
+           onclick="afficherSection('souscriptions')" title="Voir les souscriptions">
         <div class="d-flex align-items-center gap-2 mb-3">
           <div class="stat-icon stat-icon-blue"
                style="width:40px;height:40px;font-size:1.1rem">
@@ -207,6 +214,30 @@
       </div>
     </div>
 
+  </div>
+
+  <!-- Diagrammes de suivi -->
+  <div class="row g-4 mb-4">
+    <div class="col-lg-6">
+      <div class="cf-card h-100">
+        <h5 style="font-weight:700;margin-bottom:16px">
+          <i class="bi bi-pie-chart me-2 text-orange"></i>Credits par statut
+        </h5>
+        <div style="position:relative;height:260px">
+          <canvas id="chart-credits"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="cf-card h-100">
+        <h5 style="font-weight:700;margin-bottom:16px">
+          <i class="bi bi-pie-chart me-2 text-orange"></i>Assurances par statut
+        </h5>
+        <div style="position:relative;height:260px">
+          <canvas id="chart-assurances"></canvas>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Activite recente -->
@@ -396,5 +427,6 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="{% static 'js/dashboard_admin.js' %}"></script>
 {% endblock %}

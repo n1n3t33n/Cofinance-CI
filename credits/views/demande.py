@@ -11,7 +11,13 @@ from credits.serializers import (
     TraiterDemandSerializer,
 )
 from credits.permissions import EstClient, EstAgentOuAdmin
-from credits.services import calculer_score, generer_echeancier
+from credits.services import (
+    calculer_score,
+    generer_echeancier,
+    generer_reference_credit,
+    notifier_nouvelle_demande,
+    notifier_changement_statut,
+)
 
 
 # ── CLIENT ────────────────────────────────────────────────────
@@ -24,6 +30,8 @@ def soumettre_demande(request):
     serializer = SoumettreDemandSerializer(data=request.data)
     if serializer.is_valid():
         demande = serializer.save(client=request.user)
+        # Temps réel : prévenir agents + admins (notification + rafraîchissement)
+        notifier_nouvelle_demande(demande)
         return Response(
             DemandeCréditSerializer(demande).data,
             status=status.HTTP_201_CREATED
@@ -81,14 +89,20 @@ def traiter_demande(request, pk):
     except DemandeCrédit.DoesNotExist:
         return Response({'detail': 'Demande introuvable.'}, status=404)
 
+    ancien_statut = demande.statut
+
     serializer = TraiterDemandSerializer(demande, data=request.data, partial=True)
     if serializer.is_valid():
         demande = serializer.save(agent_traitant=request.user)
 
-        # Si la demande vient d'être approuvée → score + échéancier
-        if demande.statut == 'approuvee':
+        # Uniquement lors du PASSAGE à « approuvee » → score + échéancier.
+        # (évite de régénérer l'échéancier à chaque modification ultérieure)
+        if ancien_statut != 'approuvee' and demande.statut == 'approuvee':
             demande.score_eligibilite = calculer_score(demande)
-            demande.save(update_fields=['score_eligibilite'])
+            # Référence de paiement unique pré-enregistrée (une seule fois).
+            if not demande.reference_paiement:
+                demande.reference_paiement = generer_reference_credit(demande)
+            demande.save(update_fields=['score_eligibilite', 'reference_paiement'])
 
             # Supprimer un éventuel échéancier existant et en régénérer un
             demande.echeances.all().delete()
@@ -96,6 +110,10 @@ def traiter_demande(request, pk):
             Echeance.objects.bulk_create([
                 Echeance(demande=demande, **e) for e in echeances_data
             ])
+
+        # Temps réel : prévenir le client si le statut a changé.
+        if ancien_statut != demande.statut:
+            notifier_changement_statut(demande)
 
         return Response(DemandeCréditSerializer(demande).data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

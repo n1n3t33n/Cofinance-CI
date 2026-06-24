@@ -12,9 +12,11 @@ class Souscription(models.Model):
     """
 
     class Statut(models.TextChoices):
-        ACTIVE   = 'active',   'Active'
-        EXPIREE  = 'expiree',  'Expirée'
-        RESILIEE = 'resiliee', 'Résiliée'
+        EN_ATTENTE = 'en_attente', "En attente de validation"
+        EN_COURS   = 'en_cours',   'En cours'
+        REJETEE    = 'rejetee',    'Rejetée'
+        EXPIREE    = 'expiree',    'Expirée'
+        RESILIEE   = 'resiliee',   'Résiliée'
 
     client  = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -27,12 +29,22 @@ class Souscription(models.Model):
         on_delete=models.PROTECT,
         related_name='souscriptions',
     )
+    # Agent/admin ayant validé (ou rejeté) la souscription.
+    agent_traitant = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='souscriptions_traitees',
+    )
 
     statut      = models.CharField(
         max_length=15,
         choices=Statut.choices,
-        default=Statut.ACTIVE,
+        default=Statut.EN_ATTENTE,
     )
+    # Le client demande la résiliation ; un agent/admin la confirme ensuite.
+    resiliation_demandee = models.BooleanField(default=False)
+    motif_rejet = models.TextField(blank=True)
     date_debut  = models.DateField(default=date.today)
     date_fin    = models.DateField(blank=True, null=True)
 

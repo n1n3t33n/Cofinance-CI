@@ -13,6 +13,8 @@ let chatSocket         = null;
 let chatConversationId = null;
 let chatTypingTimeout  = null;
 let chatEstEnTrain     = false;
+let convClientStatut   = null;   // statut courant de la conversation
+let evalNoteSelection  = 0;      // note sélectionnée (étoiles)
 
 /* ============================================================
    INITIALISATION
@@ -99,10 +101,11 @@ async function chargerStatsRapides() {
         ['approuvee', 'decaissee'].includes(c.statut)
       ).length;
       document.getElementById('stat-credits-actifs').textContent = actifs;
+      renderChartCreditsClient(credits);
     }
 
     if (resAssurances.ok) {
-      const actives = resAssurances.data.filter(s => s.statut === 'active').length;
+      const actives = resAssurances.data.filter(s => s.statut === 'en_cours').length;
       document.getElementById('stat-assurances').textContent = actives;
     }
 
@@ -265,7 +268,9 @@ async function chargerCredits() {
                 <td>${UI.montant(c.montant_demande)}</td>
                 <td>${c.montant_approuve ? UI.montant(c.montant_approuve) : '--'}</td>
                 <td>${c.duree_mois} mois</td>
-                <td>${UI.statutBadge(c.statut)}</td>
+                <td>${UI.statutBadge(c.statut)}${c.est_soldee
+                  ? ' <span class="cf-badge" style="background:rgba(11,156,102,0.12);color:var(--cf-green)"><i class="bi bi-check-circle-fill me-1"></i>Solde</span>'
+                  : ''}</td>
                 <td>
                   ${c.score_eligibilite
                     ? `<span style="font-weight:700;color:var(--cf-green)">${c.score_eligibilite}/100</span>`
@@ -358,7 +363,148 @@ function afficherAlerteDemande(msg, type) {
 /* ============================================================
    REMBOURSEMENTS
    ============================================================ */
+let declarationEcheanceId = null;
+
 async function chargerRemboursements() {
+  await Promise.all([chargerEcheanciers(), chargerHistoriquePaiements()]);
+}
+
+/* ---- Échéanciers des crédits actifs (avec états + déclaration) ---- */
+async function chargerEcheanciers() {
+  const conteneur = document.getElementById('liste-echeanciers');
+  try {
+    const res = await API.get('/credits/mes-demandes/');
+    if (!res.ok) { conteneur.innerHTML = '<p class="text-muted">Erreur.</p>'; return; }
+
+    const credits = res.data.filter(c =>
+      (c.echeances || []).length > 0 && ['decaissee', 'approuvee'].includes(c.statut));
+
+    if (credits.length === 0) {
+      conteneur.innerHTML = `
+        <div class="text-center py-4">
+          <i class="bi bi-calendar-x" style="font-size:2.4rem;color:var(--cf-text-muted)"></i>
+          <p style="color:var(--cf-text-muted);margin-top:10px">
+            Aucun échéancier actif pour le moment.
+          </p>
+        </div>`;
+      return;
+    }
+
+    conteneur.innerHTML = credits.map(renderEcheancierCredit).join('');
+  } catch (err) {
+    conteneur.innerHTML = '<p class="text-muted">Erreur de chargement.</p>';
+  }
+}
+
+function renderEcheancierCredit(credit) {
+  const ech = (credit.echeances || []).slice().sort((a, b) => a.numero - b.numero);
+  const aujourdhui = new Date(); aujourdhui.setHours(0, 0, 0, 0);
+  const peutPayer = credit.statut === 'decaissee' && !credit.est_soldee;
+  const idxProchaine = ech.findIndex(e => !e.est_payee);  // séquentiel : la 1re impayée
+  const ref = credit.reference_paiement || '--';
+
+  const lignes = ech.map((e, i) => {
+    const due = new Date(e.date_echeance); due.setHours(0, 0, 0, 0);
+    let etat;
+    if (e.est_payee)                etat = '<span class="cf-badge cf-badge-green">Payé</span>';
+    else if (e.a_paiement_en_attente) etat = '<span class="cf-badge" style="background:rgba(245,158,11,0.14);color:#B45309">En validation</span>';
+    else if (due < aujourdhui)      etat = '<span class="cf-badge cf-badge-red">En retard</span>';
+    else                            etat = '<span class="cf-badge cf-badge-gray">À payer</span>';
+
+    let action = '--';
+    if (peutPayer && !e.est_payee && !e.a_paiement_en_attente && i === idxProchaine) {
+      action = `<button class="btn btn-sm btn-cf-primary" style="font-size:0.74rem"
+                  onclick="ouvrirDeclaration(${e.id}, ${credit.id}, ${e.numero}, '${e.montant_du}', '${ref}')">
+                  Déclarer le paiement</button>`;
+    } else if (e.a_paiement_en_attente) {
+      action = '<span style="font-size:0.73rem;color:var(--cf-text-muted)">En attente de validation</span>';
+    }
+
+    return `<tr>
+        <td style="font-weight:700">#${e.numero}</td>
+        <td style="font-size:0.84rem">${UI.date(e.date_echeance)}</td>
+        <td style="font-weight:600">${UI.montant(e.montant_du)}</td>
+        <td>${etat}</td>
+        <td>${action}</td>
+      </tr>`;
+  }).join('');
+
+  const payees = ech.filter(e => e.est_payee).length;
+  return `
+    <div style="border:1px solid var(--cf-border);border-radius:var(--cf-radius);padding:16px;margin-bottom:16px">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+          <div style="font-weight:700">
+            Crédit #${credit.id} — ${UI.montant(credit.montant_approuve || credit.montant_demande)}
+          </div>
+          <div style="font-size:0.78rem;color:var(--cf-text-muted)">
+            ${payees}/${ech.length} échéances réglées${credit.est_soldee ? ' — soldé' : ''}
+          </div>
+        </div>
+        <div style="font-size:0.82rem">
+          <span style="color:var(--cf-text-muted)">Référence : </span>
+          <span style="font-weight:700;font-family:monospace">${ref}</span>
+          <button class="btn btn-sm cf-icon-btn ms-1" title="Copier la référence"
+                  onclick="copierTexte('${ref}')"><i class="bi bi-clipboard"></i></button>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="cf-table">
+          <thead><tr><th>#</th><th>Date limite</th><th>Montant</th><th>État</th><th>Action</th></tr></thead>
+          <tbody>${lignes}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function copierTexte(txt) {
+  if (navigator.clipboard && txt && txt !== '--') {
+    navigator.clipboard.writeText(txt).then(
+      () => Toast.show('Référence copiée.', 'success'), () => {});
+  }
+}
+
+/* ---- Déclaration d'un paiement (modale) ---- */
+function ouvrirDeclaration(echeanceId, creditId, numero, montant, ref) {
+  declarationEcheanceId = echeanceId;
+  document.getElementById('declaration-resume').innerHTML =
+    `Crédit #${creditId} — échéance n°${numero}<br>
+     <strong style="color:var(--cf-orange)">${UI.montant(montant)}</strong>`;
+  document.getElementById('declaration-reference').value = ref;
+  document.getElementById('declaration-mode').value = 'orange_money';
+  document.getElementById('declaration-note').value = '';
+  document.getElementById('modal-declaration').style.display = 'flex';
+}
+
+function fermerModaleClient(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = 'none';
+}
+
+async function soumettreDeclaration() {
+  if (!declarationEcheanceId) return;
+  const btn = document.getElementById('btn-declarer');
+  UI.btnLoading(btn, true);
+  const res = await API.post('/repayments/declarer/', {
+    echeance:      declarationEcheanceId,
+    mode_paiement: document.getElementById('declaration-mode').value,
+    note:          document.getElementById('declaration-note').value.trim(),
+  });
+  UI.btnLoading(btn, false);
+  if (res.ok) {
+    fermerModaleClient('modal-declaration');
+    Toast.show('Paiement déclaré. Joignez votre justificatif dans le chat support.', 'success');
+    chargerRemboursements();
+    chargerStatsRapides();
+  } else {
+    const e = res.data && (res.data.detail
+      || (res.data.echeance && res.data.echeance[0]));
+    Toast.show(e || 'Erreur.', 'error');
+  }
+}
+
+/* ---- Historique des paiements (avec statut) ---- */
+async function chargerHistoriquePaiements() {
   const conteneur = document.getElementById('table-remboursements');
   try {
     const res = await API.get('/repayments/mon-historique/');
@@ -371,7 +517,7 @@ async function chargerRemboursements() {
         <div class="text-center py-5">
           <i class="bi bi-arrow-repeat" style="font-size:3rem;color:var(--cf-text-muted)"></i>
           <p style="color:var(--cf-text-muted);margin-top:12px">
-            Aucun remboursement enregistre.
+            Aucun paiement enregistre.
           </p>
         </div>`;
       return;
@@ -383,17 +529,23 @@ async function chargerRemboursements() {
           <thead>
             <tr>
               <th>Echeance</th>
-              <th>Montant paye</th>
+              <th>Montant</th>
               <th>Mode</th>
+              <th>Statut</th>
               <th>Reference</th>
               <th>Date</th>
             </tr>
           </thead>
           <tbody>
-            ${paiements.map(p => `
+            ${paiements.map(p => {
+              const valide = p.statut === 'valide';
+              const badge = valide
+                ? '<span class="cf-badge cf-badge-green">Validé</span>'
+                : '<span class="cf-badge" style="background:rgba(245,158,11,0.14);color:#B45309">En attente</span>';
+              return `
               <tr>
                 <td>Echeance #${p.echeance}</td>
-                <td style="font-weight:700;color:var(--cf-green)">
+                <td style="font-weight:700;color:${valide ? 'var(--cf-green)' : 'var(--cf-text-muted)'}">
                   ${UI.montant(p.montant_paye)}
                 </td>
                 <td>
@@ -401,13 +553,15 @@ async function chargerRemboursements() {
                     ${p.mode_paiement.replace('_', ' ').toUpperCase()}
                   </span>
                 </td>
+                <td>${badge}</td>
                 <td style="font-size:0.82rem;color:var(--cf-text-muted)">
                   ${p.reference_transaction || '--'}
                 </td>
                 <td style="font-size:0.82rem;color:var(--cf-text-muted)">
                   ${UI.date(p.date_paiement)}
                 </td>
-              </tr>`).join('')}
+              </tr>`;
+            }).join('')}
           </tbody>
         </table>
       </div>`;
@@ -464,18 +618,24 @@ async function chargerAssurances() {
                 <td style="font-size:0.82rem">${UI.date(s.date_debut)}</td>
                 <td style="font-size:0.82rem">${UI.date(s.date_fin)}</td>
                 <td>
-                  ${s.statut === 'active'
+                  ${s.statut === 'en_cours'
                     ? `<span style="font-weight:700;color:var(--cf-green)">${s.jours_restants}j</span>`
                     : '--'}
                 </td>
                 <td>
-                  ${s.statut === 'active'
-                    ? `<button class="btn btn-sm"
-                               style="background:rgba(239,68,68,0.1);color:#EF4444;border-radius:var(--cf-radius-sm);border:none;font-size:0.8rem;font-weight:600"
-                               onclick="resilierAssurance(${s.id})">
-                         Resilier
-                       </button>`
-                    : ''}
+                  ${s.statut === 'en_cours'
+                    ? (s.resiliation_demandee
+                        ? `<span class="cf-badge" style="background:rgba(245,158,11,0.12);color:#B45309"><i class="bi bi-hourglass-split me-1"></i>Resiliation demandee</span>`
+                        : `<button class="btn btn-sm"
+                                   style="background:rgba(239,68,68,0.1);color:#EF4444;border-radius:var(--cf-radius-sm);border:none;font-size:0.8rem;font-weight:600"
+                                   onclick="demanderResiliation(${s.id})">
+                             Demander la resiliation
+                           </button>`)
+                    : (s.statut === 'rejetee' && s.motif_rejet
+                        ? `<span style="font-size:0.76rem;color:#EF4444" title="${s.motif_rejet}"><i class="bi bi-info-circle me-1"></i>${s.motif_rejet}</span>`
+                        : (s.statut === 'en_attente'
+                            ? '<span style="font-size:0.76rem;color:var(--cf-text-muted)">En attente de validation</span>'
+                            : '--'))}
                 </td>
               </tr>`).join('')}
           </tbody>
@@ -487,13 +647,16 @@ async function chargerAssurances() {
   }
 }
 
-async function resilierAssurance(id) {
-  if (!confirm('Confirmer la resiliation de cette assurance ?')) return;
+async function demanderResiliation(id) {
+  if (!confirm('Demander la resiliation de cette assurance ? Un agent confirmera votre demande.')) return;
 
-  const res = await API.post(`/insurance/${id}/resilier/`);
+  const res = await API.post(`/insurance/${id}/demander-resiliation/`);
   if (res.ok) {
+    Toast.show('Demande de resiliation envoyee. Un agent va la traiter.', 'success');
     chargerAssurances();
     chargerStatsRapides();
+  } else {
+    Toast.show((res.data && res.data.detail) || 'Erreur.', 'error');
   }
 }
 
@@ -585,11 +748,12 @@ async function confirmerSouscription() {
   });
 
   if (res.ok) {
-    afficherAlerteSouscription('Souscription confirmee avec succes !', 'success');
+    afficherAlerteSouscription(
+      'Demande envoyee ! Elle sera validee par un agent.', 'success');
     setTimeout(() => {
       document.getElementById('form-souscription').style.display = 'none';
       afficherSection('assurances');
-    }, 1500);
+    }, 1800);
   } else {
     const erreur = Object.values(res.data)[0];
     afficherAlerteSouscription(Array.isArray(erreur) ? erreur[0] : erreur, 'error');
@@ -711,8 +875,7 @@ async function initialiserChat() {
       afficherHistoriqueChat(resMsg.data, user);
     }
 
-    document.getElementById('chat-statut-label').textContent =
-      `Conversation #${chatConversationId} — ${res.data.statut_display}`;
+    majStatutClient(res.data.statut, res.data.statut_display);
 
     /* Connecter le WebSocket */
     connecterChatWS();
@@ -732,59 +895,60 @@ function afficherHistoriqueChat(messages, user) {
     return;
   }
   zone.innerHTML = '';
-  messages.forEach(msg => {
-    ajouterMessageChat(msg.contenu, msg.auteur_username, msg.auteur_role,
-      msg.created_at, msg.auteur === user.id);
-  });
+  messages.forEach(msg => ajouterMessageChat(msg, msg.auteur === user.id));
 }
 
 function connecterChatWS() {
-  const token = Session.getToken();
-  const url   = `ws://127.0.0.1:8000/ws/chat/${chatConversationId}/?token=${token}`;
-  chatSocket  = new WebSocket(url);
+  chatSocket  = new WebSocket(wsChatUrl(chatConversationId));
   const dot   = document.getElementById('chat-ws-dot');
 
-  chatSocket.onopen = () => {
-    if (dot) dot.style.background = '#00A86B';
-    document.getElementById('chat-statut-label').textContent += ' — Connecte';
-  };
-
-  chatSocket.onclose = () => {
-    if (dot) dot.style.background = '#EF4444';
-  };
+  chatSocket.onopen  = () => { if (dot) dot.style.background = '#00A86B'; };
+  chatSocket.onclose = () => { if (dot) dot.style.background = '#EF4444'; };
 
   chatSocket.onmessage = (event) => {
     const data = JSON.parse(event.data);
     const user = Session.getUser();
 
     if (data.type === 'message') {
-      const estMoi = data.auteur === user.username;
-      ajouterMessageChat(data.contenu, data.auteur, data.auteur_role,
-        data.created_at, estMoi);
+      ajouterMessageChat({
+        message_id: data.message_id, contenu: data.contenu,
+        auteur_username: data.auteur, auteur_role: data.auteur_role,
+        created_at: data.created_at,
+        piece_jointe_url: data.piece_jointe_url, piece_jointe_nom: data.piece_jointe_nom,
+        est_recu: false, est_lu: false,
+      }, data.auteur === user.username);
     }
 
-    if (data.type === 'typing') {
+    else if (data.type === 'typing') {
       const ind = document.getElementById('chat-typing');
       if (data.username !== user.username) {
         ind.textContent = data.est_en_train_d_ecrire
-          ? `${data.username} est en train d'ecrire...`
-          : '';
+          ? `${data.username} est en train d'ecrire...` : '';
       }
     }
 
-    if (data.type === 'presence') {
-      const verbe = data.event === 'connecte' ? 'a rejoint' : 'a quitte';
-      ajouterSystemeChat(`${data.username} ${verbe} la conversation.`);
+    /* La presence (agent rejoint/quitte) est volontairement ignoree cote
+       client : il ne doit pas savoir quand un agent entre ou sort du chat. */
+
+    else if (data.type === 'statut') {
+      majStatutClient(data.statut, data.statut_display);
+      if (data.agent) ajouterSystemeChat(`Pris en charge par ${data.agent}.`);
+    }
+
+    else if (data.type === 'receipt') {
+      majRecusClient(data.message_ids, data.etat);
     }
   };
 }
 
-function ajouterMessageChat(contenu, auteur, role, createdAt, estMoi) {
+function ajouterMessageChat(msg, estMoi) {
   const zone = document.getElementById('chat-messages');
   const vide = zone.querySelector('div[style*="font-style:italic"]');
   if (vide) vide.remove();
 
   const div = document.createElement('div');
+  const mid = msg.message_id != null ? msg.message_id : msg.id;  // WS=message_id, historique=id
+  if (mid != null) div.dataset.msgId = mid;
   div.style.cssText = `
     max-width:75%;
     padding:10px 14px;
@@ -792,18 +956,26 @@ function ajouterMessageChat(contenu, auteur, role, createdAt, estMoi) {
     background:${estMoi ? 'var(--cf-orange)' : 'var(--cf-surface)'};
     color:${estMoi ? '#fff' : 'var(--cf-text)'};
     align-self:${estMoi ? 'flex-end' : 'flex-start'};
+    word-break:break-word;overflow-wrap:anywhere;
     border:1px solid ${estMoi ? 'transparent' : 'var(--cf-border)'}`;
+
+  const heure = msg.created_at
+    ? new Date(msg.created_at).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})
+    : '';
+  const recu = estMoi
+    ? `<span class="cf-receipt ${msg.est_lu ? 'lu' : ''}" data-receipt="${mid}">${rendreRecu(msg.est_recu, msg.est_lu)}</span>`
+    : '';
 
   div.innerHTML = `
     <div style="font-size:0.72rem;font-weight:700;margin-bottom:4px;
          color:${estMoi ? 'rgba(255,255,255,0.8)' : 'var(--cf-orange)'}">
-      ${auteur}
+      ${escapeChat(msg.auteur_username || '')}
     </div>
-    ${contenu}
+    ${escapeChat(msg.contenu || '')}
+    ${rendrePieceJointe(msg)}
     <div style="font-size:0.65rem;margin-top:4px;
          color:${estMoi ? 'rgba(255,255,255,0.6)' : 'var(--cf-text-muted)'}">
-      ${createdAt ? new Date(createdAt).toLocaleTimeString('fr-FR',
-        {hour:'2-digit', minute:'2-digit'}) : ''}
+      ${heure}${recu}
     </div>`;
 
   zone.appendChild(div);
@@ -849,4 +1021,145 @@ function chatSignalerFrappe() {
     chatEstEnTrain = false;
     chatSocket.send(JSON.stringify({ type: 'typing', est_en_train_d_ecrire: false }));
   }, 2000);
+}
+
+/* ============================================================
+   TEMPS REEL — le client recoit en direct les mises a jour
+   de ses dossiers (evenement emis par realtime.js).
+   On rafraichit toutes les vues : elles coexistent dans le DOM.
+   ============================================================ */
+window.addEventListener('cf:notification', () => {
+  if (typeof chargerStatsRapides === 'function')           chargerStatsRapides();
+  if (typeof chargerDerniersCredits === 'function')        chargerDerniersCredits();
+  if (typeof chargerDernieresNotifications === 'function') chargerDernieresNotifications();
+  if (typeof chargerNotifications === 'function')           chargerNotifications();
+  if (typeof chargerCredits === 'function')                 chargerCredits();
+  if (typeof chargerRemboursements === 'function')          chargerRemboursements();
+});
+
+/* ============================================================
+   TICKETS — helpers chat (client)
+   ============================================================ */
+function wsChatUrl(convId) {
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  return `${proto}://${location.host}/ws/chat/${convId}/?token=${Session.getToken()}`;
+}
+
+function escapeChat(txt) {
+  const d = document.createElement('div');
+  d.textContent = txt;
+  return d.innerHTML.replace(/\n/g, '<br>');
+}
+
+function rendreRecu(estRecu, estLu) {
+  if (estLu || estRecu) return '&#10003;&#10003;';  // ✓✓
+  return '&#10003;';                                  // ✓ (envoyé)
+}
+
+function rendrePieceJointe(msg) {
+  if (!msg.piece_jointe_url) return '';
+  const nom = msg.piece_jointe_nom || 'fichier';
+  if (/\.(jpe?g|png|gif|webp)$/i.test(nom)) {
+    return `<a href="${msg.piece_jointe_url}" target="_blank" rel="noopener">
+      <img src="${msg.piece_jointe_url}" alt="piece jointe"
+           style="display:block;margin-top:6px;max-width:200px;max-height:160px;border-radius:8px"/></a>`;
+  }
+  return `<a class="cf-chat-attach" href="${msg.piece_jointe_url}" target="_blank" rel="noopener">
+    <i class="bi bi-file-earmark-text"></i> ${escapeChat(nom)}</a>`;
+}
+
+function majRecusClient(ids, etat) {
+  (ids || []).forEach(id => {
+    const el = document.querySelector(`#chat-messages [data-receipt="${id}"]`);
+    if (!el) return;
+    if (etat === 'lu') { el.innerHTML = '&#10003;&#10003;'; el.classList.add('lu'); }
+    else if (!el.classList.contains('lu')) { el.innerHTML = '&#10003;&#10003;'; }
+  });
+}
+
+function majStatutClient(statut, statutDisplay) {
+  convClientStatut = statut;
+  const label = document.getElementById('chat-statut-label');
+  if (label) label.textContent =
+    `Conversation #${chatConversationId} — ${statutDisplay || statut}`;
+  const bloc = document.getElementById('chat-eval-bloc');
+  if (bloc) bloc.style.display =
+    (statut === 'resolue' || statut === 'fermee') ? 'block' : 'none';
+}
+
+/* ============================================================
+   TICKETS — actions client (pièce jointe, évaluation)
+   ============================================================ */
+async function envoyerPieceJointeClient() {
+  const input = document.getElementById('chat-fichier');
+  const fichier = input.files[0];
+  if (!fichier || !chatConversationId) return;
+  const form = new FormData();
+  form.append('piece_jointe', fichier);
+  const res = await API.upload(`/chat/${chatConversationId}/piece-jointe/`, form);
+  input.value = '';
+  if (!res || !res.ok) {
+    Toast.show((res && res.data && res.data.detail) || "Echec de l'envoi.", 'error');
+  }
+  // Le message s'affiche via le WebSocket (diffusion au groupe).
+}
+
+async function envoyerEvaluation() {
+  if (!evalNoteSelection) { Toast.show('Choisissez une note.', 'warning'); return; }
+  const commentaire = document.getElementById('chat-eval-commentaire').value.trim();
+  const res = await API.post(`/chat/${chatConversationId}/evaluer/`, {
+    note: evalNoteSelection, commentaire,
+  });
+  if (res.ok) {
+    document.getElementById('chat-eval-etoiles').style.display = 'none';
+    document.getElementById('chat-eval-commentaire').style.display = 'none';
+    document.querySelector('#chat-eval-bloc > button').style.display = 'none';
+    document.getElementById('chat-eval-merci').style.display = 'block';
+    Toast.show('Merci pour votre evaluation !', 'success');
+  } else {
+    Toast.show((res.data && res.data.detail) || 'Erreur.', 'error');
+  }
+}
+
+/* Sélection des étoiles (délégation) */
+document.addEventListener('click', (e) => {
+  const star = e.target.closest('#chat-eval-etoiles .cf-star');
+  if (!star) return;
+  evalNoteSelection = parseInt(star.dataset.note, 10);
+  document.querySelectorAll('#chat-eval-etoiles .cf-star').forEach(s => {
+    s.classList.toggle('active', parseInt(s.dataset.note, 10) <= evalNoteSelection);
+  });
+});
+
+/* ============================================================
+   DIAGRAMME — repartition de mes credits par statut (item 7)
+   ============================================================ */
+let chartCreditsClient = null;
+
+function cfTextColor() {
+  return (getComputedStyle(document.body).getPropertyValue('--cf-text') || '#555').trim();
+}
+
+function doughnutCf(canvasId, labels, valeurs, couleurs, existant) {
+  const el = document.getElementById(canvasId);
+  if (!el || typeof Chart === 'undefined') return existant;
+  if (existant) existant.destroy();
+  return new Chart(el, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data: valeurs, backgroundColor: couleurs, borderWidth: 0 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '62%',
+      plugins: { legend: { position: 'bottom',
+        labels: { padding: 14, color: cfTextColor(), font: { size: 12 } } } },
+    },
+  });
+}
+
+function renderChartCreditsClient(credits) {
+  const n = (s) => credits.filter(c => c.statut === s).length;
+  chartCreditsClient = doughnutCf('chart-credits-client',
+    ['Soumis', 'En analyse', 'Approuves', 'Decaisses', 'Rejetes'],
+    [n('soumise'), n('en_analyse'), n('approuvee'), n('decaissee'), n('rejetee')],
+    ['#F2640D', '#3B82F6', '#0B9C66', '#8B5CF6', '#EF4444'],
+    chartCreditsClient);
 }

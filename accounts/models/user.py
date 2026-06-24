@@ -13,6 +13,12 @@ class User(AbstractUser):
         AGENT         = 'agent',         'Agent de terrain'
         ADMINISTRATEUR = 'administrateur', 'Administrateur'
 
+    class Specialite(models.TextChoices):
+        GENERAL      = 'general',      'Généraliste'
+        CREDIT       = 'credit',       'Crédit'
+        ASSURANCE    = 'assurance',    'Assurance'
+        RECOUVREMENT = 'recouvrement', 'Recouvrement'
+
     role = models.CharField(
         max_length=20,
         choices=Role.choices,
@@ -20,12 +26,19 @@ class User(AbstractUser):
     )
     telephone = models.CharField(max_length=20, blank=True)
     region    = models.CharField(max_length=100, blank=True)
+    # Spécialité de l'agent — utilisée pour le routage / transfert des tickets.
+    specialite = models.CharField(
+        max_length=20,
+        choices=Specialite.choices,
+        blank=True,
+        help_text="Spécialité de l'agent (support client).",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     est_disponible = models.BooleanField(
-    default=False,
-    help_text="Disponibilité de l'agent pour le support client"
-)
+        default=False,
+        help_text="Disponibilité de l'agent pour le support client",
+    )
 
     def __str__(self):
         return f"{self.username} ({self.get_role_display()})"

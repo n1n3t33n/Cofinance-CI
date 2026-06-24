@@ -13,6 +13,10 @@ let chatAgentSocket     = null;
 let chatAgentConvId     = null;
 let chatAgentTypingTimeout = null;
 let chatAgentEstEnTrain = false;
+let conversationsAgent  = [];      // cache des conversations chargées
+let convAgentCourante   = null;    // conversation actuellement ouverte
+let categoriesCacheAgent = [];     // cache des catégories disponibles
+let filtreConvAgent     = 'actives'; // segment d'inbox support sélectionné
 
 /* ============================================================
    INITIALISATION
@@ -47,7 +51,7 @@ function afficherSection(nom) {
   const chargeurs = {
     accueil:       chargerVueEnsemble,
     dossiers:      () => chargerDossiers(''),
-    paiements:     () => {},
+    paiements:     () => { chargerPaiementsAValider(); chargerEcheancesAVenir(); },
     penalites:     chargerPenalites,
     conversations: chargerConversations,
     profil:        chargerProfil,
@@ -130,11 +134,12 @@ async function chargerStatsAgent() {
         d.filter(x => x.statut === 'soumise').length;
       document.getElementById('stat-dossiers-approuves').textContent =
         d.filter(x => x.statut === 'approuvee').length;
+      renderChartDossiersAgent(d);
     }
 
     if (resConvs.ok) {
       const enAttente = resConvs.data.filter(c =>
-        ['ouverte', 'en_attente'].includes(c.statut)
+        ['en_attente', 'en_cours'].includes(c.statut)
       ).length;
       document.getElementById('stat-convs-attente').textContent = enAttente;
 
@@ -195,7 +200,7 @@ async function chargerConvsRecentes() {
     if (!res.ok) { conteneur.innerHTML = '<p class="text-muted">Erreur.</p>'; return; }
 
     const convs = res.data
-      .filter(c => ['ouverte', 'en_attente'].includes(c.statut))
+      .filter(c => ['en_attente', 'en_cours'].includes(c.statut))
       .slice(0, 4);
 
     if (convs.length === 0) {
@@ -287,7 +292,7 @@ async function chargerDossiers(filtre) {
                   ${!['decaissee','rejetee'].includes(d.statut)
                     ? `<button class="btn btn-sm"
                                style="background:rgba(255,107,0,0.1);color:var(--cf-orange);border:none;border-radius:var(--cf-radius-sm);font-size:0.8rem;font-weight:600"
-                               onclick="ouvrirTraitement(${d.id})">
+                               onclick="ouvrirTraitement(${d.id}, '${d.statut}')">
                          Traiter
                        </button>`
                     : ''}
@@ -313,11 +318,32 @@ function filtrerDossiers(statut, btn) {
   chargerDossiers(statut);
 }
 
-function ouvrirTraitement(id) {
+// Transitions autorisees par la machine a etats du credit (miroir du backend :
+// credits/serializers/demande.py). On n'expose que l'etape suivante possible
+// pour ne pas proposer un saut qui serait refuse cote serveur.
+const TRANSITIONS_CREDIT = {
+  soumise:    [['en_analyse', 'Passer en analyse'], ['rejetee', 'Rejeter']],
+  en_analyse: [['approuvee', 'Approuver'],          ['rejetee', 'Rejeter']],
+  approuvee:  [['decaissee', 'Marquer decaisse'],   ['rejetee', 'Rejeter']],
+};
+
+function remplirOptionsStatut(statut) {
+  const options = TRANSITIONS_CREDIT[statut] || [];
+  document.getElementById('select-statut').innerHTML = options
+    .map(([val, label]) => `<option value="${val}">${label}</option>`)
+    .join('');
+  onStatutChange();
+  return options.length > 0;   // false => statut terminal (decaissee / rejetee)
+}
+
+function ouvrirTraitement(id, statutActuel) {
   dossierEnCours = id;
+  document.getElementById('montant-approuve').value  = '';
+  document.getElementById('commentaire-agent').value = '';
+  remplirOptionsStatut(statutActuel);
+
   document.getElementById('modal-dossier-id').textContent = `#${id}`;
   document.getElementById('alerte-traitement').classList.remove('show');
-  document.getElementById('champ-montant').style.display = 'none';
   document.getElementById('modal-traitement').style.display = 'block';
   document.getElementById('modal-traitement').scrollIntoView({ behavior: 'smooth' });
   afficherSection_agent('dossiers');
@@ -355,12 +381,26 @@ async function validerTraitement() {
   const res = await API.patch(`/credits/${dossierEnCours}/traiter/`, payload);
 
   if (res.ok) {
-    afficherAlerteTraitement('Dossier mis a jour avec succes.', 'success');
-    setTimeout(() => {
-      document.getElementById('modal-traitement').style.display = 'none';
-      chargerDossiers('');
-      chargerStatsAgent();
-    }, 1500);
+    chargerDossiers('');
+    chargerStatsAgent();
+
+    const nouveau = res.data.statut;
+    document.getElementById('montant-approuve').value  = '';
+    document.getElementById('commentaire-agent').value = '';
+
+    // On garde la modale ouverte et on propose l'etape suivante (workflow fluide).
+    const peutContinuer = remplirOptionsStatut(nouveau);
+    UI.btnLoading(btn, false);
+
+    if (peutContinuer) {
+      afficherAlerteTraitement(
+        `Etape validee (${nouveau.replace('_', ' ')}). Vous pouvez poursuivre.`, 'success');
+    } else {
+      afficherAlerteTraitement('Dossier finalise.', 'success');
+      setTimeout(() => {
+        document.getElementById('modal-traitement').style.display = 'none';
+      }, 1200);
+    }
   } else {
     const erreur = Object.values(res.data)[0];
     afficherAlerteTraitement(Array.isArray(erreur) ? erreur[0] : erreur, 'error');
@@ -407,6 +447,7 @@ async function enregistrerPaiement() {
     document.getElementById('paiement-echeance-id').value = '';
     document.getElementById('paiement-montant').value     = '';
     document.getElementById('paiement-reference').value   = '';
+    chargerEcheancesAVenir();   // rafraichir la liste des echeances a encaisser
   } else {
     const erreur = Object.values(res.data)[0];
     afficherAlertePaiement(Array.isArray(erreur) ? erreur[0] : erreur, 'error');
@@ -483,75 +524,119 @@ async function chargerPenalites() {
 /* ============================================================
    CONVERSATIONS ET CHAT
    ============================================================ */
+/* Segments de l'inbox support. 'toutes' => pas de filtre. */
+const SEGMENTS_CONV = {
+  actives:    ['en_attente', 'en_cours'],
+  en_attente: ['en_attente'],
+  terminees:  ['resolue', 'fermee'],
+  toutes:     null,
+};
+/* Ordre d'affichage : les conversations a traiter d'abord (urgence). */
+const PRIORITE_CONV = { en_attente: 0, en_cours: 1, resolue: 2, fermee: 3 };
+
 async function chargerConversations() {
   const conteneur = document.getElementById('liste-conversations');
   try {
     const res = await API.get('/chat/toutes/');
     if (!res.ok) { conteneur.innerHTML = '<p class="text-muted">Erreur.</p>'; return; }
-
-    const convs = res.data;
-
-    if (convs.length === 0) {
-      conteneur.innerHTML = `
-        <div class="text-center py-4">
-          <i class="bi bi-chat-dots" style="font-size:2rem;color:var(--cf-text-muted)"></i>
-          <p style="color:var(--cf-text-muted);font-size:0.85rem;margin-top:8px">
-            Aucune conversation
-          </p>
-        </div>`;
-      return;
-    }
-
-    conteneur.innerHTML = convs.map(c => `
-      <div style="
-        padding:12px;border-radius:var(--cf-radius);
-        background:${chatAgentConvId === c.id ? 'rgba(255,107,0,0.08)' : 'var(--cf-surface-2)'};
-        border:1px solid ${chatAgentConvId === c.id ? 'var(--cf-orange)' : 'var(--cf-border)'};
-        margin-bottom:8px;cursor:pointer;transition:var(--cf-transition)"
-        onclick="ouvrirConversationAgent(${c.id}, '${c.client_username}', '${c.statut}')">
-        <div class="d-flex justify-content-between align-items-center gap-2">
-          <div style="min-width:0;flex:1">
-            <div style="font-weight:700;font-size:0.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.client_username}</div>
-            <div style="font-size:0.72rem;color:var(--cf-text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-              Conv. #${c.id} — ${c.nb_messages_non_lus || 0} non lu(s)
-            </div>
-          </div>
-          <span style="flex-shrink:0">${UI.statutBadge(c.statut)}</span>
-        </div>
-      </div>`).join('');
+    conversationsAgent = res.data;
+    majComptesConversations();
+    rendreListeConversations();
   } catch (err) {
     conteneur.innerHTML = '<p class="text-muted">Erreur.</p>';
   }
 }
 
-async function ouvrirConversationAgent(convId, clientNom, statut) {
+function filtrerConversations(filtre, btn) {
+  filtreConvAgent = filtre;
+  document.querySelectorAll('.cf-conv-filtre').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  rendreListeConversations();
+}
+
+function majComptesConversations() {
+  const compter = (statuts) =>
+    conversationsAgent.filter(c => statuts.includes(c.statut)).length;
+  const set = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n; };
+  set('compte-actives',    compter(['en_attente', 'en_cours']));
+  set('compte-en_attente', compter(['en_attente']));
+  set('compte-terminees',  compter(['resolue', 'fermee']));
+}
+
+function rendreListeConversations() {
+  const conteneur = document.getElementById('liste-conversations');
+  if (!conteneur) return;
+
+  const statuts = SEGMENTS_CONV[filtreConvAgent];   // null => toutes
+  const liste = (statuts
+    ? conversationsAgent.filter(c => statuts.includes(c.statut))
+    : conversationsAgent.slice());
+
+  // Urgence d'abord (en_attente), puis les plus recentes.
+  liste.sort((a, b) =>
+    (PRIORITE_CONV[a.statut] - PRIORITE_CONV[b.statut]) || (b.id - a.id));
+
+  if (liste.length === 0) {
+    conteneur.innerHTML = `
+      <div class="text-center py-4">
+        <i class="bi bi-chat-dots" style="font-size:2rem;color:var(--cf-text-muted)"></i>
+        <p style="color:var(--cf-text-muted);font-size:0.85rem;margin-top:8px">
+          Aucune conversation ici.
+        </p>
+      </div>`;
+    return;
+  }
+
+  conteneur.innerHTML = liste.map(c => {
+    const actif     = chatAgentConvId === c.id;
+    const enAttente = c.statut === 'en_attente';
+    const nonLus    = c.nb_messages_non_lus || 0;
+    return `
+      <div class="cf-conv-item${actif ? ' actif' : ''}${enAttente ? ' attente' : ''}"
+           onclick="ouvrirConversationAgent(${c.id})">
+        <div class="d-flex justify-content-between align-items-start gap-2">
+          <div style="min-width:0;flex:1">
+            <div class="cf-conv-nom">${escapeChat(c.client_username || '')}</div>
+            <div class="cf-conv-sujet">${escapeChat(c.sujet ? c.sujet : 'Conv. #' + c.id)}</div>
+            ${renderTagsAgent(c.categories)}
+          </div>
+          <div class="d-flex flex-column align-items-end gap-1" style="flex-shrink:0">
+            ${UI.statutBadge(c.statut)}
+            ${nonLus > 0 ? `<span class="cf-conv-nonlus">${nonLus}</span>` : ''}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function ouvrirConversationAgent(convId) {
   chatAgentConvId = convId;
+  let conv = conversationsAgent.find(c => c.id === convId);
 
   /* Rejoindre si en attente */
-  if (statut === 'en_attente') {
-    await API.post(`/chat/${convId}/rejoindre/`);
+  if (conv && conv.statut === 'en_attente') {
+    const r = await API.post(`/chat/${convId}/rejoindre/`);
+    if (r.ok) conv = r.data;
   }
+  convAgentCourante = conv || { id: convId };
 
   /* Afficher la zone chat */
   document.getElementById('chat-agent-placeholder').style.display = 'none';
-  const actif = document.getElementById('chat-agent-actif');
-  actif.style.display  = 'flex';
+  document.getElementById('chat-agent-actif').style.display = 'flex';
 
-  document.getElementById('chat-agent-client-nom').textContent  = clientNom;
-  document.getElementById('chat-agent-conv-info').textContent   = `Conversation #${convId}`;
+  document.getElementById('chat-agent-client-nom').textContent =
+    convAgentCourante.client_username || 'Client';
+  document.getElementById('chat-agent-conv-info').textContent =
+    convAgentCourante.sujet || `Conversation #${convId}`;
+
+  majBarreStatutAgent(convAgentCourante);
 
   /* Charger historique */
   const user   = Session.getUser();
   const resMsg = await API.get(`/chat/${convId}/messages/`);
   const zone   = document.getElementById('chat-agent-messages');
   zone.innerHTML = '';
-
-  if (resMsg.ok && resMsg.data.length > 0) {
-    resMsg.data.forEach(msg => {
-      ajouterMsgAgent(msg.contenu, msg.auteur_username, msg.created_at,
-        msg.auteur === user.id);
-    });
-  }
+  if (resMsg.ok) resMsg.data.forEach(msg => ajouterMsgAgent(msg, msg.auteur === user.id));
 
   /* Connecter WS */
   if (chatAgentSocket) chatAgentSocket.close();
@@ -562,9 +647,7 @@ async function ouvrirConversationAgent(convId, clientNom, statut) {
 }
 
 function connecterChatAgentWS(convId) {
-  const token = Session.getToken();
-  const url   = `ws://127.0.0.1:8000/ws/chat/${convId}/?token=${token}`;
-  chatAgentSocket = new WebSocket(url);
+  chatAgentSocket = new WebSocket(wsChatUrl(convId));
   const dot       = document.getElementById('chat-agent-ws-dot');
 
   chatAgentSocket.onopen  = () => { if (dot) dot.style.background = '#00A86B'; };
@@ -575,24 +658,41 @@ function connecterChatAgentWS(convId) {
     const user = Session.getUser();
 
     if (data.type === 'message') {
-      const estMoi = data.auteur === user.username;
-      ajouterMsgAgent(data.contenu, data.auteur, data.created_at, estMoi);
+      ajouterMsgAgent({
+        message_id: data.message_id, contenu: data.contenu,
+        auteur_username: data.auteur, created_at: data.created_at,
+        piece_jointe_url: data.piece_jointe_url, piece_jointe_nom: data.piece_jointe_nom,
+        est_recu: false, est_lu: false,
+      }, data.auteur === user.username);
     }
 
-    if (data.type === 'typing') {
+    else if (data.type === 'typing') {
       const ind = document.getElementById('chat-agent-typing');
       if (data.username !== user.username) {
         ind.textContent = data.est_en_train_d_ecrire
-          ? `${data.username} est en train d'ecrire...`
-          : '';
+          ? `${data.username} est en train d'ecrire...` : '';
       }
+    }
+
+    else if (data.type === 'statut') {
+      if (convAgentCourante) {
+        convAgentCourante.statut = data.statut;
+        majBarreStatutAgent(convAgentCourante);
+      }
+      chargerConversations();
+    }
+
+    else if (data.type === 'receipt') {
+      majRecusAgent(data.message_ids, data.etat);
     }
   };
 }
 
-function ajouterMsgAgent(contenu, auteur, createdAt, estMoi) {
+function ajouterMsgAgent(msg, estMoi) {
   const zone = document.getElementById('chat-agent-messages');
   const div  = document.createElement('div');
+  const mid  = msg.message_id != null ? msg.message_id : msg.id;  // WS=message_id, historique=id
+  if (mid != null) div.dataset.msgId = mid;
   div.style.cssText = `
     max-width:75%;
     padding:10px 14px;
@@ -604,16 +704,23 @@ function ajouterMsgAgent(contenu, auteur, createdAt, estMoi) {
     overflow-wrap:anywhere;
     border:1px solid ${estMoi ? 'transparent' : 'var(--cf-border)'}`;
 
+  const heure = msg.created_at
+    ? new Date(msg.created_at).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})
+    : '';
+  const recu = estMoi
+    ? `<span class="cf-receipt ${msg.est_lu ? 'lu' : ''}" data-receipt="${mid}">${rendreRecu(msg.est_recu, msg.est_lu)}</span>`
+    : '';
+
   div.innerHTML = `
     <div style="font-size:0.72rem;font-weight:700;margin-bottom:4px;
          color:${estMoi ? 'rgba(255,255,255,0.8)' : 'var(--cf-green)'}">
-      ${auteur}
+      ${escapeChat(msg.auteur_username || '')}
     </div>
-    ${contenu}
+    ${escapeChat(msg.contenu || '')}
+    ${rendrePieceJointe(msg)}
     <div style="font-size:0.65rem;margin-top:4px;
          color:${estMoi ? 'rgba(255,255,255,0.6)' : 'var(--cf-text-muted)'}">
-      ${createdAt ? new Date(createdAt).toLocaleTimeString('fr-FR',
-        {hour:'2-digit', minute:'2-digit'}) : ''}
+      ${heure}${recu}
     </div>`;
 
   zone.appendChild(div);
@@ -669,6 +776,8 @@ async function chargerProfil() {
       document.getElementById('profil-email').value     = res.data.email || '';
       document.getElementById('profil-telephone').value = res.data.telephone || '';
       document.getElementById('profil-region').value    = res.data.region || '';
+      document.getElementById('profil-specialite').value = res.data.specialite || '';
+      document.getElementById('profil-disponible').checked = !!res.data.est_disponible;
     }
   } catch (err) {}
 }
@@ -678,9 +787,11 @@ async function sauverProfil() {
   UI.btnLoading(btn, true);
 
   const res = await API.patch('/auth/profile/', {
-    email:     document.getElementById('profil-email').value,
-    telephone: document.getElementById('profil-telephone').value,
-    region:    document.getElementById('profil-region').value,
+    email:          document.getElementById('profil-email').value,
+    telephone:      document.getElementById('profil-telephone').value,
+    region:         document.getElementById('profil-region').value,
+    specialite:     document.getElementById('profil-specialite').value,
+    est_disponible: document.getElementById('profil-disponible').checked,
   });
 
   const alerte = document.getElementById('alerte-profil');
@@ -698,4 +809,317 @@ async function sauverProfil() {
   }
 
   UI.btnLoading(btn, false);
+}
+
+/* ============================================================
+   TEMPS REEL — rafraichissement live a l'arrivee d'une demande
+   (evenement emis par realtime.js a la reception WebSocket)
+   ============================================================ */
+window.addEventListener('cf:dossier-nouveau', () => {
+  if (typeof chargerDossiers === 'function')   chargerDossiers('');
+  if (typeof chargerStatsAgent === 'function') chargerStatsAgent();
+});
+
+/* Toute nouvelle notification (detectee par WS ou polling) rafraichit les
+   listes pertinentes — garantit le live meme sans WebSocket fiable. */
+window.addEventListener('cf:notification', () => {
+  if (typeof chargerStatsAgent === 'function')        chargerStatsAgent();
+  if (typeof chargerDossiers === 'function')          chargerDossiers('');
+  if (typeof chargerConversations === 'function')     chargerConversations();
+  if (typeof chargerPaiementsAValider === 'function') chargerPaiementsAValider();
+});
+
+/* ============================================================
+   TICKETS — helpers communs (agent)
+   ============================================================ */
+function wsChatUrl(convId) {
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  return `${proto}://${location.host}/ws/chat/${convId}/?token=${Session.getToken()}`;
+}
+
+function escapeChat(txt) {
+  const d = document.createElement('div');
+  d.textContent = txt;
+  return d.innerHTML.replace(/\n/g, '<br>');
+}
+
+function rendreRecu(estRecu, estLu) {
+  if (estLu)   return '&#10003;&#10003;';   // ✓✓ (lu → classe .lu pour la couleur)
+  if (estRecu) return '&#10003;&#10003;';   // ✓✓
+  return '&#10003;';                          // ✓ (envoyé)
+}
+
+function rendrePieceJointe(msg) {
+  if (!msg.piece_jointe_url) return '';
+  const nom = msg.piece_jointe_nom || 'fichier';
+  if (/\.(jpe?g|png|gif|webp)$/i.test(nom)) {
+    return `<a href="${msg.piece_jointe_url}" target="_blank" rel="noopener">
+      <img src="${msg.piece_jointe_url}" alt="piece jointe"
+           style="display:block;margin-top:6px;max-width:200px;max-height:160px;border-radius:8px"/></a>`;
+  }
+  return `<a class="cf-chat-attach" href="${msg.piece_jointe_url}" target="_blank" rel="noopener">
+    <i class="bi bi-file-earmark-text"></i> ${escapeChat(nom)}</a>`;
+}
+
+function renderTagsAgent(categories) {
+  if (!categories || !categories.length) return '';
+  return `<div class="d-flex flex-wrap gap-1 mt-1">` +
+    categories.map(c => `<span class="cf-chat-tag" style="background:${c.couleur}">${escapeChat(c.nom)}</span>`).join('') +
+    `</div>`;
+}
+
+function majBarreStatutAgent(conv) {
+  const s = document.getElementById('chat-agent-statut');
+  if (s) s.innerHTML = UI.statutBadge(conv.statut);
+  const t = document.getElementById('chat-agent-tags');
+  if (t) t.innerHTML = (conv.categories || [])
+    .map(c => `<span class="cf-chat-tag" style="background:${c.couleur}">${escapeChat(c.nom)}</span>`).join('');
+}
+
+function majRecusAgent(ids, etat) {
+  (ids || []).forEach(id => {
+    const el = document.querySelector(`#chat-agent-messages [data-receipt="${id}"]`);
+    if (!el) return;
+    if (etat === 'lu') { el.innerHTML = '&#10003;&#10003;'; el.classList.add('lu'); }
+    else if (!el.classList.contains('lu')) { el.innerHTML = '&#10003;&#10003;'; }
+  });
+}
+
+/* ============================================================
+   TICKETS — actions agent (statut, transfert, tags, fichier)
+   ============================================================ */
+async function changerStatutConv(statut) {
+  if (!chatAgentConvId) return;
+  const res = await API.patch(`/chat/${chatAgentConvId}/statut/`, { statut });
+  if (res.ok) {
+    convAgentCourante = res.data;
+    majBarreStatutAgent(res.data);
+    Toast.show('Statut mis a jour.', 'success');
+    chargerConversations();
+  } else {
+    Toast.show((res.data && res.data.detail) || 'Erreur.', 'error');
+  }
+}
+
+async function ouvrirTransfert() {
+  if (!chatAgentConvId) return;
+  const res = await API.get('/chat/agents-transfert/');
+  const sel = document.getElementById('transfert-agent');
+  sel.innerHTML = (res.ok && res.data.length
+    ? res.data.map(a => `<option value="${a.id}">${escapeChat(a.username)}`
+        + `${a.specialite ? ' — ' + escapeChat(a.specialite) : ''}`
+        + `${a.est_disponible ? ' (dispo)' : ''}</option>`).join('')
+    : '<option value="">Aucun agent disponible</option>');
+  document.getElementById('transfert-note').value = '';
+  document.getElementById('modal-transfert').style.display = 'flex';
+}
+
+async function validerTransfert() {
+  const agentId = document.getElementById('transfert-agent').value;
+  const note    = document.getElementById('transfert-note').value.trim();
+  if (!agentId) return;
+  const res = await API.post(`/chat/${chatAgentConvId}/transferer/`, { agent_id: agentId, note });
+  if (res.ok) {
+    fermerModale('modal-transfert');
+    Toast.show('Conversation transferee.', 'success');
+    chargerConversations();
+  } else {
+    Toast.show((res.data && res.data.detail) || 'Erreur.', 'error');
+  }
+}
+
+async function ouvrirTags() {
+  if (!chatAgentConvId) return;
+  if (!categoriesCacheAgent.length) {
+    const res = await API.get('/chat/categories/');
+    categoriesCacheAgent = res.ok ? res.data : [];
+  }
+  const actuelles = ((convAgentCourante && convAgentCourante.categories) || []).map(c => c.id);
+  document.getElementById('tags-liste').innerHTML = categoriesCacheAgent.map(c => `
+    <label class="d-flex align-items-center gap-2" style="cursor:pointer">
+      <input type="checkbox" value="${c.id}" ${actuelles.includes(c.id) ? 'checked' : ''}/>
+      <span class="cf-chat-tag" style="background:${c.couleur}">${escapeChat(c.nom)}</span>
+    </label>`).join('');
+  document.getElementById('modal-tags').style.display = 'flex';
+}
+
+async function validerTags() {
+  const ids = Array.from(document.querySelectorAll('#tags-liste input:checked'))
+    .map(i => parseInt(i.value, 10));
+  const res = await API.post(`/chat/${chatAgentConvId}/categories/`, { categorie_ids: ids });
+  if (res.ok) {
+    convAgentCourante = res.data;
+    majBarreStatutAgent(res.data);
+    fermerModale('modal-tags');
+    Toast.show('Categories mises a jour.', 'success');
+    chargerConversations();
+  } else {
+    Toast.show('Erreur.', 'error');
+  }
+}
+
+function fermerModale(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = 'none';
+}
+
+async function envoyerPieceJointeAgent() {
+  const input = document.getElementById('chat-agent-fichier');
+  const fichier = input.files[0];
+  if (!fichier || !chatAgentConvId) return;
+  const form = new FormData();
+  form.append('piece_jointe', fichier);
+  const res = await API.upload(`/chat/${chatAgentConvId}/piece-jointe/`, form);
+  input.value = '';
+  if (!res || !res.ok) {
+    Toast.show((res && res.data && res.data.detail) || "Echec de l'envoi.", 'error');
+  }
+  // Le message s'affiche via le WebSocket (diffusion au groupe).
+}
+
+/* ============================================================
+   ECHEANCES A ENCAISSER — pre-remplissage du paiement (item #5)
+   ============================================================ */
+async function chargerEcheancesAVenir() {
+  const conteneur = document.getElementById('liste-echeances-venir');
+  if (!conteneur) return;
+  try {
+    const res = await API.get('/repayments/a-venir/');
+    if (!res.ok) { conteneur.innerHTML = '<p class="text-muted">Erreur.</p>'; return; }
+
+    if (res.data.length === 0) {
+      conteneur.innerHTML = `
+        <div class="text-center py-3" style="color:var(--cf-text-muted);font-size:0.86rem">
+          <i class="bi bi-check2-circle me-1"></i>Aucune echeance a encaisser pour le moment.
+        </div>`;
+      return;
+    }
+
+    conteneur.innerHTML = res.data.map(e => `
+      <div class="d-flex align-items-center justify-content-between gap-2"
+           style="padding:10px 12px;border:1px solid var(--cf-border);
+                  border-radius:var(--cf-radius-sm);margin-bottom:8px;background:var(--cf-surface-2)">
+        <div style="min-width:0">
+          <div style="font-weight:700;font-size:0.85rem">
+            ${escapeAttr(e.client)} — echeance n&deg;${e.numero}
+            ${e.en_retard ? '<span class="cf-badge cf-badge-red ms-1">En retard</span>' : ''}
+          </div>
+          <div style="font-size:0.75rem;color:var(--cf-text-muted)">
+            ${UI.montant(e.montant_du)} — du ${UI.date(e.date_echeance)} — credit #${e.demande_id}
+          </div>
+        </div>
+        <button class="btn btn-sm ${e.payable ? 'btn-cf-primary' : ''}"
+                ${e.payable ? '' : 'disabled title="Echeance precedente impayee"'}
+                style="white-space:nowrap;${e.payable ? '' : 'opacity:0.5'}"
+                onclick="preparerPaiement(${e.echeance_id}, '${e.montant_du}', '${escapeAttr(e.reference_suggeree)}')">
+          Preparer
+        </button>
+      </div>`).join('');
+  } catch (err) {
+    conteneur.innerHTML = '<p class="text-muted">Erreur.</p>';
+  }
+}
+
+function preparerPaiement(echeanceId, montant, reference) {
+  document.getElementById('paiement-echeance-id').value  = echeanceId;
+  document.getElementById('paiement-montant').value      = montant;
+  document.getElementById('paiement-reference').value    = reference;
+  afficherAlertePaiement('Formulaire pre-rempli. Verifiez puis enregistrez.', 'success');
+  document.getElementById('paiement-montant').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/* ============================================================
+   PAIEMENTS DECLARES PAR LES CLIENTS — a valider
+   ============================================================ */
+async function chargerPaiementsAValider() {
+  const conteneur = document.getElementById('liste-paiements-valider');
+  if (!conteneur) return;
+  try {
+    const res = await API.get('/repayments/a-valider/');
+    if (!res.ok) { conteneur.innerHTML = '<p class="text-muted">Erreur.</p>'; return; }
+
+    if (res.data.length === 0) {
+      conteneur.innerHTML = `
+        <div class="text-center py-3" style="color:var(--cf-text-muted);font-size:0.86rem">
+          <i class="bi bi-check2-circle me-1"></i>Aucun paiement en attente de validation.
+        </div>`;
+      return;
+    }
+
+    conteneur.innerHTML = res.data.map(p => {
+      const e = p.echeance_detail || {};
+      return `
+      <div class="d-flex align-items-center justify-content-between gap-2"
+           style="padding:10px 12px;border:1px solid var(--cf-border);
+                  border-radius:var(--cf-radius-sm);margin-bottom:8px;background:var(--cf-surface-2)">
+        <div style="min-width:0">
+          <div style="font-weight:700;font-size:0.85rem">
+            ${escapeAttr(p.client_username)} — echeance n&deg;${e.numero || '?'}
+            <span class="cf-badge cf-badge-blue ms-1">${(p.mode_paiement || '').replace('_', ' ').toUpperCase()}</span>
+          </div>
+          <div style="font-size:0.75rem;color:var(--cf-text-muted)">
+            ${UI.montant(p.montant_paye)} — credit #${p.demande_id} — ref. ${escapeAttr(p.reference_transaction || '--')}
+          </div>
+        </div>
+        <button class="btn btn-sm btn-cf-primary" style="white-space:nowrap"
+                onclick="validerPaiement(${p.id})">
+          <i class="bi bi-check2 me-1"></i>Valider
+        </button>
+      </div>`;
+    }).join('');
+  } catch (err) {
+    conteneur.innerHTML = '<p class="text-muted">Erreur.</p>';
+  }
+}
+
+async function validerPaiement(id) {
+  if (!confirm('Confirmer la validation de ce paiement ?')) return;
+  const res = await API.post(`/repayments/${id}/valider/`);
+  if (res.ok) {
+    Toast.show('Paiement valide.', 'success');
+    chargerPaiementsAValider();
+    chargerEcheancesAVenir();
+    chargerStatsAgent();
+  } else {
+    Toast.show((res.data && res.data.detail) || 'Erreur.', 'error');
+  }
+}
+
+function escapeAttr(txt) {
+  return String(txt == null ? '' : txt)
+    .replace(/&/g, '&amp;').replace(/'/g, '&#39;').replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/* ============================================================
+   DIAGRAMME — repartition des dossiers par statut (item 7)
+   ============================================================ */
+let chartDossiersAgent = null;
+
+function cfTextColor() {
+  return (getComputedStyle(document.body).getPropertyValue('--cf-text') || '#555').trim();
+}
+
+function doughnutCf(canvasId, labels, valeurs, couleurs, existant) {
+  const el = document.getElementById(canvasId);
+  if (!el || typeof Chart === 'undefined') return existant;
+  if (existant) existant.destroy();
+  return new Chart(el, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data: valeurs, backgroundColor: couleurs, borderWidth: 0 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '62%',
+      plugins: { legend: { position: 'bottom',
+        labels: { padding: 14, color: cfTextColor(), font: { size: 12 } } } },
+    },
+  });
+}
+
+function renderChartDossiersAgent(dossiers) {
+  const n = (s) => dossiers.filter(x => x.statut === s).length;
+  chartDossiersAgent = doughnutCf('chart-dossiers-agent',
+    ['Soumis', 'En analyse', 'Approuves', 'Decaisses', 'Rejetes'],
+    [n('soumise'), n('en_analyse'), n('approuvee'), n('decaissee'), n('rejetee')],
+    ['#F2640D', '#3B82F6', '#0B9C66', '#8B5CF6', '#EF4444'],
+    chartDossiersAgent);
 }

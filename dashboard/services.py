@@ -71,12 +71,15 @@ def get_indicateurs_assurance():
 
     return Souscription.objects.aggregate(
         total=Count('id'),
-        actives=Count('id', filter=Q(statut='active')),
+        en_attente=Count('id', filter=Q(statut='en_attente')),
+        # Clé 'actives' conservée pour le front, désormais = souscriptions en cours.
+        actives=Count('id', filter=Q(statut='en_cours')),
+        rejetees=Count('id', filter=Q(statut='rejetee')),
         expirees=Count('id', filter=Q(statut='expiree')),
         resiliees=Count('id', filter=Q(statut='resiliee')),
         revenus_primes=Sum(
             'produit__prime_mensuelle',
-            filter=Q(statut='active')
+            filter=Q(statut='en_cours')
         ),
     )
 
@@ -87,8 +90,10 @@ def get_indicateurs_support():
 
     stats_conv = Conversation.objects.aggregate(
         total=Count('id'),
-        ouvertes=Count('id', filter=Q(statut='ouverte')),
+        # Clé 'ouvertes' conservée pour le front, désormais = conversations en cours.
+        ouvertes=Count('id', filter=Q(statut='en_cours')),
         en_attente=Count('id', filter=Q(statut='en_attente')),
+        resolues=Count('id', filter=Q(statut='resolue')),
         fermees=Count('id', filter=Q(statut='fermee')),
     )
 

@@ -6,8 +6,11 @@ from insurance.views import (
     souscrire,
     mes_souscriptions,
     detail_souscription,
+    demander_resiliation,
     resilier,
     toutes_souscriptions,
+    approuver_souscription,
+    rejeter_souscription,
 )
 
 urlpatterns = [
@@ -19,7 +22,10 @@ urlpatterns = [
     # Souscriptions
     path('souscrire/',              souscrire,            name='insurance-souscrire'),
     path('mes-souscriptions/',      mes_souscriptions,    name='insurance-mes-souscriptions'),
-    path('<int:pk>/',               detail_souscription,  name='insurance-detail'),
-    path('<int:pk>/resilier/',      resilier,             name='insurance-resilier'),
     path('toutes/',                 toutes_souscriptions, name='insurance-toutes'),
+    path('<int:pk>/approuver/',     approuver_souscription, name='insurance-approuver'),
+    path('<int:pk>/rejeter/',       rejeter_souscription, name='insurance-rejeter'),
+    path('<int:pk>/demander-resiliation/', demander_resiliation, name='insurance-demander-resiliation'),
+    path('<int:pk>/resilier/',      resilier,             name='insurance-resilier'),
+    path('<int:pk>/',               detail_souscription,  name='insurance-detail'),
 ]

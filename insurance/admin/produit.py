@@ -12,6 +12,8 @@ class ProduitAssuranceAdmin(admin.ModelAdmin):
 
 @admin.register(Souscription)
 class SouscriptionAdmin(admin.ModelAdmin):
-    list_display  = ('client', 'produit', 'statut', 'date_debut', 'date_fin')
-    list_filter   = ('statut', 'produit')
-    search_fields = ('client__username',)
+    list_display  = ('client', 'produit', 'statut', 'resiliation_demandee',
+                     'agent_traitant', 'date_debut', 'date_fin')
+    list_filter   = ('statut', 'resiliation_demandee', 'produit')
+    search_fields = ('client__username', 'agent_traitant__username')
+    raw_id_fields = ('client', 'produit', 'agent_traitant')

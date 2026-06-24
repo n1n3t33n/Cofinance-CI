@@ -1,1 +1,6 @@
-from .conversation import ConversationSerializer, MessageSerializer
+from .conversation import (
+    ConversationSerializer,
+    MessageSerializer,
+    CategorieSerializer,
+    EvaluationSerializer,
+)

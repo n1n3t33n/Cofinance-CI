@@ -4,9 +4,19 @@ Services métier du module credits.
 - Génération de l'échéancier de remboursement
 """
 
+import secrets
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from decimal import Decimal
+
+
+def generer_reference_credit(demande) -> str:
+    """
+    Référence de paiement unique et stable d'un crédit, pré-enregistrée à
+    l'approbation. Format : CRD-<id>-<6 hex>. Le client l'utilise pour régler
+    toutes ses échéances. L'unicité est garantie par la contrainte du modèle.
+    """
+    return f"CRD-{demande.pk:05d}-{secrets.token_hex(3).upper()}"
 
 
 def calculer_score(demande) -> float:
@@ -85,3 +95,70 @@ def generer_echeancier(demande) -> list:
         })
 
     return echeances
+
+
+# ── NOTIFICATIONS TEMPS RÉEL ──────────────────────────────────
+
+def _fmt_montant(valeur) -> str:
+    """Formate un montant avec des espaces comme séparateurs de milliers."""
+    return f"{int(valeur):,}".replace(',', ' ')
+
+
+def notifier_nouvelle_demande(demande):
+    """
+    À la soumission d'une demande de crédit :
+      - notifie en temps réel chaque agent et admin actif (badge + toast) ;
+      - diffuse un signal 'dossier_nouveau' pour que les tableaux de bord
+        agent/admin se rafraîchissent en direct.
+    """
+    from accounts.models import User
+    from notifications.services import creer_notification, diffuser_aux_roles
+
+    montant = _fmt_montant(demande.montant_demande)
+
+    destinataires = User.objects.filter(
+        role__in=[User.Role.AGENT, User.Role.ADMINISTRATEUR],
+        is_active=True,
+    )
+    for agent in destinataires:
+        creer_notification(
+            destinataire=agent,
+            type_notif='statut_credit',
+            titre="Nouvelle demande de crédit",
+            message=f"{demande.client.username} a soumis une demande de {montant} FCFA.",
+            objet_id=demande.pk,
+        )
+
+    diffuser_aux_roles(
+        ['agent', 'administrateur'],
+        'dossier_nouveau',
+        {'dossier': {
+            'id':              demande.pk,
+            'client':          demande.client.username,
+            'montant_demande': str(demande.montant_demande),
+            'statut':          demande.statut,
+        }},
+    )
+
+
+def notifier_changement_statut(demande):
+    """Notifie le client, en temps réel, du nouveau statut de sa demande."""
+    from notifications.services import creer_notification
+
+    messages = {
+        'en_analyse': "Votre demande de crédit est passée en analyse.",
+        'approuvee':  "Bonne nouvelle : votre demande de crédit a été approuvée.",
+        'decaissee':  "Votre crédit a été décaissé. Consultez votre échéancier.",
+        'rejetee':    "Votre demande de crédit a été rejetée.",
+    }
+    message = messages.get(demande.statut, "Le statut de votre demande a changé.")
+    if demande.commentaire_agent:
+        message += f" Commentaire de l'agent : {demande.commentaire_agent}"
+
+    creer_notification(
+        destinataire=demande.client,
+        type_notif='statut_credit',
+        titre="Mise à jour de votre demande de crédit",
+        message=message,
+        objet_id=demande.pk,
+    )

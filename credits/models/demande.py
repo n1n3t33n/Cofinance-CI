@@ -43,6 +43,15 @@ class DemandeCrédit(models.Model):
                                              help_text="Taux annuel en %")
     commentaire_agent = models.TextField(blank=True)
 
+    # Référence de paiement unique, pré-enregistrée à l'approbation et
+    # communiquée au client pour régler ses échéances.
+    reference_paiement = models.CharField(
+        max_length=40, unique=True, null=True, blank=True,
+    )
+
+    # Crédit entièrement remboursé (toutes les échéances payées).
+    est_soldee        = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -1843,13 +1843,61 @@ h1, h2, h3, h4, h5, h6 {
    ------------------------------------------------------------ */
 .cf-dash-shell { display: flex; }
 
-/* Cartes de la section conversations (agent) */
-.cf-conv-list { height: 600px; overflow-y: auto; }
+/* Cartes de la section conversations (agent) — inbox support */
+.cf-conv-list { height: 600px; display: flex; flex-direction: column; overflow: hidden; }
 .cf-conv-chat { height: 600px; }
+
+/* Filtres fixes en haut, liste scrollable en dessous */
+.cf-conv-scroll { flex: 1; overflow-y: auto; margin: 0 -2px; padding: 0 2px; }
+
+.cf-conv-filtres { border-bottom: 1px solid var(--cf-border); padding-bottom: 12px; }
+.cf-conv-filtre {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 0.75rem; font-weight: 600;
+  padding: 5px 11px; border-radius: var(--cf-radius-full);
+  background: var(--cf-surface-2); color: var(--cf-text-muted);
+  border: 1px solid var(--cf-border); cursor: pointer;
+  transition: var(--cf-transition);
+}
+.cf-conv-filtre:hover { color: var(--cf-orange); border-color: var(--cf-orange); }
+.cf-conv-filtre.active {
+  background: var(--cf-orange); color: #fff; border-color: var(--cf-orange);
+}
+.cf-conv-compte {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px; padding: 0 5px;
+  font-size: 0.66rem; font-weight: 800; line-height: 1;
+  border-radius: 999px; background: rgba(0, 0, 0, 0.12); color: inherit;
+}
+.cf-conv-filtre.active .cf-conv-compte { background: rgba(255, 255, 255, 0.28); }
+
+/* Élément de conversation dans l'inbox */
+.cf-conv-item {
+  padding: 11px 12px; border-radius: var(--cf-radius);
+  background: var(--cf-surface-2); border: 1px solid var(--cf-border);
+  margin-bottom: 8px; cursor: pointer; transition: var(--cf-transition);
+}
+.cf-conv-item:hover { border-color: var(--cf-orange); background: var(--cf-surface); }
+.cf-conv-item.actif { border-color: var(--cf-orange); background: rgba(242, 100, 13, 0.08); }
+.cf-conv-item.attente { border-left: 3px solid var(--cf-orange); }
+.cf-conv-nom {
+  font-weight: 700; font-size: 0.88rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cf-conv-sujet {
+  font-size: 0.74rem; color: var(--cf-text-muted); margin-top: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cf-conv-nonlus {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px; padding: 0 5px;
+  font-size: 0.66rem; font-weight: 800;
+  border-radius: 999px; background: var(--cf-orange); color: #fff;
+}
 
 /* Les cartes conversations s'empilent dès le breakpoint lg (col-lg-*) */
 @media (max-width: 991.98px) {
-  .cf-conv-list  { height: auto; max-height: 320px; }
+  .cf-conv-list  { height: auto; max-height: 420px; }
   .cf-conv-chat  { height: 72vh; min-height: 460px; }
 }
 
@@ -1872,3 +1920,108 @@ h1, h2, h3, h4, h5, h6 {
   [data-reveal] { opacity: 1 !important; transform: none !important; filter: none !important; }
   .cf-card-stat { animation: none !important; }
 }
+
+/* ------------------------------------------------------------
+   TICKETS — boutons icône, modales, tags, accusés, étoiles
+   ------------------------------------------------------------ */
+.cf-icon-btn {
+  background: var(--cf-surface-2);
+  color: var(--cf-text-muted);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius-sm);
+  font-size: 0.85rem;
+  line-height: 1;
+  transition: var(--cf-transition);
+}
+.cf-icon-btn:hover {
+  color: var(--cf-orange);
+  border-color: var(--cf-orange);
+  background: rgba(242, 100, 13, 0.08);
+}
+
+.cf-modal-overlay {
+  position: fixed; inset: 0; z-index: 1080;
+  background: rgba(16, 13, 23, 0.55);
+  backdrop-filter: blur(3px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  animation: pageEnter 0.2s ease both;
+}
+.cf-modal-box {
+  background: var(--cf-surface);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius-lg);
+  box-shadow: var(--cf-shadow-lg, 0 24px 60px rgba(0,0,0,0.25));
+  width: 100%; max-width: 440px;
+  padding: 26px;
+}
+
+/* Tag / catégorie dans un ticket */
+.cf-chat-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.68rem; font-weight: 700;
+  padding: 2px 9px; border-radius: 999px;
+  color: #fff; white-space: nowrap;
+}
+
+/* Accusés de réception (envoyé / reçu / lu) */
+.cf-receipt { font-size: 0.62rem; margin-left: 4px; opacity: 0.85; }
+.cf-receipt.lu { color: #38BDF8; }
+
+/* Pièce jointe dans un message */
+.cf-chat-attach {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 6px; padding: 7px 11px;
+  border-radius: var(--cf-radius-sm);
+  background: rgba(0,0,0,0.06);
+  font-size: 0.78rem; font-weight: 600;
+  text-decoration: none; color: inherit;
+}
+.cf-chat-attach:hover { text-decoration: underline; }
+
+/* Notation par étoiles (évaluation client) */
+.cf-star {
+  cursor: pointer; font-size: 1.7rem; color: var(--cf-border);
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+.cf-star:hover { transform: scale(1.15); }
+.cf-star.active { color: #F5B301; }
+
+/* Lien de navigation de la page courante (navbar adaptative) */
+.cf-nav-links a.cf-link-active,
+.cf-mobile-menu a.cf-link-active {
+  color: var(--cf-orange);
+  font-weight: 700;
+}
+
+/* ------------------------------------------------------------
+   MODE SOMBRE — correctifs (controles natifs + Bootstrap)
+   ------------------------------------------------------------ */
+/* color-scheme : aligne dates, menus deroulants, scrollbars natifs. */
+:root            { color-scheme: light; }
+[data-theme="dark"] { color-scheme: dark; }
+
+/* Le bouton de fermeture Bootstrap (SVG sombre) devient visible en sombre. */
+[data-theme="dark"] .btn-close {
+  filter: invert(1) grayscale(100%) brightness(180%);
+}
+
+/* ------------------------------------------------------------
+   CLOCHE — liste deroulante des notifications
+   ------------------------------------------------------------ */
+.cf-notif-dropdown { position: relative; }
+.cf-notif-menu { min-width: 320px; max-width: 360px; }
+.cf-notif-list { max-height: 360px; overflow-y: auto; margin: 4px 0; }
+.cf-notif-item {
+  padding: 10px 12px;
+  border-radius: var(--cf-radius-sm);
+  border-left: 3px solid transparent;
+}
+.cf-notif-item:hover { background: var(--cf-surface-2); }
+.cf-notif-item.non-lue {
+  border-left-color: var(--cf-orange);
+  background: rgba(242, 100, 13, 0.05);
+}
+.cf-notif-item-titre { font-weight: 700; font-size: 0.82rem; }
+.cf-notif-item-msg   { font-size: 0.76rem; color: var(--cf-text-muted); margin-top: 2px; }
+.cf-notif-item-date  { font-size: 0.68rem; color: var(--cf-text-muted); margin-top: 4px; }

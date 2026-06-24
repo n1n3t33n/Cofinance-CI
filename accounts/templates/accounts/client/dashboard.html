@@ -30,7 +30,8 @@
   <!-- Cartes statistiques -->
   <div class="row g-3 mb-4" id="stats-cards">
     <div class="col-lg-3 col-md-6">
-      <div class="cf-card-stat">
+      <div class="cf-card-stat" style="cursor:pointer"
+           onclick="afficherSection('credits')" title="Voir mes credits">
         <div class="stat-icon stat-icon-orange">
           <i class="bi bi-cash-stack"></i>
         </div>
@@ -41,7 +42,8 @@
       </div>
     </div>
     <div class="col-lg-3 col-md-6">
-      <div class="cf-card-stat">
+      <div class="cf-card-stat" style="cursor:pointer"
+           onclick="afficherSection('credits')" title="Voir mes credits actifs">
         <div class="stat-icon stat-icon-green">
           <i class="bi bi-check-circle"></i>
         </div>
@@ -52,7 +54,8 @@
       </div>
     </div>
     <div class="col-lg-3 col-md-6">
-      <div class="cf-card-stat">
+      <div class="cf-card-stat" style="cursor:pointer"
+           onclick="afficherSection('assurances')" title="Voir mes assurances">
         <div class="stat-icon stat-icon-blue">
           <i class="bi bi-shield-check"></i>
         </div>
@@ -63,7 +66,8 @@
       </div>
     </div>
     <div class="col-lg-3 col-md-6">
-      <div class="cf-card-stat">
+      <div class="cf-card-stat" style="cursor:pointer"
+           onclick="afficherSection('notifications')" title="Voir mes notifications">
         <div class="stat-icon stat-icon-purple">
           <i class="bi bi-bell"></i>
         </div>
@@ -72,6 +76,16 @@
           <div class="stat-label">Notifications</div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Diagramme : repartition de mes credits par statut -->
+  <div class="cf-card mb-4">
+    <h5 style="font-weight:700;margin-bottom:16px">
+      <i class="bi bi-pie-chart me-2 text-orange"></i>Mes credits par statut
+    </h5>
+    <div style="position:relative;height:240px">
+      <canvas id="chart-credits-client"></canvas>
     </div>
   </div>
 
@@ -192,14 +206,69 @@
      SECTION : REMBOURSEMENTS
      ============================================================ -->
 <div id="section-remboursements" style="display:none">
+
+  <!-- Échéanciers des crédits actifs -->
+  <div class="cf-card mb-4">
+    <h5 style="font-weight:700;margin-bottom:8px">
+      <i class="bi bi-calendar3 me-2 text-orange"></i>
+      Mon échéancier de remboursement
+    </h5>
+    <p style="font-size:0.82rem;color:var(--cf-text-muted);margin:0 0 20px">
+      Réglez vos échéances avec la référence pré-enregistrée, puis joignez votre
+      justificatif dans le <a href="#" onclick="afficherSection('chat');return false"
+      style="color:var(--cf-orange);font-weight:600">chat support</a>.
+      L'agent valide ensuite votre paiement.
+    </p>
+    <div id="liste-echeanciers">
+      <div class="text-center py-4">
+        <div class="cf-spinner mx-auto"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Historique des paiements -->
   <div class="cf-card">
     <h5 style="font-weight:700;margin-bottom:24px">
       <i class="bi bi-arrow-repeat me-2 text-orange"></i>
-      Historique des remboursements
+      Historique des paiements
     </h5>
     <div id="table-remboursements">
       <div class="text-center py-4">
         <div class="cf-spinner mx-auto"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale : déclaration d'un paiement -->
+  <div id="modal-declaration" class="cf-modal-overlay" style="display:none">
+    <div class="cf-modal-box">
+      <h5 style="font-weight:700;margin-bottom:16px">
+        <i class="bi bi-cash-coin me-2 text-orange"></i>Déclarer un paiement
+      </h5>
+      <div id="declaration-resume" class="p-3 mb-3"
+           style="background:var(--cf-surface-2);border-radius:var(--cf-radius);font-size:0.86rem">
+      </div>
+      <label class="cf-label">Référence de paiement</label>
+      <input type="text" id="declaration-reference" class="cf-input mb-3" readonly/>
+      <label class="cf-label">Mode de paiement</label>
+      <select id="declaration-mode" class="cf-input mb-3">
+        <option value="orange_money">Orange Money</option>
+        <option value="wave">Wave</option>
+        <option value="mtn_momo">MTN MoMo</option>
+        <option value="especes">Espèces</option>
+      </select>
+      <label class="cf-label">Note (optionnel)</label>
+      <textarea id="declaration-note" class="cf-input mb-3" rows="2"
+                placeholder="Précision sur votre paiement..."></textarea>
+      <div class="cf-alert cf-alert-info show mb-3">
+        <i class="bi bi-info-circle"></i>
+        <span>Pensez à joindre votre justificatif dans le chat support.</span>
+      </div>
+      <div class="d-flex gap-2 justify-content-end">
+        <button class="btn cf-icon-btn" onclick="fermerModaleClient('modal-declaration')">Annuler</button>
+        <button id="btn-declarer" class="btn-cf-primary btn" onclick="soumettreDeclaration()">
+          Déclarer le paiement
+        </button>
       </div>
     </div>
   </div>
@@ -304,6 +373,31 @@
       </div>
     </div>
 
+    <!-- Bloc evaluation (visible quand la conversation est resolue / fermee) -->
+    <div id="chat-eval-bloc"
+         style="display:none;padding:14px;margin-top:10px;border:1px solid var(--cf-border);
+                border-radius:var(--cf-radius);background:var(--cf-surface-2)">
+      <div style="font-weight:700;font-size:0.9rem;margin-bottom:8px">
+        <i class="bi bi-star me-1 text-orange"></i>Evaluez votre support
+      </div>
+      <div id="chat-eval-etoiles" class="d-flex gap-1 mb-2">
+        <span class="cf-star" data-note="1">&#9733;</span>
+        <span class="cf-star" data-note="2">&#9733;</span>
+        <span class="cf-star" data-note="3">&#9733;</span>
+        <span class="cf-star" data-note="4">&#9733;</span>
+        <span class="cf-star" data-note="5">&#9733;</span>
+      </div>
+      <textarea id="chat-eval-commentaire" class="cf-input mb-2" rows="2"
+                placeholder="Un commentaire (optionnel)..."></textarea>
+      <button class="btn-cf-primary btn btn-sm" onclick="envoyerEvaluation()">
+        Envoyer mon avis
+      </button>
+      <div id="chat-eval-merci"
+           style="display:none;color:var(--cf-green);font-weight:700;font-size:0.85rem">
+        <i class="bi bi-check-circle me-1"></i>Merci pour votre retour !
+      </div>
+    </div>
+
     <!-- Indicateur frappe -->
     <div id="chat-typing"
          style="font-size:0.78rem;color:var(--cf-text-muted);font-style:italic;padding:6px 0;min-height:24px">
@@ -311,6 +405,12 @@
 
     <!-- Saisie -->
     <div style="display:flex;gap:10px;align-items:flex-end;padding-top:12px;border-top:1px solid var(--cf-border)">
+      <input type="file" id="chat-fichier" style="display:none"
+             accept="image/*,.pdf" onchange="envoyerPieceJointeClient()"/>
+      <button class="btn px-3 py-2 cf-icon-btn" title="Joindre un fichier (image/PDF)"
+              onclick="document.getElementById('chat-fichier').click()">
+        <i class="bi bi-paperclip"></i>
+      </button>
       <textarea id="chat-input" class="cf-input" rows="1"
                 placeholder="Ecrivez votre message..."
                 style="resize:none;max-height:80px"
@@ -348,5 +448,6 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="{% static 'js/dashboard_client.js' %}"></script>
 {% endblock %}

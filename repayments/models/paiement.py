@@ -5,8 +5,12 @@ from credits.models import Echeance
 
 class Paiement(models.Model):
     """
-    Enregistrement d'un paiement effectué par un client
-    sur une échéance donnée.
+    Enregistrement d'un paiement sur une échéance.
+
+    Deux origines possibles :
+      - déclaré par le client (statut « en attente »), puis validé par un agent ;
+      - enregistré directement par un agent (statut « validé »).
+    L'échéance ne passe « payée » qu'à la validation.
     """
 
     class ModePaiement(models.TextChoices):
@@ -14,6 +18,10 @@ class Paiement(models.Model):
         WAVE         = 'wave',         'Wave'
         MTN_MOMO     = 'mtn_momo',     'MTN MoMo'
         ESPECES      = 'especes',      'Espèces'
+
+    class Statut(models.TextChoices):
+        EN_ATTENTE = 'en_attente', 'En attente de validation'
+        VALIDE     = 'valide',     'Validé'
 
     echeance = models.ForeignKey(
         Echeance,
@@ -26,7 +34,18 @@ class Paiement(models.Model):
         null=True,
         related_name='paiements_enregistres',
     )
+    valide_par = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='paiements_valides',
+    )
 
+    statut        = models.CharField(
+        max_length=12,
+        choices=Statut.choices,
+        default=Statut.VALIDE,
+    )
     montant_paye  = models.DecimalField(max_digits=12, decimal_places=2)
     mode_paiement = models.CharField(
         max_length=20,

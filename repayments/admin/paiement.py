@@ -4,9 +4,9 @@ from repayments.models import Paiement, Penalite
 
 @admin.register(Paiement)
 class PaiementAdmin(admin.ModelAdmin):
-    list_display  = ('id', 'echeance', 'agent', 'montant_paye',
-                     'mode_paiement', 'date_paiement')
-    list_filter   = ('mode_paiement',)
+    list_display  = ('id', 'echeance', 'statut', 'agent', 'valide_par',
+                     'montant_paye', 'mode_paiement', 'date_paiement')
+    list_filter   = ('statut', 'mode_paiement')
     search_fields = ('echeance__demande__client__username', 'reference_transaction')
 
 

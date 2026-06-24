@@ -133,6 +133,8 @@ async function chargerDashboard() {
         </div>
       </div>`;
 
+    renderChartsAdmin(d);
+
   } catch (err) {
     console.error('Erreur dashboard:', err);
   }
@@ -401,6 +403,7 @@ async function chargerSouscriptions(filtre) {
               <th>Date debut</th>
               <th>Date fin</th>
               <th>Jours restants</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -412,9 +415,29 @@ async function chargerSouscriptions(filtre) {
                 <td style="font-size:0.82rem">${UI.date(s.date_debut)}</td>
                 <td style="font-size:0.82rem">${UI.date(s.date_fin)}</td>
                 <td>
-                  ${s.statut === 'active'
+                  ${s.statut === 'en_cours'
                     ? `<span style="font-weight:700;color:var(--cf-green)">${s.jours_restants}j</span>`
                     : '--'}
+                </td>
+                <td>
+                  ${s.statut === 'en_attente'
+                    ? `<div class="d-flex gap-1">
+                         <button class="btn btn-sm btn-cf-primary" style="font-size:0.75rem"
+                                 onclick="approuverSouscription(${s.id})">Approuver</button>
+                         <button class="btn btn-sm" style="font-size:0.75rem;background:rgba(239,68,68,0.1);color:#EF4444;border:none"
+                                 onclick="rejeterSouscription(${s.id})">Rejeter</button>
+                       </div>`
+                    : (s.statut === 'en_cours'
+                        ? `<div class="d-flex align-items-center gap-2">
+                             ${s.resiliation_demandee
+                               ? '<span class="cf-badge" style="background:rgba(245,158,11,0.12);color:#B45309" title="Le client a demande la resiliation"><i class="bi bi-hourglass-split me-1"></i>Demande client</span>'
+                               : ''}
+                             <button class="btn btn-sm" style="font-size:0.75rem;background:rgba(239,68,68,0.1);color:#EF4444;border:none;font-weight:600"
+                                     onclick="resilierSouscription(${s.id})">Resilier</button>
+                           </div>`
+                        : (s.statut === 'rejetee' && s.motif_rejet
+                            ? `<span style="font-size:0.74rem;color:var(--cf-text-muted)" title="${s.motif_rejet}"><i class="bi bi-info-circle me-1"></i>Motif</span>`
+                            : '--'))}
                 </td>
               </tr>`).join('')}
           </tbody>
@@ -541,4 +564,110 @@ async function chargerRegions() {
   } catch (err) {
     conteneur.innerHTML = '<p class="text-muted">Erreur.</p>';
   }
+}
+
+/* ============================================================
+   TEMPS REEL — rafraichissement live a l'arrivee d'une demande
+   (evenement emis par realtime.js a la reception WebSocket)
+   ============================================================ */
+window.addEventListener('cf:dossier-nouveau', () => {
+  if (typeof chargerCreditsAdmin === 'function') chargerCreditsAdmin('');
+  if (typeof chargerDashboard === 'function')    chargerDashboard();
+});
+
+/* Rafraichissement live a chaque notification (polling realtime.js) :
+   credits, KPIs et souscriptions restent a jour sans recharger la page. */
+window.addEventListener('cf:notification', () => {
+  if (typeof chargerCreditsAdmin === 'function') chargerCreditsAdmin('');
+  if (typeof chargerDashboard === 'function')    chargerDashboard();
+  if (typeof chargerSouscriptions === 'function') chargerSouscriptions('');
+});
+
+/* ============================================================
+   ASSURANCE — validation des souscriptions (item #8/#9)
+   ============================================================ */
+async function approuverSouscription(id) {
+  const res = await API.post(`/insurance/${id}/approuver/`);
+  if (res.ok) {
+    Toast.show('Souscription approuvee.', 'success');
+    chargerSouscriptions('');
+  } else {
+    Toast.show((res.data && res.data.detail) || 'Erreur.', 'error');
+  }
+}
+
+async function rejeterSouscription(id) {
+  const motif = prompt('Motif du rejet :');
+  if (motif === null) return;             // annulé
+  if (!motif.trim()) { Toast.show('Le motif est obligatoire.', 'warning'); return; }
+  const res = await API.post(`/insurance/${id}/rejeter/`, { motif: motif.trim() });
+  if (res.ok) {
+    Toast.show('Souscription rejetee.', 'info');
+    chargerSouscriptions('');
+  } else {
+    Toast.show((res.data && res.data.detail) || 'Erreur.', 'error');
+  }
+}
+
+async function resilierSouscription(id) {
+  if (!confirm('Confirmer la resiliation de cette souscription ?')) return;
+  const res = await API.post(`/insurance/${id}/resilier/`);
+  if (res.ok) {
+    Toast.show('Souscription resiliee.', 'info');
+    chargerSouscriptions('');
+  } else {
+    Toast.show((res.data && res.data.detail) || 'Erreur.', 'error');
+  }
+}
+
+/* ============================================================
+   KPIs CLIQUABLES (item 6) + DIAGRAMMES (item 7)
+   ============================================================ */
+function allerCredits(statut) {
+  afficherSection('credits');
+  if (statut) chargerCreditsAdmin(statut);
+}
+
+let chartCredits = null;
+let chartAssurances = null;
+
+function cfTextColor() {
+  return (getComputedStyle(document.body).getPropertyValue('--cf-text') || '#555').trim();
+}
+
+function doughnutCf(canvasId, labels, valeurs, couleurs, existant) {
+  const el = document.getElementById(canvasId);
+  if (!el || typeof Chart === 'undefined') return existant;
+  if (existant) existant.destroy();
+  return new Chart(el, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data: valeurs, backgroundColor: couleurs, borderWidth: 0 }] },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '62%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { padding: 14, color: cfTextColor(), font: { size: 12 } },
+        },
+      },
+    },
+  });
+}
+
+function renderChartsAdmin(d) {
+  const c = d.credits || {};
+  chartCredits = doughnutCf('chart-credits',
+    ['Soumises', 'En analyse', 'Approuvees', 'Decaissees', 'Rejetees'],
+    [c.soumises || 0, c.en_analyse || 0, c.approuvees || 0, c.decaissees || 0, c.rejetees || 0],
+    ['#F2640D', '#3B82F6', '#0B9C66', '#8B5CF6', '#EF4444'],
+    chartCredits);
+
+  const a = d.assurance || {};
+  chartAssurances = doughnutCf('chart-assurances',
+    ['En attente', 'En cours', 'Rejetees', 'Expirees', 'Resiliees'],
+    [a.en_attente || 0, a.actives || 0, a.rejetees || 0, a.expirees || 0, a.resiliees || 0],
+    ['#F59E0B', '#0B9C66', '#EF4444', '#9CA3AF', '#DC2626'],
+    chartAssurances);
 }

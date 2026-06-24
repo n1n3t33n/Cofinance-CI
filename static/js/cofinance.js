@@ -128,6 +128,29 @@ const API = {
   post(endpoint, data, auth = true)  { return this.request('POST',   endpoint, data, auth); },
   patch(endpoint, data, auth = true) { return this.request('PATCH',  endpoint, data, auth); },
   delete(endpoint, auth = true)      { return this.request('DELETE', endpoint, null, auth); },
+
+  /* Upload multipart (FormData) — ne pas fixer Content-Type (boundary auto). */
+  async upload(endpoint, formData) {
+    const faire = () => {
+      const headers = {};
+      const token = Session.getToken();
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      return fetch(`${API_BASE}${endpoint}`, { method: 'POST', headers, body: formData });
+    };
+    let response = await faire();
+    if (response.status === 401) {
+      const refreshed = await this.refreshToken();
+      if (refreshed) {
+        response = await faire();
+      } else {
+        Session.clear();
+        window.location.href = '/connexion/';
+        return null;
+      }
+    }
+    const json = await response.json().catch(() => ({}));
+    return { ok: response.ok, status: response.status, data: json };
+  },
 };
 
 /* ============================================================
@@ -161,6 +184,8 @@ const UI = {
       decaissee:  ['cf-badge-purple', 'Decaissee'],
       rejetee:    ['cf-badge-red',    'Rejetee'],
       active:     ['cf-badge-green',  'Active'],
+      en_cours:   ['cf-badge-green',  'En cours'],
+      resolue:    ['cf-badge-blue',   'Resolue'],
       expiree:    ['cf-badge-gray',   'Expiree'],
       resiliee:   ['cf-badge-red',    'Resiliee'],
       ouverte:    ['cf-badge-green',  'Ouverte'],
@@ -233,10 +258,60 @@ function toggleDropdown(event) {
 function closeAllDropdowns() {
   document.querySelectorAll('.cf-dropdown-menu').forEach(m => m.classList.remove('open'));
   document.querySelectorAll('.cf-user-dropdown').forEach(w => w.classList.remove('open'));
+  document.querySelectorAll('.cf-notif-dropdown').forEach(w => w.classList.remove('open'));
 }
 
 /* Fermer si clic ailleurs */
 document.addEventListener('click', () => closeAllDropdowns());
+
+/* ============================================================
+   CLOCHE — liste deroulante des notifications
+   ============================================================ */
+function cfEscape(s) {
+  const d = document.createElement('div');
+  d.textContent = (s == null) ? '' : s;
+  return d.innerHTML;
+}
+
+function toggleNotifs(event) {
+  event.stopPropagation();
+  const wrapper = document.getElementById('cf-notif-dropdown');
+  const menu    = document.getElementById('cf-notif-menu');
+  if (!wrapper || !menu) return;
+  const isOpen = menu.classList.contains('open');
+  closeAllDropdowns();
+  if (!isOpen) {
+    menu.classList.add('open');
+    wrapper.classList.add('open');
+    chargerNotifsDropdown();
+  }
+}
+
+async function chargerNotifsDropdown() {
+  const cont = document.getElementById('cf-notif-list');
+  if (!cont || !window.Realtime) return;
+  cont.innerHTML = '<div style="padding:16px;text-align:center;color:var(--cf-text-muted);font-size:0.82rem">Chargement...</div>';
+  const data   = await Realtime.chargerListe();
+  const notifs = (data.resultats || []).slice(0, 10);
+  if (notifs.length === 0) {
+    cont.innerHTML = '<div style="padding:18px;text-align:center;color:var(--cf-text-muted);font-size:0.82rem">Aucune notification</div>';
+    return;
+  }
+  cont.innerHTML = notifs.map(n => `
+    <div class="cf-notif-item ${n.est_lue ? '' : 'non-lue'}">
+      <div class="cf-notif-item-titre">${cfEscape(n.titre)}</div>
+      <div class="cf-notif-item-msg">${cfEscape((n.message || '').substring(0, 100))}</div>
+      <div class="cf-notif-item-date">${UI.date(n.created_at)}</div>
+    </div>`).join('');
+}
+
+async function toutMarquerLuNav(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  await API.post('/notifications/tout-lire/');
+  if (window.Realtime) { Realtime.majBadge(0); Realtime.rafraichir(); }
+  chargerNotifsDropdown();
+}
 
 /* ============================================================
    MENU MOBILE
@@ -298,10 +373,12 @@ function initNavbar() {
     const dashLink       = document.getElementById('nav-dashboard-link');
     const mobileDashLink = document.getElementById('cf-mobile-dashboard');
     const notifLink      = document.getElementById('nav-notif-link');
+    const navLinksDash   = document.getElementById('nav-links-dashboard');
 
     if (dashLink)       dashLink.href       = href;
     if (mobileDashLink) mobileDashLink.href = href;
     if (notifLink)      notifLink.href      = href;
+    if (navLinksDash)   navLinksDash.href   = href;
 
     /* Infos user + badge */
     UI.initUserNav();
@@ -339,6 +416,20 @@ function initNavbar() {
     const btnTemoignage = document.getElementById('btn-temoignage');
     if (btnTemoignage) btnTemoignage.style.display = 'none';
   }
+
+  /* La navbar s'adapte a la page courante : lien actif surligne. */
+  marquerLienActif();
+}
+
+/* Surligne le lien de navigation correspondant a la page affichee. */
+function marquerLienActif() {
+  const path = window.location.pathname;
+  document.querySelectorAll('.cf-nav-links a, .cf-mobile-menu a').forEach(a => {
+    const href = a.getAttribute('href');
+    if (!href || href === '#') return;
+    const actif = href === '/' ? path === '/' : path.startsWith(href);
+    a.classList.toggle('cf-link-active', actif);
+  });
 }
 
 /* ============================================================
